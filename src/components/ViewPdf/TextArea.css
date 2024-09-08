@@ -1,0 +1,25 @@
+.textarea {
+    box-sizing: border-box;
+    width: 90%;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #1c2025;
+    background: #fff;
+    border: 1px solid #e5eaf2; /* Custom border color */
+    box-shadow: 0px 2px 2px #f3f6f9;
+    outline: none;
+    min-height: 6rem;
+}
+
+.textarea:hover {
+    border-color: #b0bec5; /* Border color on hover */
+}
+
+.textarea:focus {
+    border-width: 2px; /* Thicker border on hover */
+    border-color: #1e88e5; /* Border color when focused */
+}
