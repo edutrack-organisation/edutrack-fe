@@ -7,10 +7,10 @@ import UploadPdfLoading from "./uploading-loading";
 
 const UploadPdfContainer = () => {
     const navigate = useNavigate();
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [_uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [isProcessingFile, setIsProcessingFile] = useState(false);
 
-    const handleUploadFile = (file: File | null) => {
+    const handleUploadFile = async (file: File | null) => {
         setUploadedFile(file);
 
         // post processing after uploaded, temporary log
@@ -18,12 +18,34 @@ const UploadPdfContainer = () => {
             console.log("File uploaded: ", file);
             setIsProcessingFile(true);
 
-            //   Stimulate file parsing with a timeout
-            setTimeout(() => {
+            // Create a FormData object to hold the file data
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                // Send the file to the FastAPI endpoint
+                const response = await fetch(
+                    "http://127.0.0.1:8000/parsePDF/",
+                    {
+                        method: "POST",
+                        body: formData,
+                    }
+                );
+
+                if (!response.ok) {
+                    // #TODO: probably need error handling here
+                    throw new Error("Failed to upload file");
+                }
+
+                const result = await response.json();
+
                 setIsProcessingFile(false);
                 // Redirect after done
-                navigate("/doneupload");
-            }, 2000);
+                navigate("/doneupload", { state: { response: result } });
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                setIsProcessingFile(false);
+            }
         }
     };
 

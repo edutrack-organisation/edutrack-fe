@@ -1,18 +1,20 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DataItem, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
+import { useLocation } from "react-router-dom";
 
 const DoneUploadPage = () => {
+    // get the response from the previous page
+    const location = useLocation();
+    const { response } = location.state || [];
+
     const [data, setData] = useState<DataItem[]>([]);
 
+    // set the data to the response
     useEffect(() => {
-        // fetch from http://127.0.0.1:8000/questions/
-        fetch("http://127.0.0.1:8000/questions/")
-            .then((response) => response.json())
-            // .then((data) => console.log(data));
-            .then((data) => setData(data));
-    }, []);
+        setData(response);
+    }, [response]);
 
     // TODO (desmond): optimisation to event handlers
     // Event Handlers
