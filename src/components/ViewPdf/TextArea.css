@@ -12,7 +12,9 @@
     border: 1px solid #e5eaf2; /* Custom border color */
     box-shadow: 0px 2px 2px #f3f6f9;
     outline: none;
-    min-height: 6rem;
+    /* min-height: fit-content; */
+    height: 150px;
+    /* overflow: hidden; Hide scrollbar */
 }
 
 .textarea:hover {
@@ -22,4 +24,19 @@
 .textarea:focus {
     border-width: 2px; /* Thicker border on hover */
     border-color: #1e88e5; /* Border color when focused */
+}
+
+/* Custom scrollbar styles */
+.textarea::-webkit-scrollbar {
+    width: 6px; /* Width of the scrollbar */
+}
+
+.textarea::-webkit-scrollbar-track {
+    background: #ebebeb; /* Background of the scrollbar track */
+    border-radius: 8px;
+}
+
+.textarea::-webkit-scrollbar-thumb {
+    background: #c2c2c2; /* Color of the scrollbar thumb */
+    border-radius: 8px;
 }
