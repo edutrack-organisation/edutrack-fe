@@ -22,33 +22,29 @@ const DoneUploadPage = () => {
         setData(updatedData);
     };
 
-    const handleDescriptionChange = useCallback(
-        (index: number, newDescription: string) => {
-            setData((prevData) => {
-                const updatedData = [...prevData];
-                updatedData[index] = {
-                    ...updatedData[index],
-                    description: newDescription,
-                };
-                return updatedData;
-            });
-            const updatedData = [...data];
-            updatedData[index].description = newDescription;
-        },
-        [data]
-    );
+    const handleDescriptionChange = (index: number, newDescription: string) => {
+        const updatedData = [...data];
+        updatedData[index].description = newDescription;
+        setData(updatedData);
+    };
 
     const handleDifficultyChange = (index: number, newDifficulty: number) => {
         const updatedData = [...data];
         updatedData[index].difficulty = newDifficulty;
         setData(updatedData);
-        console.log(data);
+    };
+
+    const handleQuestionDelete = (index: number) => {
+        const updatedData = [...data];
+        updatedData.splice(index, 1);
+        setData(updatedData);
     };
 
     const handlers: Handlers = {
         handleTopicsChange,
         handleDescriptionChange,
         handleDifficultyChange,
+        handleQuestionDelete,
     };
 
     return (

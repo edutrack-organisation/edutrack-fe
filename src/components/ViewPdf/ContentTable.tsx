@@ -1,4 +1,5 @@
 import {
+    Button,
     Paper,
     Table,
     TableBody,
@@ -11,7 +12,6 @@ import {
 import TextArea from "./TextArea";
 import { MuiChipsInput } from "mui-chips-input";
 import { DataItem, Handlers } from "../../types/types";
-
 interface ContentTableProps {
     data: DataItem[];
     handlers: Handlers;
@@ -45,7 +45,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                     <TableBody>
                         {data.map((row, index) => (
                             <TableRow
-                                key={row.question}
+                                key={row.question_uuid}
                                 sx={{
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
@@ -53,7 +53,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                 }}
                             >
                                 <TableCell component="th" scope="row">
-                                    {row.question}
+                                    {index + 1}
                                 </TableCell>
                                 <TableCell align="left">
                                     <TextArea
@@ -117,6 +117,22 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                             },
                                         }}
                                     />
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        onClick={() => {
+                                            handlers.handleQuestionDelete(
+                                                index
+                                            );
+                                        }}
+                                        sx={{
+                                            alignSelf: "flex-end",
+                                            margin: "1rem",
+                                        }}
+                                        variant="contained"
+                                    >
+                                        Delete
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
