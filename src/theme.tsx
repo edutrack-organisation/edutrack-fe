@@ -1,7 +1,8 @@
 export const theme = {
     colors: {
-        main: "#F7F3ED",
-        // secondary: "18262F", // This is in sync with the color from the icon but can reconsider
-        secondary: "#2F4858",
+        main: "#070708", // black
+        secondary: "#E8E9F3", // white
+        highlight1: "#8B84EC", // purple
+        highlight2: "#1CD1C4", // turquoise
     },
 };

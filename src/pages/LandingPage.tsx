@@ -4,19 +4,21 @@ import { theme } from "../theme"
 const LandingPage = () => {
   return (
     <Box sx={{ flex: 1, flexDirection: "column", alignItems: "center" }}>
-      <Box sx={{ background: theme.colors.main, flex: 1, padding: 10, marginBottom: 5 }}>
+      <Box sx={{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)', flex: 1, padding: 10, marginBottom: 5 }}>
         <Typography
           fontSize={"4rem"}
-          fontFamily={"monospace"}
+          fontFamily={"Poppins, sans-serif"}
           textAlign={"center"}
           fontWeight={"bold"}
+          sx={{ color: theme.colors.secondary }}
         >
           EduTrack
         </Typography>
         <Typography
           fontSize={"2.8rem"}
-          fontFamily={"monospace"}
+          fontFamily={"Poppins, sans-serif"}
           textAlign={"center"}
+          sx={{ color: theme.colors.secondary }}
         >
           measure the impact of education practices on learning outcomes.
         </Typography>
@@ -35,109 +37,64 @@ const LandingPage = () => {
 
       <Stack divider={<Divider flexItem />}>
 
-        <Stack direction="row" spacing={2} margin={5}>
-          <Box flex={1} >
-            <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />
-          </Box>
-          <Stack sx={{ flex: 2 }} >
-            <Typography
-              fontSize={"2.8rem"}
-              textAlign={"center"}
-            >
-              Question Bank
-            </Typography>
-            <Typography
-              fontSize={"1.3rem"}
-              textAlign={"center"}
-            >
-              Auto-generate corpus of questions from past year papers.
-            </Typography>
-          </Stack>
-        </Stack>
+        <FeatureStack
+          image={<Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />}
+          title={"Question Bank"}
+          desc={"Auto-generate corpus of questions from past year papers."}
+        />
 
-        <Stack direction="row" spacing={2} margin={5}>
-          <Box flex={1} >
-            <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />
-          </Box>
-          <Stack sx={{ flex: 2 }} >
-            <Typography
-              fontSize={"2.8rem"}
-              textAlign={"center"}
-            >
-              Knowledge Graph
-            </Typography>
-            <Typography
-              fontSize={"1.3rem"}
-              textAlign={"center"}
-            >
-              This is a map of all knowledge used to infer the coverage and scope of different educational activities.
-            </Typography>
-          </Stack>
-        </Stack>
+        <FeatureStack
+          image={<Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />}
+          title={"Knowledge Graph"}
+          desc={"This is a map of all knowledge used to infer the coverage and scope of different educational activities."}
+        />
 
-        <Stack direction="row" spacing={2} margin={5}>
-          <Box flex={1} >
-            <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />
-          </Box>
-          <Stack sx={{ flex: 2 }} >
-            <Typography
-              fontSize={"2.8rem"}
-              textAlign={"center"}
-            >
-              Assessment Generator
-            </Typography>
-            <Typography
-              fontSize={"1.3rem"}
-              textAlign={"center"}
-            >
-              The knowledge graph and the question bank would be leveraged to generate assessments.
-            </Typography>
-          </Stack>
-        </Stack>
+        <FeatureStack
+          image={<Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />}
+          title={"Assessment Generator"}
+          desc={"The knowledge graph and the question bank would be leveraged to generate assessments."}
+        />
 
-        <Stack direction="row" spacing={2} margin={5}>
-          <Box flex={1} >
-            <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />
-          </Box>
-          <Stack sx={{ flex: 2 }} >
-            <Typography
-              fontSize={"2.8rem"}
-              textAlign={"center"}
-            >
-              Assessment Metric
-            </Typography>
-            <Typography
-              fontSize={"1.3rem"}
-              textAlign={"center"}
-            >
-              Each student's performance would be normalized by generating a metric that is independent of the assessment.
-            </Typography>
-          </Stack>
-        </Stack>
+        <FeatureStack
+          image={<Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />}
+          title={"Assessment Metric"}
+          desc={"Each student's performance would be normalized by generating a metric that is independent of the assessment."}
+        />
 
-        <Stack direction="row" spacing={2} margin={5}>
-          <Box flex={1} >
-            <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />
-          </Box>
-          <Stack sx={{ flex: 2 }} >
-            <Typography
-              fontSize={"2.8rem"}
-              textAlign={"center"}
-            >
-              Intuitive UI
-            </Typography>
-            <Typography
-              fontSize={"1.3rem"}
-              textAlign={"center"}
-            >
-              Use intuitive UI/UX to navigate the site.
-            </Typography>
-          </Stack>
-        </Stack>
+        <FeatureStack
+          image={<Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} />}
+          title={"Intuitive UI"}
+          desc={"Use intuitive UI/UX to navigate the site."}
+        />
 
       </Stack>
     </Box>
   );
 };
+
+const FeatureStack = ({ image, title, desc }: any) => {
+  return (
+    <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} margin={5}>
+      <Box flex={1} >
+        {/* <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} /> */}
+        {image}
+      </Box>
+      <Stack sx={{ flex: 2 }} >
+        <Typography
+          fontSize={"2.8rem"}
+          textAlign={"center"}
+        >
+          {title}
+        </Typography>
+        <Typography
+          fontSize={"1.3rem"}
+          textAlign={"center"}
+        >
+          {desc}
+        </Typography>
+      </Stack>
+    </Stack>
+  );
+}
 
 export default LandingPage;
