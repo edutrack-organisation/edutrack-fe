@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { CloudUploadOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import { theme } from "../theme";
 
 interface UploadPdfButtonProps {
     label: string;
@@ -40,6 +41,8 @@ const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
                 marginTop: "2rem",
                 height: "5rem",
                 width: "15rem",
+                background: theme.colors.highlight1,
+                color: theme.colors.secondary,
             }}
         >
             {label}

@@ -48,6 +48,13 @@ const NavBar = () => {
             </Button>
             <Button
                 variant="text"
+                sx={{ ...buttonTheme, margin: 1 }}
+                href="/viewpdf"
+            >
+                View PDf
+            </Button>
+            <Button
+                variant="text"
                 sx={{ ...buttonTheme, margin: 1, marginLeft: "auto" }}
             >
                 Log In

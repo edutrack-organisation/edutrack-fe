@@ -2,19 +2,22 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DataItem, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import Api from "../api/Api";
 
 const DoneUploadPage = () => {
+    const navigate = useNavigate();
+
     // get the response from the previous page
     const location = useLocation();
-    const { response } = location.state || [];
+    const { title, questionData } = location.state.response.data || [];
 
     const [data, setData] = useState<DataItem[]>([]);
 
     // set the data to the response
     useEffect(() => {
-        setData(response);
-    }, [response]);
+        setData(questionData);
+    }, [questionData]);
 
     // TODO (desmond): optimisation to event handlers
     // Event Handlers
@@ -49,6 +52,10 @@ const DoneUploadPage = () => {
         handleQuestionDelete,
     };
 
+    const handlePdfSubmit = () => {
+        
+    };
+
     return (
         <Box
             display={"flex"}
@@ -66,7 +73,7 @@ const DoneUploadPage = () => {
             >
                 {/* This is the uploaded paper title */}
                 <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
-                    CS2105 - Computer Networks Finals 2023/2024 Semester 2
+                    {title}
                 </Typography>
                 <Box
                     width={"13rem"}
@@ -87,6 +94,7 @@ const DoneUploadPage = () => {
                 sx={{ alignSelf: "flex-end", margin: "1rem" }}
                 variant="contained"
                 size="large"
+                onClick={handlePdfSubmit}
             >
                 Continue
             </Button>
