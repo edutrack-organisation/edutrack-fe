@@ -47,7 +47,7 @@ const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
             <VisuallyHiddenInput
                 type="file"
                 // accept="application/pdf"
-                // onChange={setUploadFile}
+                onChange={setUploadFile}
             />
         </Button>
     );
