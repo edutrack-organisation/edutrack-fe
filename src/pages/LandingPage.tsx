@@ -1,9 +1,10 @@
 import { Box, Divider, Skeleton, Stack, Typography } from "@mui/material";
 import { theme } from "../theme"
+import { ReactElement } from "react";
 
 const LandingPage = () => {
   return (
-    <Box sx={{ flex: 1, flexDirection: "column", alignItems: "center" }}>
+    <Box sx={{ flex: 1, flexDirection: "column", alignItems: "center", background: theme.colors.secondary }}>
       <Box sx={{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)', flex: 1, padding: 10, marginBottom: 5 }}>
         <Typography
           fontSize={"4rem"}
@@ -72,11 +73,16 @@ const LandingPage = () => {
   );
 };
 
-const FeatureStack = ({ image, title, desc }: any) => {
+interface FeatureStackProps {
+  image: ReactElement,
+  title: String,
+  desc: String,
+}
+
+const FeatureStack: React.FC<FeatureStackProps> = ({ image, title, desc }) => {
   return (
     <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} margin={5}>
       <Box flex={1} >
-        {/* <Skeleton variant="rectangular" width={400} height={300} sx={{ marginLeft: "auto", marginRight: "auto" }} /> */}
         {image}
       </Box>
       <Stack sx={{ flex: 2 }} >
