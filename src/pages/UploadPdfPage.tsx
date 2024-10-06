@@ -1,30 +1,30 @@
-import { Typography } from "@mui/material";
-import Box from "@mui/material/Box";
-import UploadButton from "../components/UploadButton";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingCircle from "../components/LoadingCircle";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import Api, { ApiError } from "../api/Api";
+import UploadButton from "../components/UploadButton";
+import { theme } from "../theme";
 
 const UploadPdfPage = () => {
     const navigate = useNavigate();
+
     const [_uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [isProcessingFile, setIsProcessingFile] = useState(false);
 
     const handleUploadFile = async (file: File | null) => {
         setUploadedFile(file);
-        
+
         if (file) {
             console.log("File uploaded: ", file); // TODO: Post processing after uploaded, temporary log
             setIsProcessingFile(true);
 
             try {
-                const result = await Api.uploadPdfPaper(file);
-                
+                const response = await Api.uploadPdfPaper(file);
+
                 setIsProcessingFile(false);
 
                 // Redirect after done
-                navigate("/doneupload", { state: { response: result } });
+                navigate("/doneupload", { state: { response: response } });
             } catch (error) {
                 if (error instanceof ApiError) {
                     // Handle specific API errors
@@ -56,7 +56,11 @@ const UploadPdfPage = () => {
                     Upload PDF
                 </Typography>
             </Box>
-            {isProcessingFile ? <LoadingCircle /> : <UploadButton label="Upload File" handleUpload={handleUploadFile} />}
+            {isProcessingFile
+                ? <Box width={"100%"} display={"flex"} justifyContent={"center"} mt={"2rem"}>
+                    <CircularProgress size={"100px"} sx={{ color: theme.colors.highlight1 }} />
+                </Box>
+                : <UploadButton label="Upload File" handleUpload={handleUploadFile} />}
         </Box>
     );
 };

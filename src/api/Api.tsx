@@ -45,12 +45,12 @@ const Api = {
         // }
 
         function createData(
-            question: number,
+            question_uuid: number,
             description: string,
             topics: string[],
             difficulty: number
         ): DataItem {
-            return { question, description, topics, difficulty };
+            return { question_uuid, description, topics, difficulty };
         }
     
         const dummyData = [
