@@ -1,10 +1,10 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import UploadPDF from "./pages/UploadPdfPage";
-import ViewPDF from "./pages/ViewPdfPage";
 import NavBar from "./components/NavBar";
-import DoneUpload from "./pages/DoneUploadPage";
+import LandingPage from "./pages/LandingPage";
+import UploadPdfPage from "./pages/UploadPdfPage";
+import DoneUploadPage from "./pages/DoneUploadPage";
+import ViewPdfPage from "./pages/ViewPdfPage";
 
 function App() {
     return (
@@ -12,9 +12,9 @@ function App() {
             <NavBar />
             <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/uploadpdf" element={<UploadPDF />} />
-                <Route path="/viewpdf" element={<ViewPDF />} />
-                <Route path="/doneupload" element={<DoneUpload />} />
+                <Route path="/uploadpdf" element={<UploadPdfPage />} />
+                <Route path="/doneupload" element={<DoneUploadPage />} />
+                <Route path="/viewpdf" element={<ViewPdfPage />} />
             </Routes>
         </BrowserRouter>
     );

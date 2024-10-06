@@ -11,7 +11,7 @@ const DoneUploadPage = () => {
 
     // get the response from the previous page
     const location = useLocation();
-    const { title, questionData } = location.state.response.data || [];
+    const { title, questionData } = location?.state?.response?.data ?? [];
 
     const [data, setData] = useState<DataItem[]>([]);
 
