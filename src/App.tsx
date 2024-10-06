@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import UploadPDF from "./pages/UploadPdfPage";
 import ViewPDF from "./pages/ViewPdfPage";
-import NavBar from "./components/navbar";
+import NavBar from "./components/Navbar";
 import DoneUpload from "./pages/DoneUploadPage";
 
 function App() {
