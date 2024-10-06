@@ -24,7 +24,8 @@ const UploadPdfPage = () => {
                 setIsProcessingFile(false);
 
                 // Redirect after done
-                navigate("/doneupload", { state: { response: response } });
+                // navigate("/doneupload", { state: { response: response } }); // Before reverting
+                navigate("/doneupload", { state: { response: { success: true, data: { title: "CS2105 - Computer Networks Finals 2023/2024 Semester 2", questionData: response } } } });
             } catch (error) {
                 if (error instanceof ApiError) {
                     // Handle specific API errors
