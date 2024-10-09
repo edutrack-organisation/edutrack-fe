@@ -3,7 +3,6 @@ export type Handlers = {
 };
 
 export interface DataItem {
-    question_uuid: number;
     description: string;
     topics: string[];
     difficulty: number;

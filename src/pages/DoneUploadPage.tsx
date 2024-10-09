@@ -42,11 +42,23 @@ const DoneUploadPage = () => {
         setData(updatedData);
     };
 
+    // add a question (empty row) to the table
+    const handleQuestionAdd = (index: number) => {
+        const updatedData = [...data];
+        updatedData.splice(index + 1, 0, {
+            description: "",
+            topics: [],
+            difficulty: 1,
+        });
+        setData(updatedData);
+    };
+
     const handlers: Handlers = {
         handleTopicsChange,
         handleDescriptionChange,
         handleDifficultyChange,
         handleQuestionDelete,
+        handleQuestionAdd,
     };
 
     return (

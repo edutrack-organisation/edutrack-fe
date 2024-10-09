@@ -1,5 +1,5 @@
 import {
-    Button,
+    IconButton,
     Paper,
     Table,
     TableBody,
@@ -8,10 +8,14 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
 } from "@mui/material";
 import TextArea from "./TextArea";
 import { MuiChipsInput } from "mui-chips-input";
 import { DataItem, Handlers } from "../../types/types";
+import { v4 as uuidv4 } from "uuid";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 interface ContentTableProps {
     data: DataItem[];
     handlers: Handlers;
@@ -45,7 +49,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                     <TableBody>
                         {data.map((row, index) => (
                             <TableRow
-                                key={row.question_uuid}
+                                key={uuidv4()}
                                 sx={{
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
@@ -119,20 +123,38 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    <Button
-                                        onClick={() => {
-                                            handlers.handleQuestionDelete(
-                                                index
-                                            );
-                                        }}
-                                        sx={{
-                                            alignSelf: "flex-end",
-                                            margin: "1rem",
-                                        }}
-                                        variant="contained"
-                                    >
-                                        Delete
-                                    </Button>
+                                    <Tooltip title="Delete Question">
+                                        <IconButton>
+                                            <DeleteOutlineIcon
+                                                onClick={() => {
+                                                    handlers.handleQuestionDelete(
+                                                        index
+                                                    );
+                                                }}
+                                                sx={{
+                                                    height: "2rem",
+                                                    width: "2rem",
+                                                }}
+                                            />
+                                        </IconButton>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell>
+                                    <Tooltip title="Add Question">
+                                        <IconButton>
+                                            <AddCircleOutlineIcon
+                                                onClick={() => {
+                                                    handlers.handleQuestionAdd(
+                                                        index
+                                                    );
+                                                }}
+                                                sx={{
+                                                    height: "2rem",
+                                                    width: "2rem",
+                                                }}
+                                            />
+                                        </IconButton>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -15,13 +15,13 @@ import { MuiChipsInput } from "mui-chips-input";
 import { DataItem, Handlers } from "../types/types";
 import { useEffect, useState } from "react";
 import Api, { ApiError } from "../api/Api";
+import { v4 as uuidv4 } from "uuid";
 
 interface ContentTableProps {
-    title: String,
+    title: String;
 }
 
 const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
-
     const [isFetchingPaper, setIsFetchingPaper] = useState<Boolean>(true);
     const [data, setData] = useState<DataItem[]>([]);
 
@@ -63,19 +63,21 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
     };
 
     useEffect(() => {
-        Api.getPaper(title).then((response) => {
-            setIsFetchingPaper(false);
-            setData(response.data.questionData);
-        }).catch((error) => {
-            if (error instanceof ApiError) {
-                // Handle specific API errors
-                console.error("API Error uploading file:", error.message);
-            } else {
-                // Handle any unexpected errors
-                console.error("Unexpected error uploading file:", error);
-            }
-            setIsFetchingPaper(false);
-        });
+        Api.getPaper(title)
+            .then((response) => {
+                setIsFetchingPaper(false);
+                setData(response.data.questionData);
+            })
+            .catch((error) => {
+                if (error instanceof ApiError) {
+                    // Handle specific API errors
+                    console.error("API Error uploading file:", error.message);
+                } else {
+                    // Handle any unexpected errors
+                    console.error("Unexpected error uploading file:", error);
+                }
+                setIsFetchingPaper(false);
+            });
     }, []);
 
     return (
@@ -108,7 +110,7 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                     <TableBody>
                         {data.map((row, index) => (
                             <TableRow
-                                key={row.question_uuid}
+                                key={uuidv4()}
                                 sx={{
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
