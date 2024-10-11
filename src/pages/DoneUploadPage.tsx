@@ -1,19 +1,28 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { DataItem, Handlers } from "../types/types";
+import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
 import { useLocation } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 const DoneUploadPage = () => {
     // get the response from the previous page
     const location = useLocation();
     const { response } = location.state || [];
-
-    const [data, setData] = useState<DataItem[]>([]);
+    const [data, setData] = useState<DataItemWithUUID[]>([]);
+    const [title, setTitle] = useState<string>("");
 
     // set the data to the response
     useEffect(() => {
-        setData(response);
+        if (response) {
+            // #NOTE: the item type may not be DataItem as it does not have uuid
+            const dataWithUUIDs = response.questions.map((item: DataItem) => ({
+                ...item,
+                uuid: uuidv4(),
+            }));
+            setData(dataWithUUIDs);
+            setTitle(response.title);
+        }
     }, [response]);
 
     // TODO (desmond): optimisation to event handlers
@@ -46,6 +55,7 @@ const DoneUploadPage = () => {
     const handleQuestionAdd = (index: number) => {
         const updatedData = [...data];
         updatedData.splice(index + 1, 0, {
+            uuid: uuidv4(),
             description: "",
             topics: [],
             difficulty: 1,
@@ -53,6 +63,40 @@ const DoneUploadPage = () => {
         setData(updatedData);
     };
 
+    // #TODO: Desmond: Refactor into API routes
+    const sendParsedToBackend = async () => {
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/saveParsedPDF/",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        questions: data,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    `Failed to send data to backend: ${errorData.detail}`
+                );
+            }
+
+            const result = await response.json();
+            console.log("Data successfully sent to backend:", result);
+        } catch (error) {
+            console.error("Error sending data to backend:", error);
+            // Optionally, you can display an error message to the user
+            // alert(`Error: ${error.message}`);
+        }
+    };
+
+    // #TODO: we need a handler for title change as well
     const handlers: Handlers = {
         handleTopicsChange,
         handleDescriptionChange,
@@ -78,7 +122,8 @@ const DoneUploadPage = () => {
             >
                 {/* This is the uploaded paper title */}
                 <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
-                    CS2105 - Computer Networks Finals 2023/2024 Semester 2
+                    {title}
+                    {/* CS2105 - Computer Networks Finals 2023/2024 Semester 2 */}
                 </Typography>
                 <Box
                     width={"13rem"}
@@ -99,6 +144,7 @@ const DoneUploadPage = () => {
                 sx={{ alignSelf: "flex-end", margin: "1rem" }}
                 variant="contained"
                 size="large"
+                onClick={() => sendParsedToBackend()}
             >
                 Continue
             </Button>

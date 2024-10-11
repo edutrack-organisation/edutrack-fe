@@ -12,12 +12,12 @@ import {
 } from "@mui/material";
 import TextArea from "./TextArea";
 import { MuiChipsInput } from "mui-chips-input";
-import { DataItem, Handlers } from "../../types/types";
-import { v4 as uuidv4 } from "uuid";
+import { DataItemWithUUID, Handlers } from "../../types/types";
+
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 interface ContentTableProps {
-    data: DataItem[];
+    data: DataItemWithUUID[];
     handlers: Handlers;
 }
 
@@ -49,7 +49,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                     <TableBody>
                         {data.map((row, index) => (
                             <TableRow
-                                key={uuidv4()}
+                                key={row.uuid}
                                 sx={{
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
@@ -124,13 +124,14 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                 </TableCell>
                                 <TableCell>
                                     <Tooltip title="Delete Question">
-                                        <IconButton>
+                                        <IconButton
+                                            onClick={() => {
+                                                handlers.handleQuestionDelete(
+                                                    index
+                                                );
+                                            }}
+                                        >
                                             <DeleteOutlineIcon
-                                                onClick={() => {
-                                                    handlers.handleQuestionDelete(
-                                                        index
-                                                    );
-                                                }}
                                                 sx={{
                                                     height: "2rem",
                                                     width: "2rem",
@@ -141,13 +142,14 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                 </TableCell>
                                 <TableCell>
                                     <Tooltip title="Add Question">
-                                        <IconButton>
+                                        <IconButton
+                                            onClick={() => {
+                                                handlers.handleQuestionAdd(
+                                                    index
+                                                );
+                                            }}
+                                        >
                                             <AddCircleOutlineIcon
-                                                onClick={() => {
-                                                    handlers.handleQuestionAdd(
-                                                        index
-                                                    );
-                                                }}
                                                 sx={{
                                                     height: "2rem",
                                                     width: "2rem",
