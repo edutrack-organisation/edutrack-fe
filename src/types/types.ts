@@ -7,3 +7,7 @@ export interface DataItem {
     topics: string[];
     difficulty: number;
 }
+
+export interface DataItemWithUUID extends DataItem {
+    uuid: string;
+}
