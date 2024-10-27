@@ -5,6 +5,7 @@ import LandingPage from "./pages/LandingPage";
 import UploadPdfPage from "./pages/UploadPdfPage";
 import DoneUploadPage from "./pages/DoneUploadPage";
 import ViewPdfPage from "./pages/ViewPdfPage";
+import { ToastContainer } from "react-toastify";
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/doneupload" element={<DoneUploadPage />} />
                 <Route path="/viewpdf" element={<ViewPdfPage />} />
             </Routes>
+            <ToastContainer />
         </BrowserRouter>
     );
 }

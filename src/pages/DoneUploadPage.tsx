@@ -4,6 +4,7 @@ import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
 
 const DoneUploadPage = () => {
     // get the response from the previous page
@@ -82,17 +83,16 @@ const DoneUploadPage = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(
-                    `Failed to send data to backend: ${errorData.detail}`
-                );
+                throw new Error(errorData.detail);
             }
 
-            const result = await response.json();
-            console.log("Data successfully sent to backend:", result);
+            toast.success("Paper saved successfully!");
         } catch (error) {
-            console.error("Error sending data to backend:", error);
-            // Optionally, you can display an error message to the user
-            // alert(`Error: ${error.message}`);
+            if (error instanceof Error) {
+                toast.error("Error: " + error.message);
+            } else {
+                toast.error("An unknown error occurred.");
+            }
         }
     };
 
@@ -119,6 +119,7 @@ const DoneUploadPage = () => {
                 padding={"1rem"}
                 mt={"2rem"}
                 justifyContent={"space-between"}
+                gap={"1rem"}
             >
                 {/* This is the uploaded paper title */}
                 <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
