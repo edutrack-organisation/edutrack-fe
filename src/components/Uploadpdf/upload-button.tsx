@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
-import { CloudUploadOutlined } from "@mui/icons-material";
-import { Button } from "@mui/material";
+import { CloudUploadOutlined, Height } from "@mui/icons-material";
+import { Button, Typography } from "@mui/material";
 
 interface UploadPdfButtonProps {
     label: string;
@@ -34,15 +34,16 @@ const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
             role={undefined}
             variant="contained"
             tabIndex={-1}
-            startIcon={<CloudUploadOutlined fontSize="medium" />}
-            style={{
+            startIcon={<CloudUploadOutlined />}
+            sx={{
                 fontSize: "1.3rem",
                 marginTop: "2rem",
                 height: "5rem",
                 width: "15rem",
+                borderRadius: "3rem",
             }}
         >
-            {label}
+            <Typography fontWeight={"medium"}>{label}</Typography>
             {/* NOTE: temporary accept mark down as well just for testing */}
             <VisuallyHiddenInput
                 type="file"
