@@ -143,7 +143,6 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                 ? <TableBody>
                                     {data.map((row, index) => (
                                         <TableRow
-                                            key={uuidv4()}
                                             sx={{
                                                 "&:last-child td, &:last-child th": {
                                                     border: 0,
