@@ -1,5 +1,8 @@
 import {
+    Box,
     Button,
+    Chip,
+    CircularProgress,
     Paper,
     Table,
     TableBody,
@@ -23,6 +26,7 @@ interface ContentTableProps {
 
 const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
     const [isFetchingPaper, setIsFetchingPaper] = useState<Boolean>(true);
+    const [isEditing, setIsEditing] = useState<Boolean>(true);
     const [data, setData] = useState<DataItem[]>([]);
 
     // TODO: optimisation to event handlers(?)
@@ -62,7 +66,17 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
         handleQuestionDelete,
     };
 
+    const handleEdit = () => {
+        setIsEditing(true);
+    }
+
+    const handleSave = () => {
+        setIsEditing(false);
+        // TODO: Make a one time push to BE when saving instead of pushing to API with every change.
+    }
+
     useEffect(() => {
+        setIsFetchingPaper(true);
         Api.getPaper(title)
             .then((response) => {
                 setIsFetchingPaper(false);
@@ -78,132 +92,172 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                 }
                 setIsFetchingPaper(false);
             });
-    }, []);
+    }, [title]);
 
     return (
         <>
             <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
                 {title}
             </Typography>
-            <TableContainer
-                component={Paper}
-                sx={{
-                    // width: { lg: "90%", xl: "80%" },
-                    mt: "1.5rem",
-                }}
-            >
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ width: "10%" }}>
-                                Question Number
-                            </TableCell>
-                            <TableCell sx={{ width: "50%" }} align="left">
-                                Description
-                            </TableCell>
-                            <TableCell sx={{ width: "30%" }} align="left">
-                                Topics
-                            </TableCell>
-                            <TableCell align="right">Difficulty</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {data.map((row, index) => (
-                            <TableRow
-                                key={uuidv4()}
-                                sx={{
-                                    "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                    },
-                                }}
+            {isFetchingPaper
+                ? <Box><CircularProgress size={"100px"} /></Box>
+                :
+                <>
+                    <Box alignSelf={'flex-end'} marginRight={3}>
+                        {isEditing
+                            ? <Button variant="contained"
+                                onClick={handleSave}
                             >
-                                <TableCell component="th" scope="row">
-                                    {index + 1}
-                                </TableCell>
-                                <TableCell align="left">
-                                    <TextArea
-                                        textContent={row.description}
-                                        onChange={(event) =>
-                                            handlers.handleDescriptionChange(
-                                                index,
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-                                </TableCell>
-                                <TableCell align="left">
-                                    <MuiChipsInput
-                                        value={row.topics}
-                                        onChange={(newChip) =>
-                                            handlers.handleTopicsChange(
-                                                index,
-                                                newChip
-                                            )
-                                        }
-                                        sx={{
-                                            width: "350px",
-                                            "& .MuiOutlinedInput-root": {
-                                                "& fieldset": {
-                                                    borderColor: "#E5EAF2", // Custom border color
+                                Save
+                            </Button>
+                            : <Button variant="contained"
+                                onClick={handleEdit}
+                            >
+                                Edit
+                            </Button>}
+                    </Box>
+                    <TableContainer
+                        component={Paper}
+                        sx={{
+                            // width: { lg: "90%", xl: "80%" },
+                            mt: "1.5rem",
+                        }}
+                    >
+                        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ width: "10%" }}>
+                                        Question Number
+                                    </TableCell>
+                                    <TableCell sx={{ width: "50%" }} align="left">
+                                        Description
+                                    </TableCell>
+                                    <TableCell sx={{ width: "30%" }} align="left">
+                                        Topics
+                                    </TableCell>
+                                    <TableCell align="center">Difficulty</TableCell>
+                                    {isEditing && <TableCell />}
+                                </TableRow>
+                            </TableHead>
+                            {isEditing
+                                ? <TableBody>
+                                    {data.map((row, index) => (
+                                        <TableRow
+                                            key={uuidv4()}
+                                            sx={{
+                                                "&:last-child td, &:last-child th": {
+                                                    border: 0,
                                                 },
-                                                "&:hover fieldset": {
-                                                    borderColor: "#B0BEC5", // Border color on hover
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#1E88E5", // Border color when focused
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell align="right">
-                                    <TextField
-                                        type="number"
-                                        id="outlined-basic"
-                                        defaultValue={row.difficulty || 0}
-                                        variant="outlined"
-                                        onChange={(event) =>
-                                            handlers.handleDifficultyChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
-                                        }
-                                        sx={{
-                                            "& .MuiTextField-root": {
-                                                "& fieldset": {
-                                                    borderColor: "#E5EAF2", // Custom border color
-                                                },
-                                                "&:hover fieldset": {
-                                                    borderColor: "#B0BEC5", // Border color on hover
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#1E88E5", // Border color when focused
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <Button
-                                        onClick={() => {
-                                            handlers.handleQuestionDelete(
-                                                index
-                                            );
-                                        }}
-                                        sx={{
-                                            alignSelf: "flex-end",
-                                            margin: "1rem",
-                                        }}
-                                        variant="contained"
-                                    >
-                                        Delete
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                                            }}
+                                        >
+                                            <TableCell component="th" scope="row">
+                                                {index + 1}
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <TextArea
+                                                    textContent={row.description}
+                                                    onChange={(event) =>
+                                                        handlers.handleDescriptionChange(
+                                                            index,
+                                                            event.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <MuiChipsInput
+                                                    value={row.topics}
+                                                    onChange={(newChip) =>
+                                                        handlers.handleTopicsChange(
+                                                            index,
+                                                            newChip
+                                                        )
+                                                    }
+                                                    sx={{
+                                                        width: "350px",
+                                                        "& .MuiOutlinedInput-root": {
+                                                            "& fieldset": {
+                                                                borderColor: "#E5EAF2", // Custom border color
+                                                            },
+                                                            "&:hover fieldset": {
+                                                                borderColor: "#B0BEC5", // Border color on hover
+                                                            },
+                                                            "&.Mui-focused fieldset": {
+                                                                borderColor: "#1E88E5", // Border color when focused
+                                                            },
+                                                        },
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <TextField
+                                                    type="number"
+                                                    id="outlined-basic"
+                                                    defaultValue={row.difficulty || 0}
+                                                    variant="outlined"
+                                                    onChange={(event) =>
+                                                        handlers.handleDifficultyChange(
+                                                            index,
+                                                            parseInt(event.target.value)
+                                                        )
+                                                    }
+                                                    sx={{
+                                                        "& .MuiTextField-root": {
+                                                            "& fieldset": {
+                                                                borderColor: "#E5EAF2", // Custom border color
+                                                            },
+                                                            "&:hover fieldset": {
+                                                                borderColor: "#B0BEC5", // Border color on hover
+                                                            },
+                                                            "&.Mui-focused fieldset": {
+                                                                borderColor: "#1E88E5", // Border color when focused
+                                                            },
+                                                        },
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    onClick={() => {
+                                                        handlers.handleQuestionDelete(
+                                                            index
+                                                        );
+                                                    }}
+                                                    sx={{
+                                                        alignSelf: "flex-end",
+                                                        margin: "1rem",
+                                                    }}
+                                                    variant="contained"
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                                : <TableBody>
+                                    {data.map((row, index) => (
+                                        <TableRow key={uuidv4()} >
+                                            <TableCell component="th" scope="row">
+                                                {index + 1}
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <Typography> {row.description} </Typography>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                {row.topics.map(topic => <Chip label={topic} sx={{ margin: 1 }} />)}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Typography> {row.difficulty || 0} </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+
+                            }
+                        </Table>
+                    </TableContainer></>
+            }
         </>
     );
 };
