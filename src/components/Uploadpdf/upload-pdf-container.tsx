@@ -61,7 +61,7 @@ const UploadPdfContainer = () => {
                 <Box width={{ lg: "80%", xl: "70%" }} mx={"auto"}>
                     <Box
                         display={"flex"}
-                        marginTop={"8rem"}
+                        marginTop={{ lg: "3rem", xl: "8rem" }}
                         height={"50vh"}
                         className="upload-pdf-description"
                     >
@@ -74,15 +74,14 @@ const UploadPdfContainer = () => {
                         >
                             <Box className="description" mt={"2rem"}>
                                 <Typography
-                                    fontSize={"4rem"}
+                                    fontSize={{ md: "2.5rem", xl: "4rem" }}
                                     ml={2}
                                     fontWeight={"bold"}
-                                    // fontFamily={""}
                                 >
                                     Upload PDF
                                 </Typography>
                                 <Typography
-                                    fontSize={"2rem"}
+                                    fontSize={{ lg: "1.5rem", xl: "2rem" }}
                                     ml={2}
                                     fontFamily={"lato"}
                                 >
@@ -94,10 +93,14 @@ const UploadPdfContainer = () => {
                                 handleUpload={handleUploadFile}
                             />
                         </Box>
-                        <img
+                        <Box
+                            component="img"
                             src={uploadPDFImage}
                             alt="upload_pdf_icon"
-                            style={{ width: "600px", height: "400px" }}
+                            sx={{
+                                width: { lg: "400px", xl: "600px" },
+                                height: { lg: "300px", xl: "400px" },
+                            }}
                         />
                     </Box>
                     <Box
