@@ -27,7 +27,7 @@ const UploadPdfLoading = () => {
             width={"100%"}
             display={"flex"}
             justifyContent={"center"}
-            mt={"7rem"}
+            mt={"2rem"}
         >
             <Box
                 display={"flex"}

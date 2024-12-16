@@ -1,9 +1,9 @@
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import UploadPdfButton from "./UploadButton";
+import UploadPdfButton from "./upload-button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import UploadPdfLoading from "./UploadingLoading";
+import UploadPdfLoading from "./uploading-loading";
 import uploadPDFImage from "../../assets/icons/Upload_pdf.png";
 import pdfIcon from "../../assets/icons/pdf_icon.png";
 import saveIcon from "../../assets/icons/save_icon.png";
@@ -45,9 +45,7 @@ const UploadPdfContainer = () => {
                 toast.success("Paper parsed successfully!");
                 setIsProcessingFile(false);
                 // Redirect after done
-                navigate("/doneupload", {
-                    state: { response: result, file: file },
-                });
+                navigate("/doneupload", { state: { response: result } });
             } catch (error) {
                 toast.error("Error in parsing PDF");
                 setIsProcessingFile(false);
@@ -60,7 +58,7 @@ const UploadPdfContainer = () => {
             {isProcessingFile ? (
                 <UploadPdfLoading />
             ) : (
-                <Box width={{ lg: "80%", xl: "70%" }} mx={"auto"} mt={"5rem"}>
+                <Box width={{ lg: "80%", xl: "70%" }} mx={"auto"}>
                     <Box
                         display={"flex"}
                         marginTop={{ lg: "3rem", xl: "8rem" }}
