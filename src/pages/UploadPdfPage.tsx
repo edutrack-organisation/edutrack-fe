@@ -1,4 +1,4 @@
-import UploadPdfContainer from "../components/Uploadpdf/upload-pdf-container";
+import UploadPdfContainer from "../components/Uploadpdf/UploadPdfContainer";
 
 const UploadPDFPage = () => {
     return (
