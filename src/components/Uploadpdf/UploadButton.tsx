@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { CloudUploadOutlined, Height } from "@mui/icons-material";
+import { CloudUploadOutlined } from "@mui/icons-material";
 import { Button, Typography } from "@mui/material";
 
 interface UploadPdfButtonProps {

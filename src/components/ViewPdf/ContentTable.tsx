@@ -28,7 +28,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                 component={Paper}
                 sx={{
                     // width: { lg: "90%", xl: "80%" },
-                    mt: "1.5rem",
+                    mt: "16rem",
                 }}
             >
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">

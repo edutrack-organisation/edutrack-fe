@@ -5,7 +5,7 @@ import EduTrackIcon from "../assets/icons/EduTrackIcon.png";
 const buttonTheme = {
     background: theme.colors.main,
     color: theme.colors.secondary,
-    '&:hover': {
+    "&:hover": {
         color: theme.colors.highlight1,
         background: theme.colors.secondary,
     },
@@ -15,14 +15,17 @@ const NavBar = () => {
     return (
         <Box
             height={"5rem"}
+            width={"100%"}
             display={"flex"}
             alignItems={"center"}
             sx={{
                 background: theme.colors.main,
                 flexDirection: "row",
                 flex: 1,
+                zIndex: 3,
             }}
             boxShadow={2}
+            position={"fixed"}
         >
             <a href="./">
                 <img
@@ -32,11 +35,7 @@ const NavBar = () => {
                     style={{ margin: 10 }}
                 />
             </a>
-            <Button
-                variant="text"
-                sx={{ ...buttonTheme, margin: 1 }}
-                href="/"
-            >
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/">
                 Home
             </Button>
             <Button
@@ -59,10 +58,7 @@ const NavBar = () => {
             >
                 Log In
             </Button>
-            <Button
-                variant="text"
-                sx={{ ...buttonTheme, margin: 1 }}
-            >
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }}>
                 Sign Up
             </Button>
         </Box>
