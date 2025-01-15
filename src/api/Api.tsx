@@ -1,6 +1,6 @@
 import { DataItem, DataItemWithUUID } from "../types/types";
 
-interface ApiResponse {
+export interface ApiResponse {
     success: boolean; // Whether the API call is successful
     message?: string; // Optional message field
     data?: any; // Data from API call
@@ -145,6 +145,8 @@ const Api = {
 
     getPdfTitleList: async (): Promise<ApiResponse> => {
         // TODO: To be implemented
+        // Note: This function should always return valid data. In the case where
+        // data should be empty, return an empty list
         return {
             success: true,
             data: [
@@ -227,7 +229,7 @@ const Api = {
                 5
             ),
             createData(
-                "9",
+                "10",
                 "Explain the purpose of a Virtual Private Network (VPN) in a network environment. Describe how VPNs secure data transmission and provide privacy by creating a secure tunnel over the internet.",
                 ["VPN", "Network Security"],
                 6
@@ -236,6 +238,26 @@ const Api = {
         return {
             success: true,
             data: { title: title, questionData: dummyData },
+        };
+    },
+
+    getScores: async (title: String): Promise<ApiResponse> => {
+        // TODO: To be implemented
+        const dummyData: number[][] = [
+            [1, 1, 5, 3, 7, 3, 2, 5, 5, 1, 9, 5, 9, 4, 9, 1, 10, 8, 8, 7],
+            [7, 4, 8, 7, 6, 9, 6, 7, 6, 1, 5, 5, 1, 10, 2, 2, 8, 3, 10, 3],
+            [6, 5, 3, 8, 5, 6, 3, 5, 4, 8, 1, 8, 9, 4, 8, 7, 4, 2, 6, 1],
+            [8, 6, 4, 9, 3, 5, 9, 7, 9, 6, 8, 8, 1, 6, 1, 2, 6, 1, 5, 2],
+            [2, 10, 10, 4, 7, 7, 3, 1, 4, 9, 9, 3, 1, 6, 4, 5, 3, 7, 7, 1],
+            [10, 7, 7, 7, 4, 10, 4, 7, 4, 7, 1, 8, 10, 4, 2, 6, 3, 10, 7, 3],
+            [7, 4, 5, 2, 1, 2, 9, 9, 6, 1, 6, 6, 5, 5, 5, 5, 5, 9, 1, 5],
+            [9, 1, 1, 7, 4, 1, 10, 7, 2, 4, 5, 3, 9, 1, 9, 5, 6, 5, 10, 6],
+            [6, 1, 2, 3, 3, 9, 10, 4, 3, 6, 10, 4, 2, 3, 3, 3, 8, 1, 8, 2],
+            [3, 9, 3, 1, 8, 5, 9, 5, 6, 7, 1, 7, 2, 1, 1, 2, 8, 5, 3, 3],
+        ];
+        return {
+            success: true,
+            data: { title: title, scoreData: dummyData },
         };
     },
 

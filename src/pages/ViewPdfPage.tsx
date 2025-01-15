@@ -69,11 +69,9 @@ const ViewPdfPage = () => {
     return (
         <Box
             sx={{
-                flex: 1,
                 height: "calc(100vh - 5rem)", // Remaining height below the NavBar
                 display: "flex",
                 backgroundColor: theme.colors.secondary, // Example background color
-                mt: "5rem", // Margin top to prevent overlap with NavBar
             }}
         >
             {/* Left portion for selection */}

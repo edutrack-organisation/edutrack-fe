@@ -4,10 +4,10 @@ import UploadPdfButton from "./UploadButton";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadPdfLoading from "./UploadingLoading";
-import uploadPDFImage from "../../assets/icons/Upload_pdf.png";
-import pdfIcon from "../../assets/icons/pdf_icon.png";
-import saveIcon from "../../assets/icons/save_icon.png";
-import confirmIcon from "../../assets/icons/confirm_icon.png";
+import UploadPdfImage from "../../assets/images/upload_pdf.png";
+import PdfIcon from "../../assets/icons/pdf_icon.png";
+import SaveIcon from "../../assets/icons/save_icon.png";
+import ConfirmIcon from "../../assets/icons/confirm_icon.png";
 import { toast } from "react-toastify";
 
 const UploadPdfContainer = () => {
@@ -97,7 +97,7 @@ const UploadPdfContainer = () => {
                         </Box>
                         <Box
                             component="img"
-                            src={uploadPDFImage}
+                            src={UploadPdfImage}
                             alt="upload_pdf_icon"
                             sx={{
                                 width: { lg: "400px", xl: "600px" },
@@ -130,7 +130,7 @@ const UploadPdfContainer = () => {
                                 alignItems={"center"}
                             >
                                 <img
-                                    src={pdfIcon}
+                                    src={PdfIcon}
                                     alt="pdf_icn"
                                     height={"50rem"}
                                     width={"50rem"}
@@ -166,7 +166,7 @@ const UploadPdfContainer = () => {
                                 alignItems={"center"}
                             >
                                 <img
-                                    src={confirmIcon}
+                                    src={ConfirmIcon}
                                     alt="confirm_icon"
                                     height={"50rem"}
                                     width={"50rem"}
@@ -201,7 +201,7 @@ const UploadPdfContainer = () => {
                                 alignItems={"center"}
                             >
                                 <img
-                                    src={saveIcon}
+                                    src={SaveIcon}
                                     alt="save_icon"
                                     height={"50rem"}
                                     width={"50rem"}
