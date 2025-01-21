@@ -16,6 +16,7 @@ declare module "@mui/material/styles" {
         md: true;
         lg: true;
         xl: true;
+        lgxl: true;
     }
 }
 
@@ -28,6 +29,7 @@ function App() {
                 sm: 600,
                 md: 900,
                 lg: 1200,
+                lgxl: 1300,
                 xl: 1800,
             },
         },

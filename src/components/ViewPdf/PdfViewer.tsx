@@ -13,7 +13,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 const PdfViewer = ({
     pdffile,
     showPDF,
-    setShowPDF,
 }: {
     pdffile: File | null;
     showPDF: boolean;
@@ -35,21 +34,18 @@ const PdfViewer = ({
 
     return (
         <>
-            <Modal
-                open={showPDF}
-                onClose={() => setShowPDF(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                }}
-            >
+            {showPDF && (
                 <Box
-                    display={"flex"}
-                    justifyContent={"flex-end"}
-                    sx={{ mt: { xl: "5rem" }, mr: { lg: "2rem", xl: "5rem" } }}
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        position: "fixed",
+                        right: 0,
+                        zIndex: 1, // Ensure the modal is on top
+                        mt: { xs: "13rem", lgxl: "15rem", xl: "15rem" },
+                        mr: { lg: "2rem", xl: "5rem" },
+                    }}
                 >
                     <Box
                         display={"flex"}
@@ -76,7 +72,7 @@ const PdfViewer = ({
                             sx={{
                                 position: "absolute",
                                 zIndex: 2,
-                                bottom: 40,
+                                bottom: { xs: 10, xl: 40 },
                                 width: "100%",
                                 textAlign: "center", // Center content inside
                                 display: "flex", // Use flexbox for centering
@@ -88,7 +84,7 @@ const PdfViewer = ({
                         />
                     </Box>
                 </Box>
-            </Modal>
+            )}
         </>
     );
 };

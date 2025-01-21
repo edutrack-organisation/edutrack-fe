@@ -92,6 +92,13 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                                     borderColor: "#1E88E5", // Border color when focused
                                                 },
                                             },
+
+                                            "& .MuiChip-label": {
+                                                fontSize: {
+                                                    xs: "0.6rem",
+                                                    xl: "0.9rem",
+                                                },
+                                            },
                                         }}
                                     />
                                 </TableCell>

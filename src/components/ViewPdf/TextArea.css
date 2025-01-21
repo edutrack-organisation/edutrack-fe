@@ -17,6 +17,12 @@
     /* overflow: hidden; Hide scrollbar */
 }
 
+@media (min-width: 960px) and (max-width: 1801px) {
+    .textarea {
+        font-size: 0.75rem;
+    }
+}
+
 .textarea:hover {
     border-color: #b0bec5; /* Border color on hover */
 }

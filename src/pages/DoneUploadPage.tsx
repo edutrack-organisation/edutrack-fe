@@ -136,6 +136,7 @@ const DoneUploadPage = () => {
                 position={"fixed"}
                 sx={{
                     width: { lg: "91%", xl: "79%" },
+                    height: { xs: "10%", lg: "12%" },
                     backgroundColor: "white",
                     zIndex: 2,
                 }}
@@ -144,21 +145,26 @@ const DoneUploadPage = () => {
                 <Typography
                     fontWeight={"bolder"}
                     sx={{
-                        fontSize: { xs: "1.5rem", xl: "1.8rem" },
+                        fontSize: { xs: "1.2rem", xl: "1.8rem" },
                         width: { xs: "60%", xl: "75%" },
                     }}
                 >
                     {title}
                     {/* CS2105 - Computer Networks Finals 2023/2024 Semester 2 */}
                 </Typography>
-                <Button onClick={() => setShowPDF(true)}>Open PDF</Button>
+                <Button onClick={() => setShowPDF(!showPDF)}>
+                    {showPDF ? "Close PDF" : "Open PDF"}
+                </Button>
                 <Box
                     width={"13rem"}
                     padding={"1rem"}
                     borderRadius={"0.5rem"}
                     sx={{ background: "rgb(222, 242, 255)" }}
                 >
-                    <Typography textAlign={"start"}>
+                    <Typography
+                        textAlign={"start"}
+                        sx={{ fontSize: { xs: "0.8rem", xl: "1rem" } }}
+                    >
                         Please Check Through The Parsed Paper Before Proceeding.
                     </Typography>
                 </Box>
