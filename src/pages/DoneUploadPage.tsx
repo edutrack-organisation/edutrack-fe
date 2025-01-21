@@ -1,13 +1,14 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
+import { debounce } from "lodash";
 
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css"; // Required for PDF Viewer
+import "react-pdf/dist/Page/TextLayer.css"; // Required for PDF Viewer
 import PdfViewer from "../components/ViewPdf/PdfViewer";
 
 const DoneUploadPage = () => {
@@ -35,7 +36,14 @@ const DoneUploadPage = () => {
         }
     }, [response]);
 
-    // TODO (desmond): optimisation to event handlers
+    // Debounced setData function
+    const debouncedSetData = useCallback(
+        debounce((updatedData: DataItemWithUUID[]) => {
+            setData(updatedData);
+        }, 300),
+        []
+    );
+
     // Event Handlers
     const handleTopicsChange = (index: number, newChips: string[]) => {
         const updatedData = [...data];
@@ -46,7 +54,7 @@ const DoneUploadPage = () => {
     const handleDescriptionChange = (index: number, newDescription: string) => {
         const updatedData = [...data];
         updatedData[index].description = newDescription;
-        setData(updatedData);
+        debouncedSetData(updatedData);
     };
 
     const handleDifficultyChange = (index: number, newDifficulty: number) => {
