@@ -8,7 +8,7 @@ import uploadPDFImage from "../../assets/icons/Upload_pdf.png";
 import pdfIcon from "../../assets/icons/pdf_icon.png";
 import saveIcon from "../../assets/icons/save_icon.png";
 import confirmIcon from "../../assets/icons/confirm_icon.png";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const UploadPdfContainer = () => {
     const navigate = useNavigate();

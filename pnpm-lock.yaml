@@ -18,9 +18,9 @@ specifiers:
   mui-chips-input: ^2.1.5
   react: ^18.3.1
   react-dom: ^18.3.1
+  react-hot-toast: ^2.5.1
   react-pdf: ^9.1.1
   react-router-dom: ^6.26.1
-  react-toastify: ^10.0.6
   typescript: ^5.5.3
   typescript-eslint: ^8.0.1
   uuid: ^10.0.0
@@ -36,9 +36,9 @@ dependencies:
   mui-chips-input: 2.1.5_51ba20f0f5d545ea37b39d02ac104c76
   react: 18.3.1
   react-dom: 18.3.1_react@18.3.1
+  react-hot-toast: 2.5.1_react-dom@18.3.1+react@18.3.1
   react-pdf: 9.1.1_d22fd39e161ef790c83bc5921a6c9322
   react-router-dom: 6.28.0_react-dom@18.3.1+react@18.3.1
-  react-toastify: 10.0.6_react-dom@18.3.1+react@18.3.1
   uuid: 10.0.0
 
 devDependencies:
@@ -1852,6 +1852,14 @@ packages:
     engines: {node: '>=18'}
     dev: true
 
+  /goober/2.1.16_csstype@3.1.3:
+    resolution: {integrity: sha512-erjk19y1U33+XAMe1VTvIONHYoSqE4iS7BYUZfHaqeohLmnC0FdxEh7rQU+6MZ4OajItzjZFSRtVANrQwNq6/g==}
+    peerDependencies:
+      csstype: ^3.0.10
+    dependencies:
+      csstype: 3.1.3
+    dev: false
+
   /graphemer/1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: true
@@ -2349,6 +2357,19 @@ packages:
       scheduler: 0.23.2
     dev: false
 
+  /react-hot-toast/2.5.1_react-dom@18.3.1+react@18.3.1:
+    resolution: {integrity: sha512-54Gq1ZD1JbmAb4psp9bvFHjS7lje+8ubboUmvKZkCsQBLH6AOpZ9JemfRvIdHcfb9AZXRaFLrb3qUobGYDJhFQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16'
+    dependencies:
+      csstype: 3.1.3
+      goober: 2.1.16_csstype@3.1.3
+      react: 18.3.1
+      react-dom: 18.3.1_react@18.3.1
+    dev: false
+
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: false
@@ -2413,17 +2434,6 @@ packages:
     dependencies:
       '@remix-run/router': 1.21.0
       react: 18.3.1
-    dev: false
-
-  /react-toastify/10.0.6_react-dom@18.3.1+react@18.3.1:
-    resolution: {integrity: sha512-yYjp+omCDf9lhZcrZHKbSq7YMuK0zcYkDFTzfRFgTXkTFHZ1ToxwAonzA4JI5CxA91JpjFLmwEsZEgfYfOqI1A==}
-    peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
-    dependencies:
-      clsx: 2.1.1
-      react: 18.3.1
-      react-dom: 18.3.1_react@18.3.1
     dev: false
 
   /react-transition-group/4.4.5_react-dom@18.3.1+react@18.3.1:

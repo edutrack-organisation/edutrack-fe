@@ -4,7 +4,7 @@ import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
