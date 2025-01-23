@@ -62,7 +62,10 @@ const PdfViewer = ({
                             file={pdffile}
                             onLoadSuccess={onDocumentLoadSuccess}
                         >
-                            <Page pageNumber={pdfPageNumber} />
+                            <Page
+                                pageNumber={pdfPageNumber}
+                                renderTextLayer={false}
+                            />
                         </Document>
                         <Pagination
                             count={numPages}
