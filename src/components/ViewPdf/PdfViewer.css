@@ -7,8 +7,3 @@
     width: 100% !important; /*important because inline styles present*/
     height: 100% !important; /*important because inline styles present*/
 }
-
-/* @media (min-width: 960px) and (max-width: 1601px) {
-    /* .react-pdf__Document {
-        width: 400px;
-    } */

@@ -124,8 +124,10 @@ const PdfViewer = ({
                             flexDirection={"column"}
                             border={"3px solid black"}
                             overflow={"auto"}
-                            width={"420px"} // Width of the PDF viewer
-                            height={"440px"} // Height of the PDF viewer
+                            sx={{
+                                width: { xs: "420px" }, // Width of the PDF viewer
+                                height: { xs: "440px", xl: "570px" }, // Height of the PDF viewer
+                            }}
                         >
                             <Document
                                 file={pdffile}

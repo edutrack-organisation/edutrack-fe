@@ -158,7 +158,6 @@ const DoneUploadPage = () => {
                     }}
                 >
                     {title}
-                    {/* CS2105 - Computer Networks Finals 2023/2024 Semester 2 */}
                 </Typography>
                 {!showPDF && (
                     <Button onClick={() => setShowPDF(!showPDF)}>
