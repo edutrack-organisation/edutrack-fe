@@ -160,9 +160,11 @@ const DoneUploadPage = () => {
                     {title}
                     {/* CS2105 - Computer Networks Finals 2023/2024 Semester 2 */}
                 </Typography>
-                <Button onClick={() => setShowPDF(!showPDF)}>
-                    {showPDF ? "Close PDF" : "Open PDF"}
-                </Button>
+                {!showPDF && (
+                    <Button onClick={() => setShowPDF(!showPDF)}>
+                        Open PDF
+                    </Button>
+                )}
                 <Box
                     width={"13rem"}
                     padding={"1rem"}
