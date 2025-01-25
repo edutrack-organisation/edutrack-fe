@@ -1,8 +1,9 @@
-.textarea {
+/* Common styles */
+.textarea,
+.textarea-title {
     box-sizing: border-box;
     width: 90%;
     font-family: "IBM Plex Sans", sans-serif;
-    font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
     padding: 8px 12px;
@@ -12,14 +13,28 @@
     border: 1px solid #e5eaf2; /* Custom border color */
     box-shadow: 0px 2px 2px #f3f6f9;
     outline: none;
-    /* min-height: fit-content; */
+}
+
+/* Specific styles */
+.textarea {
+    font-size: 0.875rem;
     height: 150px;
-    /* overflow: hidden; Hide scrollbar */
+}
+
+.textarea-title {
+    font-size: 1.8rem;
+    font-weight: bolder;
+    height: 70px;
 }
 
 @media (min-width: 960px) and (max-width: 1801px) {
     .textarea {
         font-size: 0.75rem;
+    }
+
+    .textarea-title {
+        font-size: 1.2rem;
+        font-weight: bolder;
     }
 }
 

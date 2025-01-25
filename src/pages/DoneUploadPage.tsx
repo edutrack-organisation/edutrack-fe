@@ -10,6 +10,8 @@ import { debounce } from "lodash";
 import "react-pdf/dist/Page/AnnotationLayer.css"; // Required for PDF Viewer
 import "react-pdf/dist/Page/TextLayer.css"; // Required for PDF Viewer
 import PdfViewer from "../components/ViewPdf/PdfViewer";
+import TextArea from "../components/ViewPdf/TextArea";
+import EditIcon from "@mui/icons-material/Edit";
 
 const DoneUploadPage = () => {
     // get the response from the previous page
@@ -17,6 +19,7 @@ const DoneUploadPage = () => {
     const { response, file } = location.state;
     const [data, setData] = useState<DataItemWithUUID[]>([]);
     const [title, setTitle] = useState<string>("");
+    const [isEditingTitle, setisEditingTitle] = useState<boolean>(false); // keep track if editing title to conditionally render textarea or typography
     const [pdffile, setPDFFile] = useState<File | null>(null);
     const [showPDF, setShowPDF] = useState<boolean>(false);
 
@@ -40,6 +43,13 @@ const DoneUploadPage = () => {
     const debouncedSetData = useCallback(
         debounce((updatedData: DataItemWithUUID[]) => {
             setData(updatedData);
+        }, 300),
+        []
+    );
+
+    const debouncedSetTitle = useCallback(
+        debounce((newTitle: string) => {
+            setTitle(newTitle);
         }, 300),
         []
     );
@@ -81,6 +91,11 @@ const DoneUploadPage = () => {
         setData(updatedData);
     };
 
+    const handleTitleChange = (newTitle: string) => {
+        debouncedSetTitle(newTitle);
+        setisEditingTitle(true);
+    };
+
     // #TODO: Desmond: Refactor into API routes
     const sendParsedToBackend = async () => {
         try {
@@ -120,6 +135,7 @@ const DoneUploadPage = () => {
         handleDifficultyChange,
         handleQuestionDelete,
         handleQuestionAdd,
+        handleTitleChange,
     };
 
     return (
@@ -150,15 +166,37 @@ const DoneUploadPage = () => {
                 }}
             >
                 {/* This is the uploaded paper title */}
-                <Typography
-                    fontWeight={"bolder"}
-                    sx={{
-                        fontSize: { xs: "1.2rem", xl: "1.8rem" },
-                        width: { xs: "60%", xl: "75%" },
-                    }}
-                >
-                    {title}
-                </Typography>
+                {!isEditingTitle ? (
+                    <Box
+                        display={"flex"}
+                        sx={{ width: { xs: "60%", xl: "75%" } }}
+                    >
+                        <Typography
+                            fontWeight={"bolder"}
+                            sx={{
+                                fontSize: { xs: "1.2rem", xl: "1.8rem" },
+                            }}
+                        >
+                            {title}
+                        </Typography>
+                        <EditIcon
+                            onClick={() => setisEditingTitle(true)}
+                            sx={{
+                                cursor: "pointer",
+                                ml: { xs: "1rem", xl: "3rem" },
+                            }}
+                        />
+                    </Box>
+                ) : (
+                    <TextArea
+                        className="textarea-title"
+                        textContent={title}
+                        onChange={(event) =>
+                            handlers.handleTitleChange(event.target.value)
+                        }
+                    />
+                )}
+
                 {!showPDF && (
                     <Button onClick={() => setShowPDF(!showPDF)}>
                         Open PDF

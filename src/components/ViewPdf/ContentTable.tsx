@@ -61,6 +61,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                 </TableCell>
                                 <TableCell align="left">
                                     <TextArea
+                                        className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
                                             handlers.handleDescriptionChange(
