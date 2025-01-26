@@ -48,7 +48,7 @@ export const calculateStatistics = (data: number[]) => {
 };
 
 // BoxAndPointerDiagram Component with a border of 5 around the diagram
-const BoxAndPointerDiagram: React.FC<{ data: number[], height?: number, width?: number }> = ({ data, width = 300, height = 40 }) => {
+const BoxAndPointerDiagram: React.FC<{ data: number[], min_value?: number, max_value?: number, height?: number, width?: number }> = ({ data, min_value = 0, max_value = -1, width = 300, height = 40 }) => {
     const stats = calculateStatistics(data);
 
     if (!stats) {
@@ -56,9 +56,11 @@ const BoxAndPointerDiagram: React.FC<{ data: number[], height?: number, width?: 
     }
 
     const { mean, mode, median, q1, q3, min, max } = stats;
+    if (max_value == -1) max_value = max;                  // When max_value is not set explicitly, use max from data
+    if (max_value == min_value) max_value = min_value + 1; // When max_value - min_value == 0, set that to 1 instead to prevent division by 0 errors
 
     const scale = (value: number) =>
-        5 + ((value - min) / (max - min)) * (width - 10); // Scales value to fit the diagram width
+        5 + ((value - min_value) / (max_value - min_value)) * (width - 10); // Scales value to fit the diagram width
 
     const Y1 = 5;                       // Top limit
     const Y2 = 5 + ((height - 10) / 4); // Quarter way

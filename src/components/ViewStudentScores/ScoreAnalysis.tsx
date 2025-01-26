@@ -1,28 +1,29 @@
 import { useEffect, useState } from "react";
-import { DataItemWithUUID } from "../../types/types";
+import { QuestionItem } from "../../types/types";
 import Api, { ApiResponse } from "../../api/Api";
 import BoxAndPointerDiagram from "../BoxAndPointerDiagram";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import ApiMock from "../../api/ApiMock";
 
-const ScoreAnalysis: React.FC<{ paper: string }> = ({ paper }) => {
-    const [questions, setQuestions] = useState<DataItemWithUUID[]>([]);
-    const [scoreData, setScoreData] = useState<number[][]>([]);
+const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
+    const [questions, setQuestions] = useState<QuestionItem[]>([]);
+    const [studentScores, setStudentScores] = useState<number[][]>([]);
 
     useEffect(() => {
-        Api.getPaper(paper).then((result: ApiResponse) => {
-            setQuestions(result.data?.questionData);
+        ApiMock.getPaperQuestions(paperId).then((result: ApiResponse) => {
+            setQuestions(result.data);
         });
-        Api.getScores(paper).then((result: ApiResponse) => {
-            setScoreData(result.data?.scoreData);
+        ApiMock.getPaperStudentScores(paperId).then((result: ApiResponse) => {
+            setStudentScores(result.data);
         });
-    }, [paper])
+    }, [paperId])
 
     return (
         <TableContainer component={Paper}>
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>No.</TableCell>
+                        <TableCell>Question Number</TableCell>
                         <TableCell>Description</TableCell>
                         <TableCell>Statistics</TableCell>
                     </TableRow>
@@ -30,10 +31,10 @@ const ScoreAnalysis: React.FC<{ paper: string }> = ({ paper }) => {
                 <TableBody>
                     {questions.map((question, index) => (
                         <TableRow key={index}>
-                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{question.questionNumber}</TableCell>
                             <TableCell>{question.description}</TableCell>
                             <TableCell>
-                                <BoxAndPointerDiagram data={scoreData[index]} />
+                                <BoxAndPointerDiagram data={studentScores[index]} />
                             </TableCell>
                         </TableRow>
                     ))}

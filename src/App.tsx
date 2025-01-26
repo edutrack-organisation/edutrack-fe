@@ -1,18 +1,21 @@
-import "./App.css";
+import { Box, createTheme, ThemeProvider } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import NavBar from "./components/NavBar";
-import LandingPage from "./pages/LandingPage";
-import UploadPdfPage from "./pages/UploadPdfPage";
-import DoneUploadPage from "./pages/DoneUploadPage";
-import ViewPdfPage from "./pages/ViewPdfPage";
-import UploadStudentScoresPage from "./pages/UploadStudentScoresPage.tsx";
-import LoginPage from "./pages/LoginPage.tsx";
-import SignupPage from "./pages/SignupPage.tsx";
-import LogoutPage from "./pages/LogoutPage.tsx";
 import { ToastContainer } from "react-toastify";
-import { createTheme, ThemeProvider } from "@mui/material";
+import "./App.css";
+import NavBar from "./components/NavBar";
+import { COLORS } from "./constants/constants.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import CourseSelectPage from "./pages/CourseSelectPage.tsx";
+import DoneUploadPage from "./pages/DoneUploadPage";
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage.tsx";
+import LogoutPage from "./pages/LogoutPage.tsx";
+import SignupPage from "./pages/SignupPage.tsx";
 import UploadDifficultyPage from "./pages/UploadDifficultyPage.tsx";
+import UploadPdfPage from "./pages/UploadPdfPage";
+import UploadStudentScoresPage from "./pages/UploadStudentScoresPage.tsx";
+import ViewPapersPage from "./pages/ViewPapersPage.tsx";
+import ViewPdfPage from "./pages/ViewPdfPage";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -36,17 +39,6 @@ function App() {
                 xl: 1800,
             },
         },
-        // palette: { // TODO: change the default colors for buttons and such
-        //     primary: {
-        //         main: "#070708", // Black
-        //     },
-        //     secondary: {
-        //         main: "#FFFAFA", // White
-        //     },
-        //     background: {
-        //         default: "#FFFAFA", // White
-        //     },
-        // },
     });
 
     return (
@@ -54,17 +46,24 @@ function App() {
             <AuthProvider>
                 <BrowserRouter>
                     <NavBar />
-                    <Routes>
-                        <Route path="/" element={<LandingPage />} />
-                        <Route path="/uploadpdf" element={<UploadPdfPage />} />
-                        <Route path="/doneupload" element={<DoneUploadPage />} />
-                        <Route path="/viewpdf" element={<ViewPdfPage />} />
-                        <Route path="/uploadstudentscores" element={<UploadStudentScoresPage />} />
-                        <Route path="/uploaddifficulty" element={<UploadDifficultyPage />} />
-                        <Route path="/signup" element={<SignupPage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/logout" element={<LogoutPage />} />
-                    </Routes>
+                    {/* Margin used to place NavBar in fixed position */}
+                    <Box sx={{ display: "flex", marginTop: "5rem", minHeight: "calc(100vh - 5rem)", background: COLORS.WHITE }} >
+                        <Routes>
+                            <Route path="/" element={<LandingPage />} />
+                            <Route path="/uploadpdf" element={<UploadPdfPage />} />
+                            <Route path="/doneupload" element={<DoneUploadPage />} />
+                            <Route path="/courses" element={<CourseSelectPage />} />
+                            <Route path="/courses/:courseId" element={<ViewPapersPage />} />
+                            <Route path="/viewpdf" element={<ViewPdfPage />} />
+                            <Route path="/uploadstudentscores" element={<UploadStudentScoresPage />} />
+                            <Route path="/uploaddifficulty" element={<UploadDifficultyPage />} />
+                            <Route path="/signup" element={<SignupPage />} />
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/logout" element={<LogoutPage />} />
+                            {/* Fallabck page */}
+                            <Route path="*" element={<LandingPage />} />
+                        </Routes>
+                    </Box>
                     <ToastContainer />
                 </BrowserRouter>
             </AuthProvider>

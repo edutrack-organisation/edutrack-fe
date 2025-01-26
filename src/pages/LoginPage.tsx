@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuthState } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { AuthContextType, User } from '../types/types';
 
 const LoginPage = () => {
@@ -10,7 +10,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState<string | null>('');
     const [showPassword, setShowPassword] = useState<boolean | null>(false);
 
-    const { login }: AuthContextType = useAuthState();
+    const { login }: AuthContextType = useAuthContext();
     const navigate = useNavigate();
 
     const handleLogin = () => {

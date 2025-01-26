@@ -12,17 +12,33 @@ export interface DataItemWithUUID extends DataItem {
     uuid: string;
 }
 
-export interface User { // TODO: discuss with backend to figure out exact details
-    userId: number;
-}
+// Objects
+export interface CourseItem {
+    courseId: number;
+    courseTitle: string;
+    papers?: PaperItem[];
+};
 
-export interface AuthState { // TODO: discuss with backend to figure out exact details
-    user: User | null;
-}
+export interface PaperItem {
+    paperId: number;
+    paperTitle: string;
+    questions?: QuestionItem[];
+    studentScores?: number[][];
+};
 
+export interface QuestionItem {
+    questionId: number;
+    questionNumber: number;
+    description: string;
+    topics: string[];
+    marks: number;
+    difficulty: number;
+};
+
+// Context
 export interface AuthContextType {
-    state: AuthState | null;
-    setState: React.Dispatch<React.SetStateAction<AuthState | null>>;
-    login: (user: User) => void;
+    userId: number | null;
+    setUserId: React.Dispatch<React.SetStateAction<number | null>>;
+    login: (userId: number) => void;
     logout: () => void;
-}
+};

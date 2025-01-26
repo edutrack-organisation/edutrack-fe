@@ -3,6 +3,7 @@ import { Box, Button, Typography, Select, MenuItem, FormControl, InputLabel, Ale
 import { theme } from "../theme";
 import Api, { ApiResponse } from "../api/Api";
 import ScoreAnalysis from "../components/ViewStudentScores/ScoreAnalysis";
+import { COLORS } from "../constants/constants";
 
 const UploadStudentScoresPage = () => {
     const [paperList, setPaperList] = useState<string[] | null>(null);
@@ -42,6 +43,7 @@ const UploadStudentScoresPage = () => {
             setErrorMessage("The CSV file might be incorrect. Please check its contents.");
         } else {
             // navigate("/"); // Navigate to success page
+            await Api.setScores(csvFile!);
             setIsSumbitSuccessful(true); // TODO: move this into ViewStudentScore
         }
     };
@@ -98,8 +100,8 @@ const UploadStudentScoresPage = () => {
                             component="label"
                             sx={{
                                 marginBottom: "1rem",
-                                backgroundColor: theme.colors.highlight1,
-                                "&:hover": { backgroundColor: theme.colors.highlight2 },
+                                backgroundColor: COLORS.HIGHLIGHT,
+                                "&:hover": { backgroundColor: COLORS.WHITE },
                             }}
                             disabled={!selectedPaper}
                         >
@@ -145,7 +147,7 @@ const UploadStudentScoresPage = () => {
                         orientation="vertical"
                         flexItem
                         sx={{
-                            backgroundColor: theme.colors.highlight1,
+                            backgroundColor: COLORS.HIGHLIGHT,
                             width: "0.25rem",
                             borderRadius: 3,
                             margin: 1,

@@ -13,11 +13,11 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import TextArea from "./ViewPdf/TextArea";
+import TextArea from "./TextArea";
 import { MuiChipsInput } from "mui-chips-input";
-import { DataItem, Handlers } from "../types/types";
+import { DataItem, Handlers } from "../../types/types";
 import { useEffect, useState } from "react";
-import Api, { ApiError } from "../api/Api";
+import Api, { ApiError } from "../../api/Api";
 import { v4 as uuidv4 } from "uuid";
 
 interface ContentTableProps {
@@ -25,8 +25,9 @@ interface ContentTableProps {
 }
 
 const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
-    const [isFetchingPaper, setIsFetchingPaper] = useState<Boolean>(true);
-    const [isEditing, setIsEditing] = useState<Boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [isUploadingScores, setIsUploadingScores] = useState<boolean>(false);
     const [data, setData] = useState<DataItem[]>([]);
 
     // TODO: optimisation to event handlers(?)
@@ -43,6 +44,13 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
         updatedData[index].description = newDescription;
         setData(updatedData);
         Api.changePaperQuestionDescription(title, index, newDescription);
+    };
+
+    const handleMarksChange = (index: number, newMarks: number) => {
+        const updatedData = [...data];
+        updatedData[index].marks = newMarks;
+        setData(updatedData);
+        Api.changePaperQuestionMarks(title, index, newMarks);
     };
 
     const handleDifficultyChange = (index: number, newDifficulty: number) => {
@@ -66,20 +74,33 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
         handleQuestionDelete,
     };
 
+    const handleUploadDifficulty = () => {
+        // TODO: to be implemented
+    };
+
+    const handleViewScores = () => {
+        // TODO: to be implemented
+    };
+
+    const handleUploadScores = () => {
+        setIsUploadingScores(true);
+    };
+
     const handleEdit = () => {
         setIsEditing(true);
-    }
+    };
 
     const handleSave = () => {
         setIsEditing(false);
         // TODO: Make a one time push to BE when saving instead of pushing to API with every change.
-    }
+    };
 
     useEffect(() => {
-        setIsFetchingPaper(true);
+        setIsLoading(true);
+        setIsEditing(false);
         Api.getPaper(title)
             .then((response) => {
-                setIsFetchingPaper(false);
+                setIsLoading(false);
                 setData(response.data.questionData);
             })
             .catch((error) => {
@@ -90,20 +111,36 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                     // Handle any unexpected errors
                     console.error("Unexpected error uploading file:", error);
                 }
-                setIsFetchingPaper(false);
+                setIsLoading(false);
             });
     }, [title]);
 
     return (
         <>
-            <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
+            {/* Paper title */}
+            <Typography fontWeight={"bold"} fontSize={"1.8rem"}>
                 {title}
             </Typography>
-            {isFetchingPaper
+            {isLoading
                 ? <Box><CircularProgress size={"100px"} /></Box>
                 :
                 <>
-                    <Box alignSelf={'flex-end'} marginRight={3}>
+                    <Box sx={{ display: "flex", gap: 2, marginRight: 3, alignSelf: 'flex-end' }}>
+                        <Button variant="contained"
+                            onClick={handleUploadDifficulty}
+                        >
+                            Upload Difficulty
+                        </Button>
+                        <Button variant="contained"
+                            onClick={handleViewScores}
+                        >
+                            View Scores
+                        </Button>
+                        <Button variant="contained"
+                            onClick={handleUploadScores}
+                        >
+                            Upload Scores
+                        </Button>
                         {isEditing
                             ? <Button variant="contained"
                                 onClick={handleSave}
@@ -132,10 +169,11 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                     <TableCell sx={{ width: "50%" }} align="left">
                                         Description
                                     </TableCell>
-                                    <TableCell sx={{ width: "30%" }} align="left">
+                                    <TableCell sx={{ width: "20%" }} align="left">
                                         Topics
                                     </TableCell>
-                                    <TableCell align="center">Difficulty</TableCell>
+                                    <TableCell sx={{ width: "10%" }} align="center">Marks</TableCell>
+                                    <TableCell sx={{ width: "10%" }} align="center">Difficulty</TableCell>
                                     {isEditing && <TableCell />}
                                 </TableRow>
                             </TableHead>
@@ -175,6 +213,33 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                                     sx={{
                                                         width: "350px",
                                                         "& .MuiOutlinedInput-root": {
+                                                            "& fieldset": {
+                                                                borderColor: "#E5EAF2", // Custom border color
+                                                            },
+                                                            "&:hover fieldset": {
+                                                                borderColor: "#B0BEC5", // Border color on hover
+                                                            },
+                                                            "&.Mui-focused fieldset": {
+                                                                borderColor: "#1E88E5", // Border color when focused
+                                                            },
+                                                        },
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <TextField
+                                                    type="number"
+                                                    id="outlined-basic"
+                                                    defaultValue={row.marks || 0}
+                                                    variant="outlined"
+                                                    onChange={(event) =>
+                                                        handlers.handleMarksChange(
+                                                            index,
+                                                            parseInt(event.target.value)
+                                                        )
+                                                    }
+                                                    sx={{
+                                                        "& .MuiTextField-root": {
                                                             "& fieldset": {
                                                                 borderColor: "#E5EAF2", // Custom border color
                                                             },
@@ -245,6 +310,9 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                             </TableCell>
                                             <TableCell align="left">
                                                 {row.topics.map(topic => <Chip label={topic} sx={{ margin: 1 }} />)}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Typography> {row.marks || 0} </Typography>
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Typography> {row.difficulty || 0} </Typography>

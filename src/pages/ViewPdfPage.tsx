@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Api, { ApiError } from "../api/Api";
 import { theme } from "../theme";
-import ContentTableFromTitle from "../components/ContentTableFromTitle";
+import ContentTableFromTitle from "../components/ViewPdf/ContentTableFromTitle";
 import "../App.css";
 
 const ViewPdfPage = () => {

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useAuthState } from "../context/AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { theme } from "../theme";
+import { COLORS } from "../constants/constants";
 
 const LogoutPage = () => {
     const navigate = useNavigate();
-    const { logout } = useAuthState();
+    const { logout } = useAuthContext();
 
     const [isLoggedOut, setIsLoggedOut] = useState<boolean | null>(false);
 
@@ -26,7 +26,7 @@ const LogoutPage = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 minHeight: "100vh",
-                backgroundColor: theme.colors.secondary,
+                backgroundColor: COLORS.WHITE,
                 padding: "2rem",
             }}
         >

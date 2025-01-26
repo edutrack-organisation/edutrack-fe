@@ -5,6 +5,7 @@ import KnowledgeGraphImage from "../assets/images/knowledge_graph.jpg";
 import AssessmentGeneratorImage from "../assets/images/assessment_generator.jpg";
 import AssessmentMetricImage from "../assets/images/assessment_metric.jpg";
 import IntuitiveUiImage from "../assets/images/intuitive_ui.jpg";
+import { COLORS } from "../constants/constants";
 
 const LandingPage = () => {
     return (
@@ -13,7 +14,7 @@ const LandingPage = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                background: theme.colors.secondary,
+                background: COLORS.WHITE,
             }}
         >
             <Container
@@ -29,7 +30,7 @@ const LandingPage = () => {
                     fontFamily={"Poppins, sans-serif"}
                     textAlign={"center"}
                     fontWeight={"bold"}
-                    sx={{ color: theme.colors.secondary }}
+                    sx={{ color: COLORS.WHITE }}
                 >
                     EduTrack
                 </Typography>
@@ -37,7 +38,7 @@ const LandingPage = () => {
                     fontSize={{ xs: "1.4rem", sm: "2.1rem", md: "2.8rem" }}
                     fontFamily={"Poppins, sans-serif"}
                     textAlign={"center"}
-                    sx={{ color: theme.colors.secondary }}
+                    sx={{ color: COLORS.WHITE }}
                 >
                     measure the impact of education practices on learning
                     outcomes.

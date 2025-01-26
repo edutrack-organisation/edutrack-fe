@@ -3,6 +3,7 @@ import { Box, Button, Typography, Select, MenuItem, FormControl, InputLabel, Ale
 import { theme } from "../theme";
 import Api, { ApiResponse } from "../api/Api";
 import ScoreAnalysis from "../components/UploadDifficulty/ScoreAnalysis";
+import { COLORS } from "../constants/constants";
 
 const UploadDifficultyPage = () => {
     const [paperList, setPaperList] = useState<string[] | null>(null);
@@ -98,8 +99,8 @@ const UploadDifficultyPage = () => {
                             component="label"
                             sx={{
                                 marginBottom: "1rem",
-                                backgroundColor: theme.colors.highlight1,
-                                "&:hover": { backgroundColor: theme.colors.highlight2 },
+                                backgroundColor: COLORS.HIGHLIGHT,
+                                "&:hover": { backgroundColor: COLORS.WHITE },
                             }}
                             disabled={!selectedPaper}
                         >
@@ -145,7 +146,7 @@ const UploadDifficultyPage = () => {
                         orientation="vertical"
                         flexItem
                         sx={{
-                            backgroundColor: theme.colors.highlight1,
+                            backgroundColor: COLORS.HIGHLIGHT,
                             width: "0.25rem",
                             borderRadius: 3,
                             margin: 1,

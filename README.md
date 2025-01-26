@@ -1,4 +1,44 @@
-# React + TypeScript + Vite
+# EduTrack
+
+## Installation
+
+1. Clone the repository.
+1. Install [Node.js](https://nodejs.org/en/download). 
+1. Install [pnpm](https://pnpm.io/installation).
+1. Install dependencies:
+    ```bash
+    pnpm install
+    ```
+
+1. Run program:
+    ```bash
+    pnpm run dev
+    ```
+
+## Folder Structure
+
+```php
+src/                      # Application source code
+├── api/                  # API integration files
+├── assets/               # Icons and images
+├── components/           # React components (page specific components are stored in respective subfolders)
+├── constants/            # Global constants
+├── context/              # Page components (LandingPage, ViewPdfPage, etc.)
+│   ├── AuthContext.tsx   # Context for user authentication
+├── pages/                # Page components
+├── types/                # Commonly used types
+├── App.tsx               # Main application file
+├── main.tsx              # Entry point
+
+.gitignore                # Files and directories to ignore in Git
+DEV_MEMO.md               # Notes for developers
+index.html                # Root HTML file
+package.json              # Project dependencies and scripts
+pnpm-lock.yaml            # Lock file to ensure consistent dependency versions
+README.md                 # Project documentation
+```
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
@@ -48,3 +88,7 @@ export default tseslint.config({
   },
 })
 ```
+
+## License
+
+## Contributions
