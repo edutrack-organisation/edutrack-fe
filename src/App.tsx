@@ -54,13 +54,10 @@ function App() {
                             <Route path="/doneupload" element={<DoneUploadPage />} />
                             <Route path="/courses" element={<CourseSelectPage />} />
                             <Route path="/courses/:courseId" element={<ViewPapersPage />} />
-                            <Route path="/viewpdf" element={<ViewPdfPage />} />
-                            <Route path="/uploadstudentscores" element={<UploadStudentScoresPage />} />
-                            <Route path="/uploaddifficulty" element={<UploadDifficultyPage />} />
                             <Route path="/signup" element={<SignupPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/logout" element={<LogoutPage />} />
-                            {/* Fallabck page */}
+                            {/* Fallback page */}
                             <Route path="*" element={<LandingPage />} />
                         </Routes>
                     </Box>

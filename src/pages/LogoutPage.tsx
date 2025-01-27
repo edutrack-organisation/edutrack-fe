@@ -1,8 +1,8 @@
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useAuthContext } from "../context/AuthContext";
-import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { COLORS } from "../constants/constants";
+import { useAuthContext } from "../context/AuthContext";
 
 const LogoutPage = () => {
     const navigate = useNavigate();
@@ -21,6 +21,7 @@ const LogoutPage = () => {
     return (
         <Box
             sx={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",

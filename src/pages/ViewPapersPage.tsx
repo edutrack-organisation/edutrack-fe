@@ -1,11 +1,4 @@
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Divider,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiMock, { ApiError } from "../api/ApiMock";

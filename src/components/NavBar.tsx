@@ -87,36 +87,6 @@ const NavBar = () => {
                 Upload PDf
             </Button>,
 
-        viewPdf:
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="ViewPdf Button"
-                onClick={() => handleNavigate("/viewpdf")}
-            >
-                View PDf
-            </Button>,
-
-        uploadScores: // To be removed
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="UploadScores Button"
-                onClick={() => handleNavigate("/uploadstudentscores")}
-            >
-                Upload Scores
-            </Button>,
-
-        uploadDifficulty: // To be removed
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="UploadDifficulty Button"
-                onClick={() => handleNavigate("/uploaddifficulty")}
-            >
-                Upload Difficulty
-            </Button>,
-
         login:
             <Button
                 variant="text"
@@ -153,9 +123,6 @@ const NavBar = () => {
         menuItems.home,
         menuItems.courseSelect,
         menuItems.uploadPdf,
-        menuItems.viewPdf,
-        menuItems.uploadScores,
-        menuItems.uploadDifficulty,
     ];
 
     // The buttons in the menu when user is logged out

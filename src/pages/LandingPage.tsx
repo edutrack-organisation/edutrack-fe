@@ -1,16 +1,16 @@
 import { Box, Container, Divider, Stack, Typography } from "@mui/material";
-import { theme } from "../theme";
-import QuestionBankImage from "../assets/images/question_bank.jpg";
-import KnowledgeGraphImage from "../assets/images/knowledge_graph.jpg";
 import AssessmentGeneratorImage from "../assets/images/assessment_generator.jpg";
 import AssessmentMetricImage from "../assets/images/assessment_metric.jpg";
 import IntuitiveUiImage from "../assets/images/intuitive_ui.jpg";
+import KnowledgeGraphImage from "../assets/images/knowledge_graph.jpg";
+import QuestionBankImage from "../assets/images/question_bank.jpg";
 import { COLORS } from "../constants/constants";
 
 const LandingPage = () => {
     return (
         <Box
             sx={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
