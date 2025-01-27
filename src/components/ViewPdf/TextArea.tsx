@@ -6,9 +6,13 @@ interface TextAreaProps
     textContent: string | number;
 }
 
-const TextArea: React.FC<TextAreaProps> = ({ textContent, ...props }) => {
+const TextArea: React.FC<TextAreaProps> = ({
+    textContent,
+    className,
+    ...props
+}) => {
     return (
-        <textarea className="textarea" defaultValue={textContent} {...props} />
+        <textarea className={className} defaultValue={textContent} {...props} />
     );
 };
 

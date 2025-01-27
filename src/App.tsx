@@ -1,6 +1,7 @@
+import "@mui/material";
 import { Box, createTheme, ThemeProvider } from "@mui/material";
+import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 import "./App.css";
 import NavBar from "./components/NavBar";
 import { COLORS } from "./constants/constants.tsx";
@@ -11,11 +12,8 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage.tsx";
 import LogoutPage from "./pages/LogoutPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
-import UploadDifficultyPage from "./pages/UploadDifficultyPage.tsx";
 import UploadPdfPage from "./pages/UploadPdfPage";
-import UploadStudentScoresPage from "./pages/UploadStudentScoresPage.tsx";
 import ViewPapersPage from "./pages/ViewPapersPage.tsx";
-import ViewPdfPage from "./pages/ViewPdfPage";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -24,6 +22,7 @@ declare module "@mui/material/styles" {
         md: true;
         lg: true;
         xl: true;
+        lgxl: true;
     }
 }
 
@@ -36,6 +35,7 @@ function App() {
                 sm: 600,
                 md: 900,
                 lg: 1200,
+                lgxl: 1300,
                 xl: 1800,
             },
         },
@@ -60,8 +60,8 @@ function App() {
                             {/* Fallback page */}
                             <Route path="*" element={<LandingPage />} />
                         </Routes>
+                        <Toaster position="top-right" reverseOrder={false} />
                     </Box>
-                    <ToastContainer />
                 </BrowserRouter>
             </AuthProvider>
         </ThemeProvider>
