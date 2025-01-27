@@ -122,6 +122,7 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                 </TableCell>
                                 <TableCell align="left">
                                     <TextArea
+                                        className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
                                             handlers.handleDescriptionChange(

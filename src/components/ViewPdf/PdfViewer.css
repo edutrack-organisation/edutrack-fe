@@ -1,14 +1,9 @@
 .react-pdf__Document {
-    width: 500px;
+    /* width: 450px; */
+    width: var(--pdf-width, 400px); /* Default width is 400px */
 }
 
 .react-pdf__Page__canvas {
     width: 100% !important; /*important because inline styles present*/
     height: 100% !important; /*important because inline styles present*/
-}
-
-@media (min-width: 960px) and (max-width: 1801px) {
-    .react-pdf__Document {
-        width: 400px;
-    }
 }

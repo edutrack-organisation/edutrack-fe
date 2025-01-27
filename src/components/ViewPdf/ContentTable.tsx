@@ -61,6 +61,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                 </TableCell>
                                 <TableCell align="left">
                                     <TextArea
+                                        className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
                                             handlers.handleDescriptionChange(
@@ -90,6 +91,13 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                                 },
                                                 "&.Mui-focused fieldset": {
                                                     borderColor: "#1E88E5", // Border color when focused
+                                                },
+                                            },
+
+                                            "& .MuiChip-label": {
+                                                fontSize: {
+                                                    xs: "0.6rem",
+                                                    xl: "0.9rem",
                                                 },
                                             },
                                         }}

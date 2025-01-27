@@ -5,9 +5,9 @@ import LandingPage from "./pages/LandingPage";
 import UploadPdfPage from "./pages/UploadPdfPage";
 import DoneUploadPage from "./pages/DoneUploadPage";
 import ViewPdfPage from "./pages/ViewPdfPage";
-import { ToastContainer } from "react-toastify";
 import { createTheme, ThemeProvider } from "@mui/material";
 import "@mui/material";
+import { Toaster } from "react-hot-toast";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -16,6 +16,7 @@ declare module "@mui/material/styles" {
         md: true;
         lg: true;
         xl: true;
+        lgxl: true;
     }
 }
 
@@ -28,6 +29,7 @@ function App() {
                 sm: 600,
                 md: 900,
                 lg: 1200,
+                lgxl: 1300,
                 xl: 1800,
             },
         },
@@ -43,7 +45,8 @@ function App() {
                     <Route path="/doneupload" element={<DoneUploadPage />} />
                     <Route path="/viewpdf" element={<ViewPdfPage />} />
                 </Routes>
-                <ToastContainer />
+
+                <Toaster position="top-right" reverseOrder={false} />
             </BrowserRouter>
         </ThemeProvider>
     );
