@@ -11,8 +11,8 @@ const NavBar = () => {
     const auth = useAuthContext();
 
     // User a drawer to keep menu Items when page width is small
-    const [shouldUseDrawerButton, setShouldUseDrawerButon] = useState(window.innerWidth < window.innerHeight);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [shouldUseDrawerButton, setShouldUseDrawerButon] = useState<boolean>(window.innerWidth < window.innerHeight);
+    const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
     useEffect(() => {
         // Extracting local userId

@@ -49,26 +49,6 @@ const ApiMock = {
         }
     },
 
-    /**
-     * API call to submit the confirmed fields of the paper.
-     *
-     * @param title The title of the paper
-     * @param questionData The list of questions in the paper
-     * @returns An ApiResponse object with the data being a JSON object containing { title: String } // TODO: to be discussed, this should redirect user to view the paper
-     */
-    submitPdfData: async (
-        title: String,
-        questionData: DataItem[]
-    ): Promise<ApiResponse> => {
-        // TODO: To be implemented
-        return {
-            success: true,
-            data: {
-                title: "CS2105 - Computer Networks Finals 2023/2024 Semester 2",
-            },
-        };
-    },
-
     getCourses: async (): Promise<ApiResponse<CourseItem[]>> => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return { 

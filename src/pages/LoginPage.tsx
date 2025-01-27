@@ -6,9 +6,9 @@ import { useAuthContext } from '../context/AuthContext';
 import { AuthContextType } from '../types/types';
 
 const LoginPage = () => {
-    const [username, setUsername] = useState<string | null>('');
-    const [password, setPassword] = useState<string | null>('');
-    const [showPassword, setShowPassword] = useState<boolean | null>(false);
+    const [username, setUsername] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const { login }: AuthContextType = useAuthContext();
     const navigate = useNavigate();

@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
-    const [username, setUsername] = useState<string | null>('');
+    const [username, setUsername] = useState<string>('');
 
-    const [password, setPassword] = useState<string | null>('');
-    const [showPassword, setShowPassword] = useState<boolean | null>(false);
-    const [isPasswordValid, setIsPasswordValid] = useState<boolean | null>(true);
+    const [password, setPassword] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
 
-    const [reenterPassword, setReenterPassword] = useState<string | null>('');
-    const [showReenterPassword, setShowReenterPassword] = useState<boolean | null>(false);
-    const [isReenterPasswordValid, setIsReenterPasswordValid] = useState<boolean | null>(true);
+    const [reenterPassword, setReenterPassword] = useState<string>('');
+    const [showReenterPassword, setShowReenterPassword] = useState<boolean>(false);
+    const [isReenterPasswordValid, setIsReenterPasswordValid] = useState<boolean>(true);
 
     const navigate = useNavigate();
 

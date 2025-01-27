@@ -6,8 +6,8 @@ import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, T
 import ApiMock from "../../api/ApiMock";
 
 const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
-    const [questions, setQuestions] = useState<QuestionItem[]>([]);
-    const [studentScores, setStudentScores] = useState<number[][]>([]);
+    const [questions, setQuestions] = useState<QuestionItem[]>();
+    const [studentScores, setStudentScores] = useState<number[][]>();
 
     useEffect(() => {
         ApiMock.getPaperQuestions(paperId).then((result: ApiResponse) => {

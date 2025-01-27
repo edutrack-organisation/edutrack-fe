@@ -8,7 +8,7 @@ const LogoutPage = () => {
     const navigate = useNavigate();
     const { logout } = useAuthContext();
 
-    const [isLoggedOut, setIsLoggedOut] = useState<boolean | null>(false);
+    const [isLoggedOut, setIsLoggedOut] = useState<boolean>(false);
 
     useEffect(() => {
         // Simulate a logout process (involving API)
