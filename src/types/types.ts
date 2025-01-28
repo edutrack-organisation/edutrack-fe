@@ -30,7 +30,7 @@ export interface QuestionItem {
     questionId: number;
     questionNumber: number;
     description: string;
-    topics: string[];
+    topics: string[]; // TODO: use TopicItem in the future
     marks: number;
     difficulty: number;
 };

@@ -1,7 +1,8 @@
 import { Box, Button, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import ApiMock, { ApiError } from "../api/ApiMock";
+import Api from "../api/Api";
 import PaperInspector from "../components/ViewPaper/PaperInspector";
 import { COLORS } from "../constants/constants";
 import type { PaperItem } from "../types/types";
@@ -23,20 +24,23 @@ const ViewPapersPage = () => {
         };
 
         // Fetch papers for the course
-        ApiMock.getCoursePapers(courseId).then((response) => {
-            setPaperList(response.data);
-            setIsFetchingPapers(false);
-        }).catch((error) => {
-            if (error instanceof ApiError) {
-                // Handle specific API errors
-                console.error("API Error uploading file:", error.message);
+        fetchPapers(courseId);
+    }, []);
+
+    const fetchPapers = (courseId: number) => {
+        setIsFetchingPapers(true);
+        Api.getCoursePapers(courseId).then((response) => {
+            if (response.success) {
+                setPaperList(response.data);
             } else {
-                // Handle any unexpected errors
-                console.error("Unexpected error uploading file:", error);
+                toast.error("Error fetching papers");
             }
+        }).catch((error) => {
+            toast.error(`API Error getting papers: ${error.message}`);
+        }).finally(() => {
             setIsFetchingPapers(false);
         });
-    }, []);
+    };
 
     return (
         <Box sx={containerStyle}>

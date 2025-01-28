@@ -1,10 +1,11 @@
 import { Alert, Box, Button, Chip, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from "@mui/material";
 import { MuiChipsInput } from "mui-chips-input";
 import { useEffect, useState } from "react";
-import ApiMock from "../../api/ApiMock";
 import { COLORS } from "../../constants/constants";
 import type { PaperItem, QuestionItem } from "../../types/types";
 import ScoreAnalysis from "./ScoreAnalysis";
+import Api from "../../api/Api";
+import ApiMock from "../../api/ApiMock";
 
 interface PaperInspectorProps {
     paper: PaperItem;
@@ -17,8 +18,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
     const [hasScores, setHasScores] = useState<boolean>(false); // Enables the View Scores tab if scores has been uploaded before
     const handlePaperChange = () => {
         setHasScores(false); // Disable View Scores Tab by default
-        ApiMock.getIsPaperScoresAvailable(paper.paperId).then((result) => {
-            if (result.data) {
+        Api.getIsPaperScoresAvailable(paper.paperId).then((response) => {
+            if (response.data) {
                 setHasScores(true);
             }
         });
@@ -48,8 +49,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
                 setPaperQuestions(undefined);
                 setIsEditing(false);
                 // Fetch new data
-                ApiMock.getPaperQuestions(paper.paperId).then((result) => {
-                    setPaperQuestions(result.data);
+                Api.getPaperQuestions(paper.paperId).then((response) => {
+                    setPaperQuestions(response.data);
                 });
             } else if (tabValue === 1) { // View Scores Tab
                 // Clear old data
@@ -80,8 +81,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
     const handleSave = () => {
         // Uploads updated paperQuestions to backend
         setIsSavingPaper(true);
-        ApiMock.savePaper({ ...paper, questions: paperQuestions }).then((result) => {
-            if (result.success == true) {
+        ApiMock.savePaper({ ...paper, questions: paperQuestions }).then((response) => {
+            if (response.success == true) {
                 alert("Paper saved!"); // TODO: Use toast
                 setIsEditing(false);
             } else {
@@ -152,8 +153,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             setErrorMessage("The CSV file might be incorrect. Please check its contents.");
         } else {
             // navigate("/"); // Navigate to success page
-            await ApiMock.setPaperStudentScores(paper.paperId, csvFile!).then((result) => {
-                if (result.success) {
+            await ApiMock.setPaperStudentScores(paper.paperId, csvFile!).then((response) => {
+                if (response.success) {
                     setIsSumbitSuccessful(true);
                 }
             });
@@ -169,7 +170,7 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             const rows = text.split("\n").filter(row => row.trim() !== "");
             
             // Get the number of questions in the selected paper
-            const numQuestions = (await ApiMock.getPaperQuestions(paper.paperId)).data.length ?? -1;
+            const numQuestions = (await Api.getPaperQuestions(paper.paperId)).data.length ?? -1;
 
             // Check if the number of rows equals the number of questions
             return rows.length === numQuestions;
@@ -190,8 +191,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             setErrorMessage("The CSV file might be incorrect. Please check its contents.");
         } else {
             // navigate("/"); // Navigate to success page
-            await ApiMock.setPaperDifficulty(paper.paperId, csvFile!).then((result) => {
-                if (result.success) {
+            await ApiMock.setPaperDifficulty(paper.paperId, csvFile!).then((response) => {
+                if (response.success) {
                     setIsSumbitSuccessful(true);
                 }
             });
@@ -207,7 +208,7 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             const rows = text.split("\n").filter(row => row.trim() !== "");
             
             // Get the number of questions in the selected paper
-            const numQuestions = (await ApiMock.getPaperQuestions(paper.paperId)).data.length ?? -1;
+            const numQuestions = (await Api.getPaperQuestions(paper.paperId)).data.length ?? -1;
 
             // Check if the number of rows equals the number of questions
             return rows.length === numQuestions;
@@ -225,12 +226,14 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             </Typography>
 
             {/* Tabs */}
-            <Tabs value={tabValue} onChange={(_, newTabValue) => setTabValue(newTabValue)}>
-                <Tab label="View Questions" />
-                <Tab label="View Scores" disabled={!hasScores} />
-                <Tab label="Upload Scores" />
-                <Tab label="Upload Difficulty" />
-            </Tabs>
+            {tabValue !== undefined && ( // Prevents error when tabValue was initially undefined
+                <Tabs value={tabValue} onChange={(_, newTabValue) => setTabValue(newTabValue)}>
+                    <Tab label="View Questions" />
+                    <Tab label="View Scores" disabled={!hasScores} />
+                    <Tab label="Upload Scores" />
+                    <Tab label="Upload Difficulty" />
+                </Tabs>
+            )}
 
             {/* View Questions Tab */}
             {tabValue === 0 && (
@@ -308,7 +311,7 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
                                                 <TableRow key={`row${index}`}>
                                                     <TableCell>{question.questionNumber}</TableCell>
                                                     <TableCell>{question.description}</TableCell>
-                                                    <TableCell>{question.topics.map(topic => <Chip label={topic} sx={{ margin: 1 }} />)}</TableCell>
+                                                    <TableCell>{question.topics.map((topic) => <Chip key={`${topic}`} label={topic} sx={{ margin: 1 }} />)}</TableCell>
                                                     <TableCell>{question.marks}</TableCell>
                                                     <TableCell>{question.difficulty}</TableCell>
                                                 </TableRow>

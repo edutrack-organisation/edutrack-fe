@@ -10,11 +10,11 @@ const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
     const [studentScores, setStudentScores] = useState<number[][]>();
 
     useEffect(() => {
-        ApiMock.getPaperQuestions(paperId).then((result: ApiResponse) => {
-            setQuestions(result.data);
+        Api.getPaperQuestions(paperId).then((response: ApiResponse) => {
+            setQuestions(response.data);
         });
-        ApiMock.getPaperStudentScores(paperId).then((result: ApiResponse) => {
-            setStudentScores(result.data);
+        ApiMock.getPaperStudentScores(paperId).then((response: ApiResponse) => {
+            setStudentScores(response.data);
         });
     }, [paperId])
 

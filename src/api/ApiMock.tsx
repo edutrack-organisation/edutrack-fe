@@ -1,4 +1,4 @@
-import { CourseItem, DataItem, DataItemWithUUID, PaperItem, QuestionItem } from "../types/types";
+import { CourseItem, PaperItem, QuestionItem } from "../types/types";
 
 export interface ApiResponse<T = any> {
     success: boolean; // Whether the API call is successful
@@ -57,7 +57,7 @@ const ApiMock = {
                 { courseId: 1, courseTitle: "CS2105" },
                 { courseId: 2, courseTitle: "Test Course 1" },
                 { courseId: 3, courseTitle: "Test Course 2" },
-                { courseId: 4, courseTitle: "Test Course 3" },
+                { courseId: 400, courseTitle: "Test Course" },
             ],
         };
     },
@@ -79,7 +79,7 @@ const ApiMock = {
         };
     },
 
-    getIsPaperScoresAvailable: async (courseId: number): Promise<ApiResponse<boolean>> => {
+    getIsPaperScoresAvailable: async (paperId: number): Promise<ApiResponse<boolean>> => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return {
             success: true,
@@ -230,7 +230,7 @@ const ApiMock = {
         } catch (error) {
             return { success: false };
         }
-    }
+    },
 };
 
 export default ApiMock;
