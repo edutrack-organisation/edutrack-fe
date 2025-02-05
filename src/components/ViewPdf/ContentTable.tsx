@@ -11,17 +11,40 @@ import {
     Tooltip,
 } from "@mui/material";
 import TextArea from "./TextArea";
-import { MuiChipsInput } from "mui-chips-input";
 import { DataItemWithUUID, Handlers } from "../../types/types";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CreatableSelect from "react-select/creatable";
+import { MultiValue } from "react-select";
 interface ContentTableProps {
     data: DataItemWithUUID[];
     handlers: Handlers;
+    allTopics: string[];
 }
 
-const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
+const ContentTable: React.FC<ContentTableProps> = ({
+    data,
+    handlers,
+    allTopics,
+}) => {
+    // Helper functions to format topics properly for react-select rendering
+    // React-select requires the value to be in the format {label: string, value: string}
+    const formatTopicsForReactSelect = (topics: string[]) => {
+        return topics.map((topic) => {
+            return { label: topic, value: topic };
+        });
+    };
+
+    // Helper function to deformat topics for react-select (from {label: string, value: string} to string[])
+    const deformatTopicsForReactSelect = (
+        topicsLabelValue: MultiValue<{ label: string; value: string }>
+    ) => {
+        return topicsLabelValue.map((t) => {
+            return t.label;
+        });
+    };
+
     return (
         <>
             <TableContainer
@@ -72,34 +95,43 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                     />
                                 </TableCell>
                                 <TableCell align="left">
-                                    <MuiChipsInput
-                                        value={row.topics}
+                                    <CreatableSelect
+                                        isMulti
+                                        value={formatTopicsForReactSelect(
+                                            row.topics
+                                        )}
+                                        options={formatTopicsForReactSelect(
+                                            allTopics
+                                        )}
                                         onChange={(newChip) =>
                                             handlers.handleTopicsChange(
                                                 index,
-                                                newChip
+                                                deformatTopicsForReactSelect(
+                                                    newChip
+                                                )
                                             )
                                         }
-                                        sx={{
-                                            width: "350px",
-                                            "& .MuiOutlinedInput-root": {
-                                                "& fieldset": {
-                                                    borderColor: "#E5EAF2", // Custom border color
+                                        styles={{
+                                            control: (baseStyles) => ({
+                                                ...baseStyles,
+                                                width: "350px",
+                                            }),
+                                            menuList: (baseStyles) => ({
+                                                ...baseStyles,
+                                                maxHeight: "200px", // Set max height for the dropdown
+                                                overflowY: "auto", // Enable vertical scrolling
+                                                "::-webkit-scrollbar": {
+                                                    width: "6px", // Width of the scrollbar
                                                 },
-                                                "&:hover fieldset": {
-                                                    borderColor: "#B0BEC5", // Border color on hover
+                                                "::-webkit-scrollbar-track": {
+                                                    background: "#ebebeb", // Background of the scrollbar track
+                                                    borderRadius: "8px",
                                                 },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#1E88E5", // Border color when focused
+                                                "::-webkit-scrollbar-thumb": {
+                                                    background: "#c2c2c2", // Color of the scrollbar thumb
+                                                    borderRadius: "8px", // Rounded corners for the scrollbar thumb
                                                 },
-                                            },
-
-                                            "& .MuiChip-label": {
-                                                fontSize: {
-                                                    xs: "0.6rem",
-                                                    xl: "0.9rem",
-                                                },
-                                            },
+                                            }),
                                         }}
                                     />
                                 </TableCell>
