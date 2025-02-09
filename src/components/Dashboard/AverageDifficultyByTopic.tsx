@@ -17,7 +17,7 @@ const AverageDifficultyByTopic = ({
             <Grid container spacing={2}>
                 {difficultyFrequencyAndAverageDifficultyForEachTopic.map(
                     (perTopic, index) => (
-                        <Grid item xs={3} key={index}>
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                             <Card
                                 variant="outlined"
                                 sx={{
