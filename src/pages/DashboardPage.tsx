@@ -1,39 +1,19 @@
-import {
-    Box,
-    Card,
-    Chip,
-    Grid,
-    LinearProgress,
-    Tooltip,
-    Typography,
-} from "@mui/material";
-import { BarChart, PieChart } from "@mui/x-charts";
+import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import InfoIcon from "@mui/icons-material/Info";
-import { DatasetElementType } from "@mui/x-charts/internals";
-
+import OverallDifficulty from "../components/Dashboard/OverallDifficulty";
+import { TopicFrequency } from "../types/types";
+import TopicsCovered from "../components/Dashboard/TopicsCovered";
+import { DifficultyFrequencyAndAverageDifficultyForTopic } from "../types/types";
+import AverageDifficultyByTopic from "../components/Dashboard/AverageDifficultyByTopic";
+import TopicsNotCovered from "../components/Dashboard/TopicsNotCovered";
 // Type declarations
-interface TopicFrequency {
-    id: number;
-    value: number;
-    label: string;
-}
 
 interface Question {
     description: string;
     difficulty: number;
     topics: string[];
     uuid: string;
-}
-
-// This is for each topic, rather than overall for the paper
-interface DifficultyFrequencyAndAverageDifficultyForTopic {
-    label: string;
-    topicDifficultyFrequency: DatasetElementType<
-        string | number | Date | null | undefined
-    >[]; // [{frequency, difficulty}...]
-    topicAverageDifficulty: number;
 }
 
 const DashboardPage = () => {
@@ -44,9 +24,9 @@ const DashboardPage = () => {
         savedPaper: { title, questions, allTopics },
     } = location.state;
 
-    const [topicFrequency, setTopicsFrequencyMap] = useState<TopicFrequency[]>(
-        []
-    ); // This is the frequency of each topic
+    const [topicFrequencies, setTopicsFrequencyMap] = useState<
+        TopicFrequency[]
+    >([]); // This is the frequency of each topic
 
     const [notCoveredTopics, setNotCoveredTopics] = useState<string[]>([]); // This are the topics that are not covered by this exam papers
     const [paperAverageDifficulty, setPaperAverageDifficulty] =
@@ -234,223 +214,16 @@ const DashboardPage = () => {
                     Exam Paper Summary
                 </Typography>
 
-                <Box className="overall-difficulty-container">
-                    <Typography
-                        fontWeight={"bolder"}
-                        fontSize={"17px"}
-                        mb="0.5rem"
-                    >
-                        Overall Difficulty
-                    </Typography>
-                    <Box
-                        className="progress-bar-container"
-                        display={"flex"}
-                        flexDirection={"column"}
-                        sx={{ gap: "0.5rem" }}
-                    >
-                        <Typography fontWeight={"Medium"}>
-                            Average difficulty level:
-                            {paperAverageDifficulty}
-                        </Typography>
-                        <LinearProgress
-                            variant="determinate"
-                            value={(paperAverageDifficulty / 5) * 100}
-                            sx={{
-                                height: "0.8rem",
-                                borderRadius: "1rem",
-                            }}
-                        />
-                        <Typography fontWeight={"light"}>
-                            Based on the average difficulty rating of all
-                            questions
-                        </Typography>
-                    </Box>
-                </Box>
-                <Box className="topics-covered-container">
-                    <Typography
-                        fontWeight={"bolder"}
-                        fontSize={"17px"}
-                        mb="0.5rem"
-                    >
-                        Topics Covered
-                    </Typography>
-                    <Box
-                        className="topics-container"
-                        display={"flex"}
-                        flexWrap={"wrap"} // Ensure the content wraps
-                        sx={{
-                            gap: "0.5rem",
-                            mb: "2rem",
-                        }}
-                    >
-                        {/* NOTE: dummy all topics covered only */}
-                        {/* iterate through the key of topicFrequency  */}
-                        {topicFrequency.map((t: any, index: number) => (
-                            <Tooltip title={t.label} key={index}>
-                                <Chip
-                                    label={t.label}
-                                    sx={{
-                                        width: "15rem",
-                                    }}
-                                />
-                            </Tooltip>
-                        ))}
-                    </Box>
-
-                    <Typography
-                        fontWeight={"bolder"}
-                        fontSize={"17px"}
-                        mb="0.5rem"
-                    >
-                        Topics Covered to Frequency Pie Chart
-                    </Typography>
-                    <PieChart
-                        series={[
-                            {
-                                data: topicFrequency,
-
-                                highlightScope: {
-                                    fade: "global",
-                                    highlight: "item",
-                                },
-                                faded: {
-                                    innerRadius: 30,
-                                    additionalRadius: -30,
-                                    color: "gray",
-                                },
-                                innerRadius: 30,
-                            },
-                        ]}
-                        width={400}
-                        height={250}
-                        slotProps={{ legend: { hidden: true } }}
-                    />
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: "0.5rem",
-                            mt: "0.5rem",
-                            alignItems: "center",
-                        }}
-                    >
-                        <InfoIcon sx={{ fontSize: "1.3rem" }} />
-                        <Typography fontWeight={"light"}>
-                            Hover over the pie chart to see the frequency of
-                            each topic
-                        </Typography>
-                    </Box>
-                </Box>
-                <Box className="average-difficulty-by-topic-container">
-                    <Typography
-                        fontWeight={"bolder"}
-                        fontSize={"17px"}
-                        mb="0.5rem"
-                    >
-                        Average Difficulty by Topic
-                    </Typography>
-                    <Grid container spacing={2}>
-                        {difficultyFrequencyAndAverageDifficultyForEachTopic.map(
-                            (perTopic, index) => (
-                                <Grid item xs={3} key={index}>
-                                    <Card
-                                        variant="outlined"
-                                        sx={{
-                                            height: "15rem",
-                                            padding: "1rem",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            justifyContent: "space-between",
-                                        }}
-                                    >
-                                        <Tooltip
-                                            title={perTopic.label}
-                                            placement="bottom-end"
-                                        >
-                                            <Typography
-                                                fontWeight={"bolder"}
-                                                sx={{
-                                                    // Below is to clamp if the text is more than 3 lines
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    display: "-webkit-box",
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: "vertical",
-                                                }}
-                                            >
-                                                {perTopic.label}
-                                            </Typography>
-                                        </Tooltip>
-                                        <Typography
-                                            fontWeight={"bolder"}
-                                            fontSize={"1.5rem"}
-                                            sx={{ mt: "0.2rem" }}
-                                        >
-                                            {perTopic.topicAverageDifficulty.toFixed(
-                                                1
-                                            )}
-                                        </Typography>
-                                        <Typography
-                                            fontWeight={"lighter"}
-                                            fontSize={"0.7rem"}
-                                        >
-                                            Average Difficulty
-                                        </Typography>
-                                        <BarChart
-                                            series={[
-                                                {
-                                                    dataKey: "frequency",
-                                                },
-                                            ]}
-                                            dataset={
-                                                perTopic.topicDifficultyFrequency
-                                            }
-                                            xAxis={[
-                                                {
-                                                    scaleType: "band",
-                                                    dataKey: "difficulty",
-                                                },
-                                            ]}
-                                            width={300}
-                                            height={150}
-                                            borderRadius={5}
-                                        />
-                                    </Card>
-                                </Grid>
-                            )
-                        )}
-                    </Grid>
-                </Box>
-                <Box className="topics-not-covered-container">
-                    <Typography
-                        fontWeight={"bolder"}
-                        fontSize={"17px"}
-                        mb="0.5rem"
-                    >
-                        Topics Not Covered
-                    </Typography>
-                    <Box
-                        className="topics-not-used-container"
-                        display={"flex"}
-                        flexWrap={"wrap"} // Ensure the content wraps
-                        sx={{
-                            gap: "0.5rem",
-                            mb: "2rem",
-                        }}
-                    >
-                        {/* NOTE: dummy all topics covered only */}
-                        {/* iterate through the key of topicFrequency  */}
-                        {notCoveredTopics.map((t: string, index: number) => (
-                            <Tooltip title={t} key={index}>
-                                <Chip
-                                    label={t}
-                                    sx={{
-                                        width: "15rem",
-                                    }}
-                                />
-                            </Tooltip>
-                        ))}
-                    </Box>
-                </Box>
+                <OverallDifficulty
+                    paperAverageDifficulty={paperAverageDifficulty}
+                />
+                <TopicsCovered topicFrequencies={topicFrequencies} />
+                <AverageDifficultyByTopic
+                    difficultyFrequencyAndAverageDifficultyForEachTopic={
+                        difficultyFrequencyAndAverageDifficultyForEachTopic
+                    }
+                />
+                <TopicsNotCovered notCoveredTopics={notCoveredTopics} />
             </Box>
         </Box>
     );
