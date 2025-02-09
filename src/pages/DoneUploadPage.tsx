@@ -21,6 +21,7 @@ const DoneUploadPage = () => {
     const { response, file } = location.state;
     const [data, setData] = useState<DataItemWithUUID[]>([]);
     const [title, setTitle] = useState<string>("");
+    const [allTopics, setAllTopics] = useState<string[]>([]);
     const [isEditingTitle, setisEditingTitle] = useState<boolean>(false); // keep track if editing title to conditionally render textarea or typography
     const [pdffile, setPDFFile] = useState<File | null>(null);
     const [showPDF, setShowPDF] = useState<boolean>(false);
@@ -35,6 +36,7 @@ const DoneUploadPage = () => {
             }));
             setData(dataWithUUIDs);
             setTitle(response.title);
+            setAllTopics(response.all_topics);
         }
         if (file) {
             setPDFFile(file);

@@ -285,8 +285,8 @@ const DashboardPage = () => {
                     >
                         {/* NOTE: dummy all topics covered only */}
                         {/* iterate through the key of topicFrequency  */}
-                        {topicFrequency.map((t: any) => (
-                            <Tooltip title={t.label} key={t}>
+                        {topicFrequency.map((t: any, index: number) => (
+                            <Tooltip title={t.label} key={index}>
                                 <Chip
                                     label={t.label}
                                     sx={{
@@ -350,8 +350,8 @@ const DashboardPage = () => {
                     </Typography>
                     <Grid container spacing={2}>
                         {difficultyFrequencyAndAverageDifficultyForEachTopic.map(
-                            (perTopic) => (
-                                <Grid item xs={3}>
+                            (perTopic, index) => (
+                                <Grid item xs={3} key={index}>
                                     <Card
                                         variant="outlined"
                                         sx={{
@@ -439,8 +439,8 @@ const DashboardPage = () => {
                     >
                         {/* NOTE: dummy all topics covered only */}
                         {/* iterate through the key of topicFrequency  */}
-                        {notCoveredTopics.map((t: string) => (
-                            <Tooltip title={t} key={t}>
+                        {notCoveredTopics.map((t: string, index: number) => (
+                            <Tooltip title={t} key={index}>
                                 <Chip
                                     label={t}
                                     sx={{
