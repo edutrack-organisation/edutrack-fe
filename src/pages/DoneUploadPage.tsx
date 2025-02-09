@@ -2,7 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/ViewPdf/ContentTable";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 import { debounce } from "lodash";
@@ -16,6 +16,8 @@ import EditIcon from "@mui/icons-material/Edit";
 const DoneUploadPage = () => {
     // get the response from the previous page
     const location = useLocation();
+    const navigate = useNavigate();
+
     const { response, file } = location.state;
     const [data, setData] = useState<DataItemWithUUID[]>([]);
     const [title, setTitle] = useState<string>("");
@@ -119,6 +121,17 @@ const DoneUploadPage = () => {
             }
 
             toast.success("Paper saved successfully!");
+
+            // Redirect after done saving to database
+            navigate("/dashboard", {
+                state: {
+                    savedPaper: {
+                        title: title,
+                        questions: data,
+                        allTopics: allTopics,
+                    },
+                },
+            });
         } catch (error) {
             if (error instanceof Error) {
                 toast.error("Error: " + error.message);
