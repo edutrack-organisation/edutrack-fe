@@ -10,9 +10,17 @@ interface TopicsCoveredProps {
 const TopicsCovered = ({ topicFrequencies }: TopicsCoveredProps) => {
     return (
         <Box className="topics-covered-container">
-            <Typography fontWeight={"bolder"} fontSize={"17px"} mb="0.5rem">
-                Topics Covered
-            </Typography>
+            <Box display={"flex"} alignItems={"center"} sx={{ mb: "0.5rem" }}>
+                <Typography fontWeight={"bolder"} fontSize={"17px"}>
+                    Topics Covered
+                </Typography>
+                <Tooltip
+                    title="These are the topics covered in the scope for this exam paper"
+                    placement="right"
+                >
+                    <InfoIcon sx={{ fontSize: "1.3rem", ml: "0.5rem" }} />
+                </Tooltip>
+            </Box>
             <Box
                 className="topics-container"
                 display={"flex"}

@@ -1,6 +1,7 @@
 import { Box, Card, Grid, Tooltip, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
 import { DifficultyFrequencyAndAverageDifficultyForTopic } from "../../types/types";
+import InfoIcon from "@mui/icons-material/Info";
 
 interface AverageDifficultyByTopicProps {
     difficultyFrequencyAndAverageDifficultyForEachTopic: DifficultyFrequencyAndAverageDifficultyForTopic[];
@@ -11,9 +12,18 @@ const AverageDifficultyByTopic = ({
 }: AverageDifficultyByTopicProps) => {
     return (
         <Box className="average-difficulty-by-topic-container">
-            <Typography fontWeight={"bolder"} fontSize={"17px"} mb="0.5rem">
-                Average Difficulty by Topic
-            </Typography>
+            <Box display={"flex"} alignItems={"center"} sx={{ mb: "0.5rem" }}>
+                <Typography fontWeight={"bolder"} fontSize={"17px"}>
+                    Difficulty by Topic
+                </Typography>
+
+                <Tooltip
+                    title="These are the difficulty levels for each topic based on the questions in the exam paper"
+                    placement="right"
+                >
+                    <InfoIcon sx={{ fontSize: "1.3rem", ml: "0.5rem" }} />
+                </Tooltip>
+            </Box>
             <Grid container spacing={2}>
                 {difficultyFrequencyAndAverageDifficultyForEachTopic.map(
                     (perTopic, index) => (
@@ -70,11 +80,19 @@ const AverageDifficultyByTopic = ({
                                         {
                                             scaleType: "band",
                                             dataKey: "difficulty",
+                                            label: "Difficulty",
                                         },
                                     ]}
                                     width={300}
                                     height={150}
                                     borderRadius={5}
+                                    // Below is to add the y-axis label
+                                    yAxis={[
+                                        {
+                                            label: "Frequency",
+                                            tickMinStep: 1,
+                                        },
+                                    ]}
                                 />
                             </Card>
                         </Grid>
