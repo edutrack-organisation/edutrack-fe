@@ -1,13 +1,19 @@
-import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import NavBar from "./components/NavBar";
-import LandingPage from "./pages/LandingPage";
-import UploadPdfPage from "./pages/UploadPdfPage";
-import DoneUploadPage from "./pages/DoneUploadPage";
-import ViewPdfPage from "./pages/ViewPdfPage";
-import { createTheme, ThemeProvider } from "@mui/material";
 import "@mui/material";
+import { Box, createTheme, ThemeProvider } from "@mui/material";
 import { Toaster } from "react-hot-toast";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
+import NavBar from "./components/NavBar";
+import { COLORS } from "./constants/constants.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
+import CourseSelectPage from "./pages/CourseSelectPage.tsx";
+import DoneUploadPage from "./pages/DoneUploadPage";
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage.tsx";
+import LogoutPage from "./pages/LogoutPage.tsx";
+import SignupPage from "./pages/SignupPage.tsx";
+import UploadPdfPage from "./pages/UploadPdfPage";
+import ViewPapersPage from "./pages/ViewPapersPage.tsx";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -37,17 +43,27 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <BrowserRouter>
-                <NavBar />
-                <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/uploadpdf" element={<UploadPdfPage />} />
-                    <Route path="/doneupload" element={<DoneUploadPage />} />
-                    <Route path="/viewpdf" element={<ViewPdfPage />} />
-                </Routes>
-
-                <Toaster position="top-right" reverseOrder={false} />
-            </BrowserRouter>
+            <AuthProvider>
+                <BrowserRouter>
+                    <NavBar />
+                    {/* Margin used to place NavBar in fixed position */}
+                    <Box sx={{ display: "flex", marginTop: "5rem", minHeight: "calc(100vh - 5rem)", background: COLORS.WHITE }} >
+                        <Routes>
+                            <Route path="/" element={<LandingPage />} />
+                            <Route path="/uploadpdf" element={<UploadPdfPage />} />
+                            <Route path="/doneupload" element={<DoneUploadPage />} />
+                            <Route path="/courses" element={<CourseSelectPage />} />
+                            <Route path="/courses/:courseId" element={<ViewPapersPage />} />
+                            <Route path="/signup" element={<SignupPage />} />
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/logout" element={<LogoutPage />} />
+                            {/* Fallback page */}
+                            <Route path="*" element={<LandingPage />} />
+                        </Routes>
+                        <Toaster position="top-right" reverseOrder={false} />
+                    </Box>
+                </BrowserRouter>
+            </AuthProvider>
         </ThemeProvider>
     );
 }

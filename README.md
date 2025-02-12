@@ -1,3 +1,5 @@
+# EduTrack
+
 # Setting up this frontend respository
 
 1. Clone the repository:
@@ -6,10 +8,33 @@
     git clone https://github.com/edutrack-organisation/edutrack-fe
     ```
 
-2. Ensure you have `nodejs` installed.
-3. Ensure that you have `pnpm` installed. You can use this command `npm install -g pnpm@latest-10` or follow the link for instructions `https://pnpm.io/installation`.
-4. CD into the directory and run `pnpm i` to install the node dependencies.
-5. Start the server by running the command `pnpm run dev`.
+1. Ensure you have [`nodejs`](https://nodejs.org/en/download) installed.
+1. Ensure that you have `pnpm` installed. You can use this command `npm install -g pnpm@latest-10` or follow the link for instructions `https://pnpm.io/installation`.
+1. CD into the directory and run `pnpm i` to install the node dependencies.
+1. Start the server by running the command `pnpm run dev`.
+
+## Folder Structure
+
+```php
+src/                      # Application source code
+├── api/                  # API integration files
+├── assets/               # Icons and images
+├── components/           # React components (page specific components are stored in respective subfolders)
+├── constants/            # Global constants
+├── context/              # Page components (LandingPage, ViewPdfPage, etc.)
+│   ├── AuthContext.tsx   # Context for user authentication
+├── pages/                # Page components
+├── types/                # Commonly used types
+├── App.tsx               # Main application file
+├── main.tsx              # Entry point
+
+.gitignore                # Files and directories to ignore in Git
+DEV_MEMO.md               # Notes for developers
+index.html                # Root HTML file
+package.json              # Project dependencies and scripts
+pnpm-lock.yaml            # Lock file to ensure consistent dependency versions
+README.md                 # Project documentation
+```
 
 # React + TypeScript + Vite
 
@@ -61,3 +86,7 @@ export default tseslint.config({
     },
 });
 ```
+
+## License
+
+## Contributions
