@@ -233,7 +233,11 @@ const DoneUploadPage = () => {
             </Box>
 
             {/* This is the table of questions and its details */}
-            <ContentTable data={data} handlers={handlers} />
+            <ContentTable
+                data={data}
+                handlers={handlers}
+                allTopics={allTopics}
+            />
 
             <Button
                 sx={{ alignSelf: "flex-end", margin: "1rem" }}
