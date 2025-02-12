@@ -10,7 +10,9 @@ import TopicsNotCovered from "../components/Dashboard/TopicsNotCovered";
 
 import { DatasetElementType } from "@mui/x-charts/internals";
 import DifficultyFrequency from "../components/Dashboard/DifficultyFrequency";
-// Type declarations
+import SubcategorisedTopicsCovered from "../components/Dashboard/SubcategorisedTopicsCovered";
+import SubcategorisedTopicsNotCovered from "../components/Dashboard/SubcategorisedTopicsNotCovered";
+import { subtract } from "lodash";
 
 interface Question {
     description: string;
@@ -44,6 +46,9 @@ const DashboardPage = () => {
     const [difficultyFrequency, setDifficultyFrequency] = useState<
         DatasetElementType<string | number | Date | null | undefined>[]
     >([]);
+
+    // This is the flag to further subcategories the topics
+    const [toSubCategorise, setToSubCategorise] = useState<boolean>(true);
 
     /**
      * This function serve to count the frequency of each difficulty level and the average difficulty for each topic
@@ -259,7 +264,6 @@ const DashboardPage = () => {
                 sx={{
                     backgroundColor: "#fff8f6",
                     borderRadius: "3rem",
-                    height: "100vh",
                     mt: "1rem",
                     gap: "1.3rem",
                 }}
@@ -270,13 +274,38 @@ const DashboardPage = () => {
                 <OverallDifficulty
                     paperAverageDifficulty={paperAverageDifficulty}
                 />
-                <TopicsCovered topicFrequencies={topicFrequencies} />
+                {toSubCategorise && (
+                    <SubcategorisedTopicsCovered
+                        topicFrequencies={topicFrequencies}
+                        onChange={setToSubCategorise}
+                    />
+                )}
+
+                {!toSubCategorise && (
+                    <TopicsCovered
+                        topicFrequencies={topicFrequencies}
+                        onChange={setToSubCategorise}
+                    />
+                )}
+
                 <AverageDifficultyByTopic
                     difficultyFrequencyAndAverageDifficultyForEachTopic={
                         difficultyFrequencyAndAverageDifficultyForEachTopic
                     }
                 />
-                <TopicsNotCovered notCoveredTopics={notCoveredTopics} />
+                {toSubCategorise && (
+                    <SubcategorisedTopicsNotCovered
+                        notCoveredTopics={notCoveredTopics}
+                        onChange={setToSubCategorise}
+                    />
+                )}
+
+                {!toSubCategorise && (
+                    <TopicsNotCovered
+                        notCoveredTopics={notCoveredTopics}
+                        onChange={setToSubCategorise}
+                    />
+                )}
                 <DifficultyFrequency
                     difficultyFrequency={difficultyFrequency}
                 />

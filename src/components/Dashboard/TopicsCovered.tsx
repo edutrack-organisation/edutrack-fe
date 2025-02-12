@@ -1,13 +1,14 @@
-import { Box, Chip, Tooltip, Typography } from "@mui/material";
+import { Box, Checkbox, Chip, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { TopicFrequency } from "../../types/types";
 import { PieChart } from "@mui/x-charts";
 
 interface TopicsCoveredProps {
     topicFrequencies: TopicFrequency[];
+    onChange: (checked: boolean) => void;
 }
 
-const TopicsCovered = ({ topicFrequencies }: TopicsCoveredProps) => {
+const TopicsCovered = ({ topicFrequencies, onChange }: TopicsCoveredProps) => {
     return (
         <Box className="topics-covered-container">
             <Box display={"flex"} alignItems={"center"} sx={{ mb: "0.5rem" }}>
@@ -20,6 +21,8 @@ const TopicsCovered = ({ topicFrequencies }: TopicsCoveredProps) => {
                 >
                     <InfoIcon sx={{ fontSize: "1.3rem", ml: "0.5rem" }} />
                 </Tooltip>
+                <Checkbox onChange={() => onChange(true)} />
+                <Typography>Catagorise Topics Covered</Typography>
             </Box>
             <Box
                 className="topics-container"
@@ -32,7 +35,7 @@ const TopicsCovered = ({ topicFrequencies }: TopicsCoveredProps) => {
             >
                 {/* NOTE: dummy all topics covered only */}
                 {/* iterate through the key of topicFrequency  */}
-                {topicFrequencies.map((t: any, index: number) => (
+                {topicFrequencies.map((t: TopicFrequency, index: number) => (
                     <Tooltip title={t.label} key={index}>
                         <Chip
                             label={t.label}
