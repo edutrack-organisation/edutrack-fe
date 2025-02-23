@@ -12,7 +12,6 @@ import { DatasetElementType } from "@mui/x-charts/internals";
 import DifficultyFrequency from "../components/Dashboard/DifficultyFrequency";
 import SubcategorisedTopicsCovered from "../components/Dashboard/SubcategorisedTopicsCovered";
 import SubcategorisedTopicsNotCovered from "../components/Dashboard/SubcategorisedTopicsNotCovered";
-import { subtract } from "lodash";
 
 interface Question {
     description: string;
