@@ -13,7 +13,6 @@ import {
 import TextArea from "../ViewPdf/TextArea";
 import React, { useEffect, useState } from "react";
 import GptIcon from "../../assets/icons/gpt_icon.png";
-import { v4 as uuidv4 } from "uuid";
 import DatabaseIcon from "../../assets/icons/database_icon.png";
 import { SelectChangeEvent } from "@mui/material/Select";
 import toast from "react-hot-toast";
@@ -22,8 +21,8 @@ import { DataItemWithUUID } from "../../types/types";
 interface AddQuestionModalProps {
     open: boolean;
     handleClose: () => void;
-    questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
+    selectedIndex: number; // Add selectedIndex prop
 }
 
 interface Topic {
@@ -57,13 +56,17 @@ const style = {
     p: 4,
 };
 
-// generatedQuestions have other field such as FK etc
-const formatGeneratedQuestions = (generatedQuestions: QuestionFromDB[]) => {
+/**
+ * Questions that are generated/retrieved from the database have other fields such as Foreign keys
+ * We want to format the question from QuestionFromDB to DataItemWithUUID for rendering on our table
+ * @param generatedQuestions
+ * @returns DataItemWithUUID[]
+ */ const formatGeneratedQuestions = (generatedQuestions: QuestionFromDB[]) => {
     return generatedQuestions.map((q) => {
         return {
             description: q.description,
             difficulty: q.difficulty,
-            uuid: uuidv4(), // uuid from content table uses id from database
+            uuid: String(q.id), // uuid from content table uses id from database
             topics: q.topics.map((t: Topic) => t.title),
         } as DataItemWithUUID;
     });
@@ -72,8 +75,8 @@ const formatGeneratedQuestions = (generatedQuestions: QuestionFromDB[]) => {
 const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     open,
     handleClose,
-    questions,
     setQuestions,
+    selectedIndex,
 }) => {
     const [method, setMethod] = useState("gpt"); // This is to handle the toggling between different mode (gpt and DB)
     const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
@@ -82,7 +85,9 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
         useState(false); // This is for fetching the questions with topic
 
-    // This method fetch the list of available topics from the backend
+    /**
+     * This method fetch the full list of topics from the database.
+     */
     const fetchAndSetTopics = async () => {
         try {
             setIsFetchingTopics(true);
@@ -98,12 +103,15 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
             setIsFetchingTopics(false);
             return;
         } catch (error) {
-            toast.error("Error in parsing PDF");
+            toast.error("Failed to fetch list of topics");
             setIsFetchingTopics(false);
         }
     };
 
-    // This method get the questions with list of topics containing selectedTopic
+    /**
+     * This method fetch the list of questions from the backend that topics containing selectedTopic
+     * @param selectedTopic
+     */
     const getQuestionsWithTopic = async (selectedTopic: Number) => {
         try {
             setIsFetchingQuestionWithTopic(true);
@@ -115,17 +123,13 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
             );
 
             if (!response.ok) {
-                throw new Error("Failed to questions with this topic");
+                throw new Error("Failed to fetch questions with this topic");
             }
 
-            const newQuestions = await response.json();
-            const formattedNewQuestions =
-                formatGeneratedQuestions(newQuestions);
-            // append to existing questions
-
-            const appendedQuestionsWithoutDuplicates =
-                appendAndHandleDuplicates(questions, formattedNewQuestions);
-            // setQuestions(appendedQuestionsWithoutDuplicates); // update questions
+            const questionsWithTopic = await response.json();
+            const formattedQuestionsWithTopic =
+                formatGeneratedQuestions(questionsWithTopic);
+            appendAndHandleDuplicates(formattedQuestionsWithTopic);
 
             setIsFetchingQuestionWithTopic(false);
         } catch (error) {
@@ -134,37 +138,47 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
         }
     };
 
+    /**
+     * This method filters off the duplicates and add the first (non duplicate) question into the list. We only want to add to the list if the question is not already in the list.
+     * @param formattedNewQuestions
+     */
+
     const appendAndHandleDuplicates = (
-        questions: DataItemWithUUID[],
         formattedNewQuestions: DataItemWithUUID[]
     ) => {
-        const newQuestionsNotAlreadyInside = formattedNewQuestions.filter(
-            (fnq) => !questions.some((q) => q.uuid === fnq.uuid)
-        );
-
-        if (newQuestionsNotAlreadyInside.length === 0) {
-            toast.error(
-                "All of the questions with this topic is already included in the list of generated questions"
+        setQuestions((prevQuestions) => {
+            /**
+             * We filter questions based on description.
+             * Even if questions have the exact same description (but different paper), we still consider them as duplicates as we do not want to generate the same questions.
+             * Note that 2 question can be very similar but not duplicates due to having extra characters (e.g. new line character during different run of the paper parsing process)
+             */
+            const newQuestionsNotAlreadyInside = formattedNewQuestions.filter(
+                (fnq) => {
+                    return !prevQuestions.some(
+                        (q) => q.description === fnq.description
+                    );
+                }
             );
-        }
 
-        // #TODO: for now we just append one to it instead of a list because we want to let user choose
+            // If there are no questions of this topic that is to be added to the list of questions in the table
+            if (newQuestionsNotAlreadyInside.length === 0) {
+                toast.error(
+                    "All of the questions with this topic are already included in the list of generated questions"
+                );
+                return prevQuestions; // return original set of questions
+            }
 
-        // adding the inserted data (just 1) to the appropriate index
-        const updatedData = [...questions];
-        // updatedData.splice(index + 1, 0, {
-        //     uuid: uuidv4(),
-        //     description: "",
-        //     topics: [],
-        //     difficulty: 1,
-        // });
+            const updatedData = [...prevQuestions]; // make a copy of the old set of questions before addition
+            const toInsertQuestion = newQuestionsNotAlreadyInside[0]; // always inserting the first element that is not already inside the list
 
-        setQuestions(updatedData);
-        // };
+            // insert at the correct position
+            updatedData.splice(selectedIndex + 1, 0, toInsertQuestion);
 
-        // return [...questions, ...newQuestionsNotAlreadyInside];
+            return updatedData; // return statement for setQuestions
+        });
     };
 
+    // EVENT HANDLERS
     // This is to handleChange for the dropdown select
     const handleChangeSelect = (event: SelectChangeEvent) => {
         setSelectedTopic(Number(event.target.value));

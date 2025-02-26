@@ -17,14 +17,16 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CreatableSelect from "react-select/creatable";
 import { MultiValue } from "react-select";
+import AddQuestionModal from "./AddQuestionModal";
+import { useState } from "react";
 interface ContentTableProps {
-    data: DataItemWithUUID[];
+    questions: DataItemWithUUID[];
     handlers: Handlers;
     allTopics: string[];
 }
 
 const ContentTable: React.FC<ContentTableProps> = ({
-    data,
+    questions,
     handlers,
     allTopics,
 }) => {
@@ -43,6 +45,18 @@ const ContentTable: React.FC<ContentTableProps> = ({
         return topicsLabelValue.map((t) => {
             return t.label;
         });
+    };
+
+    const [open, setOpen] = useState(false); // indicates whether the modal for generating question is open or close
+    const [selectedIndex, setSelectedIndex] = useState<number>(0); // this is the index of the selected question
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const handleOpen = (index: number) => {
+        setOpen(true);
+        setSelectedIndex(index);
     };
 
     return (
@@ -69,7 +83,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {data.map((row, index) => (
+                        {questions.map((row, index) => (
                             <TableRow
                                 key={row.uuid}
                                 sx={{
@@ -183,9 +197,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <Tooltip title="Add Question">
                                         <IconButton
                                             onClick={() => {
-                                                handlers.handleQuestionAdd(
-                                                    index
-                                                );
+                                                handleOpen(index);
                                             }}
                                         >
                                             <AddCircleOutlineIcon
@@ -202,6 +214,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     </TableBody>
                 </Table>
             </TableContainer>
+            <AddQuestionModal
+                open={open}
+                handleClose={handleClose}
+                setQuestions={handlers.setQuestions}
+                selectedIndex={selectedIndex} // Pass the selected index to the modal
+            />
         </>
     );
 };

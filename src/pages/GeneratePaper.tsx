@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Tooltip, Typography } from "@mui/material";
 import TextsmsIcon from "@mui/icons-material/Textsms";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { v4 as uuidv4 } from "uuid";
@@ -6,6 +6,7 @@ import ContentTable from "../components/GeneratePaper/ContentTable";
 import { DataItemWithUUID, Handlers } from "../types/types";
 import AddQuestionModal from "../components/GeneratePaper/AddQuestionModal";
 import { useState } from "react";
+import export_excel from "../assets/icons/export_excel.png";
 
 const GeneratePaper = () => {
     const [open, setOpen] = useState(false); // indicates whether the modal for generating question is open or close
@@ -59,6 +60,7 @@ const GeneratePaper = () => {
         handleDifficultyChange,
         handleQuestionDelete,
         handleQuestionAdd,
+        setQuestions,
     };
 
     return (
@@ -141,14 +143,21 @@ const GeneratePaper = () => {
                         {questions.length} questions
                     </Typography>
                 </Box>
+                <Tooltip title="Export as Excel Spreadsheet">
+                    <img src={export_excel} style={{ marginLeft: "1rem" }} />
+                </Tooltip>
             </Box>
             {/* generated question section */}
-            <ContentTable data={questions} handlers={handlers} allTopics={[]} />
+            <ContentTable
+                questions={questions}
+                handlers={handlers}
+                allTopics={[]}
+            />
 
             <AddQuestionModal
+                selectedIndex={questions.length} // always add to the end of the list if modal is opened from here
                 open={open}
                 handleClose={handleClose}
-                questions={questions}
                 setQuestions={setQuestions}
             />
             {/* add a question section */}
