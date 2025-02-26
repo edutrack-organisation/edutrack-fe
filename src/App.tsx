@@ -8,6 +8,7 @@ import ViewPdfPage from "./pages/ViewPdfPage";
 import { createTheme, ThemeProvider } from "@mui/material";
 import "@mui/material";
 import { Toaster } from "react-hot-toast";
+import GeneratePaper from "./pages/GeneratePaper";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/uploadpdf" element={<UploadPdfPage />} />
                     <Route path="/doneupload" element={<DoneUploadPage />} />
                     <Route path="/viewpdf" element={<ViewPdfPage />} />
+                    <Route path="/generate" element={<GeneratePaper />} />
                 </Routes>
 
                 <Toaster position="top-right" reverseOrder={false} />
