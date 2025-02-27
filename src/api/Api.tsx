@@ -54,21 +54,28 @@ const Api = {
         return { success: true };
     },
 
-    savePaper: async (paper: PaperItem): Promise<ApiResponse> => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return { success: true };
-    },
-
     getPaperStudentScores: async (paperId: number): Promise<ApiResponse<number[][]>> => {
-        return { success: true };
-    },
+        // TODO: Can be optimized in the backend to simply return true or false
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(`http://127.0.0.1:8000/papers/${paperId}`);
 
-    setPaperStudentScores: async (paperId: number, csvFile: File): Promise<ApiResponse> => {
-        return { success: true };
-    },
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
 
-    setPaperDifficulty: async (paperId: number, csvFile: File): Promise<ApiResponse> => {
-        return { success: true };
+            const data = (await response.json()).student_scores;
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
     },
 
     // ================= Working APIs =================
@@ -171,7 +178,7 @@ const Api = {
                 throw new ApiError(`Error ${response.status}: ${errorMessage}`);
             }
 
-            const data = (await response.json()).student_scores.length() > 0;
+            const data = (await response.json()).student_scores.length > 0;
 
             return {
                 success: response.ok,
@@ -194,18 +201,129 @@ const Api = {
                 throw new ApiError(`Error ${response.status}: ${errorMessage}`);
             }
 
-            const data = (await response.json()).questions.map((question) => ({
-                questionId: question.id,
-                questionNumber: question.question_number,
-                description: question.description,
-                topics: question.topics.map((topic) => (topic.title)), // TODO: use TopicItem in the future
-                marks: 10, // TODO: use actual marks instead of dummy marks
-                difficulty: question.difficulty,
-            }));
+            const data = (await response.json()).questions
+                .map((question) => ({
+                    questionId: question.id,
+                    questionNumber: question.question_number,
+                    description: question.description,
+                    topics: question.topics.map((topic) => (topic.title)), // TODO: use TopicItem in the future
+                    marks: question.marks ?? 0, // TODO: use actual marks instead of dummy marks
+                    difficulty: question.difficulty,
+                }))
+                .sort((a, b) => a.questionNumber - b.questionNumber); // Sort in ascending order
 
             return {
                 success: response.ok,
                 data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    updatePaper: async (paper: PaperItem): Promise<ApiResponse> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/papers/${paper.paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: paper.paperId,
+                        title: paper.paperTitle,
+                        questions: paper.questions?.map((q) => ({
+                            id: q.questionId,
+                            question_number: q.questionNumber,
+                            description: q.description,
+                            marks: q.marks,
+                            difficulty: q.difficulty,
+                            topics_str: q.topics,
+                        })) ?? [],
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    /**
+     * Updates student scores for a paper
+     * @param paperId The id of the paper to update scores
+     * @param studentScores The student score values to update to
+     */
+    updateStudentScores: async (paperId: number, studentScores: number[][]): Promise<ApiResponse<CourseItem>> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/studentScores/${paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_scores: studentScores
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    /**
+     * Update difficulty for all questions a paper
+     * @param paperId The id of the paper to update question difficulty
+     * @param difficulty The difficulty values to update to for the questions
+     */
+    updatePaperQuestionDifficulties: async (paperId: number, questionDifficulties: number[]): Promise<ApiResponse<CourseItem>> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/questionDifficulties/${paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question_difficulties: questionDifficulties
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
             };
         } catch (error) {
             // Handle network or other unexpected errors

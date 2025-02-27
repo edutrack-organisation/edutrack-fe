@@ -231,6 +231,16 @@ const ApiMock = {
             return { success: false };
         }
     },
+
+    getTopicStatistics: async (): Promise<ApiResponse> => {
+        return { success: true, data: [
+            {topic: "Test Topic 1", value: 0},
+            {topic: "Test Topic 2", value: 15},
+            {topic: "Test Topic 3", value: 50},
+            {topic: "Test Topic 4", value: 75},
+            {topic: "Test Topic 5", value: 100},
+        ]};
+    },
 };
 
 export default ApiMock;

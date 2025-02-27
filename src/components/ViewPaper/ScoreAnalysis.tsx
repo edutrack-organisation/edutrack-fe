@@ -3,7 +3,6 @@ import { QuestionItem } from "../../types/types";
 import Api, { ApiResponse } from "../../api/Api";
 import BoxAndPointerDiagram from "../BoxAndPointerDiagram";
 import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import ApiMock from "../../api/ApiMock";
 
 const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
     const [questions, setQuestions] = useState<QuestionItem[]>();
@@ -13,7 +12,7 @@ const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
         Api.getPaperQuestions(paperId).then((response: ApiResponse) => {
             setQuestions(response.data);
         });
-        ApiMock.getPaperStudentScores(paperId).then((response: ApiResponse) => {
+        Api.getPaperStudentScores(paperId).then((response: ApiResponse) => {
             setStudentScores(response.data);
         });
     }, [paperId])

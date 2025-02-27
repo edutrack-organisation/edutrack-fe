@@ -14,6 +14,8 @@ import LogoutPage from "./pages/LogoutPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
 import UploadPdfPage from "./pages/UploadPdfPage";
 import ViewPapersPage from "./pages/ViewPapersPage.tsx";
+import KnowledgeGraphPage from "./pages/KnowledgeGraphPage.tsx";
+import QuestionBankPage from "./pages/QuestionBankPage.tsx";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -54,6 +56,12 @@ function App() {
                             <Route path="/doneupload" element={<DoneUploadPage />} />
                             <Route path="/courses" element={<CourseSelectPage />} />
                             <Route path="/courses/:courseId" element={<ViewPapersPage />} />
+
+                            {/* Use the version with course id in the future*/}
+                            {/* <Route path="/knowledgegraph/:courseId" element={<KnowledgeGraphPage />} /> */}
+                            <Route path="/knowledgegraph" element={<KnowledgeGraphPage />} />
+                            <Route path="/questionbank" element={<QuestionBankPage />} />
+
                             <Route path="/signup" element={<SignupPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/logout" element={<LogoutPage />} />

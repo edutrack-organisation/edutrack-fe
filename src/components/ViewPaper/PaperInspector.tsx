@@ -5,7 +5,7 @@ import { COLORS } from "../../constants/constants";
 import type { PaperItem, QuestionItem } from "../../types/types";
 import ScoreAnalysis from "./ScoreAnalysis";
 import Api from "../../api/Api";
-import ApiMock from "../../api/ApiMock";
+import { csvFileToNumberArray, csvFileToNumberMatrix, transposeMatrix } from "../../utility/utility";
 
 interface PaperInspectorProps {
     paper: PaperItem;
@@ -20,7 +20,7 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
         setHasScores(false); // Disable View Scores Tab by default
         Api.getIsPaperScoresAvailable(paper.paperId).then((response) => {
             if (response.data) {
-                setHasScores(true);
+                setHasScores(response.data);
             }
         });
         setTabValue(0); // Set to default tab // Note: Sets the initial rendering tab here to prevent double rendering
@@ -81,12 +81,13 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
     const handleSave = () => {
         // Uploads updated paperQuestions to backend
         setIsSavingPaper(true);
-        ApiMock.savePaper({ ...paper, questions: paperQuestions }).then((response) => {
+        Api.updatePaper({ ...paper, questions: paperQuestions }).then((response) => {
             if (response.success == true) {
                 alert("Paper saved!"); // TODO: Use toast
                 setIsEditing(false);
             } else {
                 // TODO: Use toast when encountering upload error
+                alert("Error");
             }
         }).finally(() => {
             setIsSavingPaper(false);
@@ -152,10 +153,11 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
         if (!isValid) {
             setErrorMessage("The CSV file might be incorrect. Please check its contents.");
         } else {
-            // navigate("/"); // Navigate to success page
-            await ApiMock.setPaperStudentScores(paper.paperId, csvFile!).then((response) => {
+            const newStudentScores: number[][] = transposeMatrix(await csvFileToNumberMatrix(csvFile!));
+            await Api.updateStudentScores(paper.paperId, newStudentScores).then((response) => {
                 if (response.success) {
                     setIsSumbitSuccessful(true);
+                    setHasScores(true);
                 }
             });
         }
@@ -168,12 +170,18 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             
             // Split the text into rows by newlines (and filter out empty rows)
             const rows = text.split("\n").filter(row => row.trim() !== "");
+    
+            // Ensure there's at least one row (for parsing)
+            if (rows.length === 0) return false;
+    
+            // Split the first row by commas to determine the number of columns
+            const columns = rows[0].split(",").map(col => col.trim());
             
             // Get the number of questions in the selected paper
-            const numQuestions = (await Api.getPaperQuestions(paper.paperId)).data.length ?? -1;
+            const numQuestions = (await Api.getPaperQuestions(paper.paperId))?.data?.length ?? -1;
 
             // Check if the number of rows equals the number of questions
-            return rows.length === numQuestions;
+            return columns.length === numQuestions;
         } catch (error) {
             console.error("Error reading or processing the CSV file:", error);
             return false;
@@ -190,8 +198,8 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
         if (!isValid) {
             setErrorMessage("The CSV file might be incorrect. Please check its contents.");
         } else {
-            // navigate("/"); // Navigate to success page
-            await ApiMock.setPaperDifficulty(paper.paperId, csvFile!).then((response) => {
+            const new_difficulties: number[] = await csvFileToNumberArray(csvFile!);
+            await Api.updatePaperQuestionDifficulties(paper.paperId, new_difficulties).then((response) => {
                 if (response.success) {
                     setIsSumbitSuccessful(true);
                 }
@@ -204,19 +212,26 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
             // Read the file content as text
             const text = await file.text();
             
-            // Split the text into rows by newlines (and filter out empty rows)
+            // Split the text into rows (and filter out empty rows)
             const rows = text.split("\n").filter(row => row.trim() !== "");
+    
+            // Ensure there's at least one row (for parsing)
+            if (rows.length === 0) return false;
+    
+            // Split the first row by commas to determine the number of columns
+            const columns = rows[0].split(",").map(col => col.trim());
             
             // Get the number of questions in the selected paper
-            const numQuestions = (await Api.getPaperQuestions(paper.paperId)).data.length ?? -1;
-
-            // Check if the number of rows equals the number of questions
-            return rows.length === numQuestions;
+            const numQuestions = (await Api.getPaperQuestions(paper.paperId))?.data?.length ?? -1;
+    
+            // Check if the number of columns equals the number of questions
+            return columns.length === numQuestions;
         } catch (error) {
             console.error("Error reading or processing the CSV file:", error);
             return false;
         }
     };
+    
 
     return (
         <Box sx={containerStyle}>
