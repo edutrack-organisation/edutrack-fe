@@ -5,7 +5,6 @@ import {
     ToggleButtonGroup,
     Typography,
 } from "@mui/material";
-import TextArea from "../ViewPdf/TextArea";
 import React, { useState } from "react";
 import GptIcon from "../../assets/icons/gpt_icon.png";
 import DatabaseIcon from "../../assets/icons/database_icon.png";
@@ -113,30 +112,16 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                 </Typography>
 
                 {method === "gpt" ? (
-                    // <Box mt={"1rem"}>
-                    //     <Typography
-                    //         fontWeight={"bolder"}
-                    //         sx={{
-                    //             fontSize: "17px",
-                    //             mb: "0.5rem",
-                    //         }}
-                    //     >
-                    //         Generate questions from scratch (by passing in
-                    //         prompt to GPT-4o)
-                    //     </Typography>
-                    //     <TextArea
-                    //         className="textarea"
-                    //         placeHolder={"Type your prompt here..."}
-                    //         // onChange={(event) =>
-                    //         //     handlers.handleTitleChange(event.target.value)
-                    //         // }
-                    //     />
-                    // </Box>
-                    <GenerateQuestionFromGPT />
+                    <GenerateQuestionFromGPT
+                        setQuestions={setQuestions}
+                        selectedIndex={selectedIndex}
+                        handleModalClose={handleClose}
+                    />
                 ) : (
                     <GenerateQuestionFromDB
                         setQuestions={setQuestions}
                         selectedIndex={selectedIndex}
+                        handleModalClose={handleClose}
                     />
                 )}
             </Box>

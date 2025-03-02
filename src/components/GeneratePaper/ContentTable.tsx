@@ -1,4 +1,5 @@
 import {
+    Button,
     IconButton,
     Paper,
     Table,
@@ -9,11 +10,13 @@ import {
     TableRow,
     TextField,
     Tooltip,
+    Typography,
 } from "@mui/material";
 import TextArea from "../ViewPdf/TextArea";
-import { DataItemWithUUID, Handlers } from "../../types/types";
+import { DataItemWithUUID } from "../../types/types";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CreatableSelect from "react-select/creatable";
 import { MultiValue } from "react-select";
@@ -21,13 +24,13 @@ import AddQuestionModal from "./AddQuestionModal";
 import { useState } from "react";
 interface ContentTableProps {
     questions: DataItemWithUUID[];
-    handlers: Handlers;
+    setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
     allTopics: string[];
 }
 
 const ContentTable: React.FC<ContentTableProps> = ({
     questions,
-    handlers,
+    setQuestions,
     allTopics,
 }) => {
     // Helper functions to format topics properly for react-select rendering
@@ -48,7 +51,33 @@ const ContentTable: React.FC<ContentTableProps> = ({
     };
 
     const [open, setOpen] = useState(false); // indicates whether the modal for generating question is open or close
-    const [selectedIndex, setSelectedIndex] = useState<number>(0); // this is the index of the selected question
+    const [selectedIndex, setSelectedIndex] = useState<number>(-2); // this is the index of the selected question
+
+    // Event Handlers
+    const handleTopicsChange = (index: number, newChips: string[]) => {
+        const updatedData = [...questions];
+        updatedData[index].topics = newChips;
+        setQuestions(updatedData);
+    };
+
+    const handleDescriptionChange = (index: number, newDescription: string) => {
+        const updatedData = [...questions];
+        updatedData[index].description = newDescription;
+        setQuestions(updatedData);
+    };
+
+    const handleDifficultyChange = (index: number, newDifficulty: number) => {
+        const updatedData = [...questions];
+        updatedData[index].difficulty = newDifficulty;
+        setQuestions(updatedData);
+    };
+
+    const handleQuestionDelete = (index: number) => {
+        const updatedData = [...questions];
+        updatedData.splice(index, 1);
+        setQuestions(updatedData);
+        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
+    };
 
     const handleClose = () => {
         setOpen(false);
@@ -90,6 +119,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
                                     },
+                                    border:
+                                        selectedIndex + 1 === index && !open
+                                            ? "3px solid #E4CACA"
+                                            : "none",
                                 }}
                             >
                                 <TableCell component="th" scope="row">
@@ -100,7 +133,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
-                                            handlers.handleDescriptionChange(
+                                            handleDescriptionChange(
                                                 index,
                                                 event.target.value
                                             )
@@ -117,7 +150,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                             allTopics
                                         )}
                                         onChange={(newChip) =>
-                                            handlers.handleTopicsChange(
+                                            handleTopicsChange(
                                                 index,
                                                 deformatTopicsForReactSelect(
                                                     newChip
@@ -155,7 +188,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
                                         onChange={(event) =>
-                                            handlers.handleDifficultyChange(
+                                            handleDifficultyChange(
                                                 index,
                                                 parseInt(event.target.value)
                                             )
@@ -179,9 +212,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <Tooltip title="Delete Question">
                                         <IconButton
                                             onClick={() => {
-                                                handlers.handleQuestionDelete(
-                                                    index
-                                                );
+                                                handleQuestionDelete(index);
                                             }}
                                         >
                                             <DeleteOutlineIcon
@@ -217,9 +248,27 @@ const ContentTable: React.FC<ContentTableProps> = ({
             <AddQuestionModal
                 open={open}
                 handleClose={handleClose}
-                setQuestions={handlers.setQuestions}
+                setQuestions={setQuestions}
                 selectedIndex={selectedIndex} // Pass the selected index to the modal
             />
+            <Button
+                variant="text"
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mt: "1rem",
+                    variant: "contained",
+                }}
+                onClick={() => {
+                    setSelectedIndex(questions.length - 1); // selectedIndex set to -1 as after adding we want to highlight index 0 element
+                    setOpen(true);
+                }}
+            >
+                <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
+                    Add a question
+                </Typography>
+                <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
+            </Button>
         </>
     );
 };

@@ -1,6 +1,7 @@
 import {
     Box,
     Button,
+    CircularProgress,
     FormControl,
     InputLabel,
     MenuItem,
@@ -30,11 +31,13 @@ interface QuestionFromDB {
 interface GenerateQuestionFromDBProps {
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
     selectedIndex: number;
+    handleModalClose: () => void;
 }
 
 const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     setQuestions,
     selectedIndex,
+    handleModalClose,
 }) => {
     const [selectedTopic, setSelectedTopic] = useState<Number>(0); // This is to manage the selectedTopic
     const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
@@ -86,7 +89,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
             const formattedQuestionsWithTopic =
                 formatGeneratedQuestions(questionsWithTopic);
             appendAndHandleDuplicates(formattedQuestionsWithTopic);
-
+            handleModalClose();
             setIsFetchingQuestionWithTopic(false);
         } catch (error) {
             toast.error("Error in fetch questions with this topic");
@@ -216,6 +219,11 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                     </Select>
                 </FormControl>
             </Box>
+            {isFetchingTopics ||
+                (isFetchingQuestionsWithTopic && (
+                    <CircularProgress sx={{ my: "auto", mx: "auto" }} />
+                ))}
+
             <Button
                 variant="contained"
                 sx={{ mt: "auto", alignSelf: "flex-start" }}
