@@ -143,7 +143,6 @@ const DoneUploadPage = () => {
         }
     };
 
-    // #TODO: we need a handler for title change as well
     const handlers: Handlers = {
         handleTopicsChange,
         handleDescriptionChange,

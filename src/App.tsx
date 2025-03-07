@@ -8,6 +8,7 @@ import ViewPdfPage from "./pages/ViewPdfPage";
 import { createTheme, ThemeProvider } from "@mui/material";
 import "@mui/material";
 import { Toaster } from "react-hot-toast";
+import GeneratePaper from "./pages/GeneratePaper";
 import DashboardPage from "./pages/DashboardPage";
 
 declare module "@mui/material/styles" {
@@ -45,6 +46,7 @@ function App() {
                     <Route path="/uploadpdf" element={<UploadPdfPage />} />
                     <Route path="/doneupload" element={<DoneUploadPage />} />
                     <Route path="/viewpdf" element={<ViewPdfPage />} />
+                    <Route path="/generate" element={<GeneratePaper />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
                 </Routes>
 
