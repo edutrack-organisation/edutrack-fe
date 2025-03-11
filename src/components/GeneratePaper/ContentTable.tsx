@@ -66,6 +66,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
         setQuestions(updatedData);
     };
 
+    const handleMarkChange = (index: number, newMark: number) => {
+        const updatedData = [...questions];
+        updatedData[index].mark = newMark;
+        setQuestions(updatedData);
+    };
+
     const handleDifficultyChange = (index: number, newDifficulty: number) => {
         const updatedData = [...questions];
         updatedData[index].difficulty = newDifficulty;
@@ -105,8 +111,11 @@ const ContentTable: React.FC<ContentTableProps> = ({
                             <TableCell sx={{ width: "50%" }} align="left">
                                 Description
                             </TableCell>
-                            <TableCell sx={{ width: "30%" }} align="left">
+                            <TableCell sx={{ width: "20%" }} align="left">
                                 Topics
+                            </TableCell>
+                            <TableCell sx={{ width: "10%" }} align="left">
+                                Marks
                             </TableCell>
                             <TableCell align="right">Difficulty</TableCell>
                         </TableRow>
@@ -178,6 +187,33 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                                     borderRadius: "8px", // Rounded corners for the scrollbar thumb
                                                 },
                                             }),
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell align="left">
+                                    <TextField
+                                        type="number"
+                                        id="outlined-basic"
+                                        defaultValue={row.mark || 0}
+                                        variant="outlined"
+                                        onChange={(event) =>
+                                            handleMarkChange(
+                                                index,
+                                                parseInt(event.target.value)
+                                            )
+                                        }
+                                        sx={{
+                                            "& .MuiTextField-root": {
+                                                "& fieldset": {
+                                                    borderColor: "#E5EAF2", // Custom border color
+                                                },
+                                                "&:hover fieldset": {
+                                                    borderColor: "#B0BEC5", // Border color on hover
+                                                },
+                                                "&.Mui-focused fieldset": {
+                                                    borderColor: "#1E88E5", // Border color when focused
+                                                },
+                                            },
                                         }}
                                     />
                                 </TableCell>

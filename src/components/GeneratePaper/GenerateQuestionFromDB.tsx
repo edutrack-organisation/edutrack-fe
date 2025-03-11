@@ -25,6 +25,7 @@ interface QuestionFromDB {
     question_number: number;
     description: string;
     topics: Topic[];
+    mark: number;
     difficulty: number;
 }
 
@@ -148,6 +149,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
         return generatedQuestions.map((q) => {
             return {
                 description: q.description,
+                mark: q.mark,
                 difficulty: q.difficulty,
                 uuid: String(q.id), // uuid from content table uses id from database
                 topics: q.topics.map((t: Topic) => t.title),
