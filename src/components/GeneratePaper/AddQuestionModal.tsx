@@ -75,7 +75,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                             mb: "0.5rem",
                         }}
                     >
-                        Generate Question
+                        Add a Question
                     </Typography>
                     <ToggleButtonGroup
                         color="primary"
@@ -105,9 +105,9 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     sx={{ opacity: "0.7", mt: "0.2rem" }}
                     fontSize={"15px"}
                 >
-                    This tool will help you generate questions. You can either
-                    use ChatGPT API to generate questions from scratch by
-                    passing in a prompt or generate questions by retrieving from
+                    This tool will help you generate and add a question. You can
+                    either use ChatGPT API to generate question from scratch by
+                    passing in a prompt or generate question by retrieving from
                     database based on a topic.
                 </Typography>
 

@@ -1,21 +1,19 @@
-import {
-    Box,
-    Button,
-    CircularProgress,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-    Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { DataItemWithUUID } from "../../types/types";
+import CreatableSelect from "react-select/creatable";
 
 interface Topic {
     id: number;
     title: string;
+}
+
+// #NOTE:abstract them into common code
+interface TopicForReactSelect {
+    label: string;
+    value: string;
+    id: number; // this is the id for the topic in the backend
 }
 
 // Interface for questions retrieved from db. This can contain additional fields such as FK and hence != DataItem WithUUID;
@@ -45,6 +43,18 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
         useState(false); // This is for fetching the questions with topic
+
+    // TODO: abstract them into commmon function
+    const formatTopicsForReactSelect = (topics: Topic[]) => {
+        return topics.map((topic) => {
+            return {
+                label: topic.title, // required for react-select
+                value: topic.title, // required for react-select
+                id: topic.id, // for generating questions for this topic from backend
+            } as TopicForReactSelect;
+        });
+    };
+
     /**
      * This method fetch the full list of topics from the database.
      */
@@ -158,10 +168,6 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     };
 
     // Event handlers
-    const handleChangeSelect = (event: SelectChangeEvent) => {
-        setSelectedTopic(Number(event.target.value));
-    };
-
     // This is to handle the clicking of generate button for database
     const handleGenerateQuestionDB = (selectedTopic: Number) => {
         getQuestionsWithTopic(selectedTopic);
@@ -182,44 +188,54 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                 >
                     Generate questions based on topic (from database)
                 </Typography>
-                <FormControl
-                    sx={{
-                        display: "flex",
-                    }}
-                >
-                    <InputLabel id="select-label">Topic</InputLabel>
-                    <Select
-                        labelId="topic-select-label"
-                        id="topic-select"
-                        value={selectedTopic.toString()}
-                        label="Selected Topic"
-                        onChange={handleChangeSelect}
-                        MenuProps={{
-                            PaperProps: {
-                                sx: {
-                                    maxHeight: { xs: 200, xl: 400 },
-                                    "::-webkit-scrollbar": {
-                                        width: "6px", // Width of the scrollbar
-                                    },
-                                    "::-webkit-scrollbar-track": {
-                                        background: "#ebebeb", // Background of the scrollbar track
-                                        borderRadius: "8px",
-                                    },
-                                    "::-webkit-scrollbar-thumb": {
-                                        background: "#c2c2c2", // Color of the scrollbar thumb
-                                        borderRadius: "8px", // Rounded corners for the scrollbar thumb
-                                    },
-                                },
+
+                <CreatableSelect
+                    required
+                    isValidNewOption={() => false} // disable option for creating new chip on the go
+                    options={formatTopicsForReactSelect(topics)}
+                    onChange={(newChip) => setSelectedTopic(newChip?.id as any)}
+                    styles={{
+                        control: (baseStyles) => ({
+                            ...baseStyles,
+                            marginTop: "1rem",
+                            padding: "0.2rem",
+                            borderRadius: "1rem",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                            "@media (max-width: 1300px)": {
+                                // below lgxl size
+                                maxHeight: "120px",
                             },
-                        }}
-                    >
-                        {topics.map((t, index) => (
-                            <MenuItem value={t.id} key={index}>
-                                {t.title}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                            "::-webkit-scrollbar": {
+                                width: "6px", // Width of the scrollbar
+                            },
+                            "::-webkit-scrollbar-track": {
+                                background: "#ebebeb", // Background of the scrollbar track
+                                borderRadius: "8px",
+                            },
+                            "::-webkit-scrollbar-thumb": {
+                                background: "#c2c2c2", // Color of the scrollbar thumb
+                                borderRadius: "8px", // Rounded corners for the scrollbar thumb
+                            },
+                        }),
+                        menuList: (baseStyles) => ({
+                            ...baseStyles,
+                            maxHeight: "200px", // Set max height for the dropdown
+                            overflowY: "auto", // Enable vertical scrolling
+                            "::-webkit-scrollbar": {
+                                width: "6px", // Width of the scrollbar
+                            },
+                            "::-webkit-scrollbar-track": {
+                                background: "#ebebeb", // Background of the scrollbar track
+                                borderRadius: "8px",
+                            },
+                            "::-webkit-scrollbar-thumb": {
+                                background: "#c2c2c2", // Color of the scrollbar thumb
+                                borderRadius: "8px", // Rounded corners for the scrollbar thumb
+                            },
+                        }),
+                    }}
+                />
             </Box>
             {isFetchingTopics ||
                 (isFetchingQuestionsWithTopic && (
