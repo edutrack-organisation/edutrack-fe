@@ -1,4 +1,5 @@
 import {
+    Box,
     Button,
     IconButton,
     Paper,
@@ -22,6 +23,7 @@ import CreatableSelect from "react-select/creatable";
 import { MultiValue } from "react-select";
 import AddQuestionModal from "./AddQuestionModal";
 import { useState } from "react";
+import QuickGenerateQuestionModal from "./QuickGenerateQuestionModal";
 interface ContentTableProps {
     questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
@@ -33,6 +35,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
     setQuestions,
     allTopics,
 }) => {
+    const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // indicates whether the modal for adding individual question is open or close
+    const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // indicates whether the modal for quick generation of questions is open or close
+    const [selectedIndex, setSelectedIndex] = useState<number>(-2); // this is the index of the selected question
+
     // Helper functions to format topics properly for react-select rendering
     // React-select requires the value to be in the format {label: string, value: string}
     const formatTopicsForReactSelect = (topics: string[]) => {
@@ -49,9 +55,6 @@ const ContentTable: React.FC<ContentTableProps> = ({
             return t.label;
         });
     };
-
-    const [open, setOpen] = useState(false); // indicates whether the modal for generating question is open or close
-    const [selectedIndex, setSelectedIndex] = useState<number>(-2); // this is the index of the selected question
 
     // Event Handlers
     const handleTopicsChange = (index: number, newChips: string[]) => {
@@ -85,13 +88,17 @@ const ContentTable: React.FC<ContentTableProps> = ({
         setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleIndivQuestionModalClose = () => {
+        setIndivQuestionModalOpen(false);
     };
 
-    const handleOpen = (index: number) => {
-        setOpen(true);
+    const handleIndivQuestionModalOpen = (index: number) => {
+        setIndivQuestionModalOpen(true);
         setSelectedIndex(index);
+    };
+
+    const handleQuickGenerateQuestionModalClose = () => {
+        setQuickGenerateModalOpen(false);
     };
 
     return (
@@ -129,7 +136,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         border: 0,
                                     },
                                     border:
-                                        selectedIndex + 1 === index && !open
+                                        selectedIndex + 1 === index &&
+                                        !indivQuestionModalOpen
                                             ? "3px solid #E4CACA"
                                             : "none",
                                 }}
@@ -264,7 +272,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <Tooltip title="Add Question">
                                         <IconButton
                                             onClick={() => {
-                                                handleOpen(index);
+                                                handleIndivQuestionModalOpen(
+                                                    index
+                                                );
                                             }}
                                         >
                                             <AddCircleOutlineIcon
@@ -282,29 +292,59 @@ const ContentTable: React.FC<ContentTableProps> = ({
                 </Table>
             </TableContainer>
             <AddQuestionModal
-                open={open}
-                handleClose={handleClose}
+                open={indivQuestionModalOpen}
+                handleClose={handleIndivQuestionModalClose}
                 setQuestions={setQuestions}
                 selectedIndex={selectedIndex} // Pass the selected index to the modal
             />
-            <Button
-                variant="text"
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mt: "1rem",
-                    variant: "contained",
-                }}
-                onClick={() => {
-                    setSelectedIndex(questions.length - 1); // selectedIndex set to -1 as after adding we want to highlight index 0 element
-                    setOpen(true);
-                }}
-            >
-                <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
-                    Add a question
-                </Typography>
-                <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
-            </Button>
+
+            {/* modal for quick generation of questions */}
+            <QuickGenerateQuestionModal
+                open={quickGenerateModalOpen}
+                handleClose={handleQuickGenerateQuestionModalClose}
+            />
+
+            {/* Buttons for modal */}
+            <Box display="flex">
+                {/* button for quick generation of questions */}
+                <Button
+                    variant="text"
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mt: "1rem",
+                        variant: "contained",
+                    }}
+                    onClick={() => {
+                        setQuickGenerateModalOpen(true);
+                    }}
+                >
+                    <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
+                        Quick Generate
+                    </Typography>
+                    <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
+                </Button>
+
+                {/* button for adding new question */}
+                <Button
+                    variant="text"
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mt: "1rem",
+                        variant: "contained",
+                    }}
+                    onClick={() => {
+                        setSelectedIndex(questions.length - 1); // selectedIndex set to -1 as after adding we want to highlight index 0 element
+                        setIndivQuestionModalOpen(true);
+                    }}
+                >
+                    <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
+                        Add a question
+                    </Typography>
+                    <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
+                </Button>
+            </Box>
         </>
     );
 };

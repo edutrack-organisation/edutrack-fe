@@ -36,6 +36,7 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
 
             if (!response.ok) {
                 toast.error("Error in generating question using GPT");
+                return;
             }
 
             const generatedQuestion = await response.json();
