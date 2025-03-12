@@ -2,11 +2,13 @@ import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
+import { formatGeneratedQuestions } from "./generate.utils";
+import { DataItemWithUUID } from "../../types/types";
 
 interface QuickGenerateModalProps {
     open: boolean;
     handleClose: () => void;
-    // setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
+    setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
     // selectedIndex: number; // Add selectedIndex prop
 }
 
@@ -57,6 +59,7 @@ interface TopicForReactSelect {
 const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
     open,
     handleClose,
+    setQuestions,
 }) => {
     const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
     const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
@@ -129,8 +132,6 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
 
         setIsSubmitting(false);
 
-        console.log(selectedTopics);
-
         // Proceed with form submission
         // Your submission logic here
         // #TODO: send the selected topics to the backend for processing
@@ -163,13 +164,21 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
 
             if (!response.ok) {
                 toast.error("Error in quick generating questions");
-                return;
+                // return;
             }
 
             const generatedQuestions = await response.json();
+
             console.log(generatedQuestions);
             // add to list etc
-        } catch {}
+            const formattedQuestionsWithTopic =
+                formatGeneratedQuestions(generatedQuestions);
+            setQuestions(formattedQuestionsWithTopic);
+            handleClose();
+            // #TODO: loading
+        } catch (error) {
+            toast.error("Error in quick generating questions");
+        }
     };
 
     const handleMarksChange = (index: number, mark: number) => {

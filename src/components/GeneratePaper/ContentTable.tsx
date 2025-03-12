@@ -38,6 +38,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
     const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // indicates whether the modal for adding individual question is open or close
     const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // indicates whether the modal for quick generation of questions is open or close
     const [selectedIndex, setSelectedIndex] = useState<number>(-2); // this is the index of the selected question
+    const [highlightIndex, setHighlightIndex] = useState<number>(-2); // this is the index of the highlight question
 
     // Helper functions to format topics properly for react-select rendering
     // React-select requires the value to be in the format {label: string, value: string}
@@ -85,7 +86,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
         const updatedData = [...questions];
         updatedData.splice(index, 1);
         setQuestions(updatedData);
-        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
+        setHighlightIndex(-2); // reset selected index to -2 to remove the highlight
     };
 
     const handleIndivQuestionModalClose = () => {
@@ -94,11 +95,17 @@ const ContentTable: React.FC<ContentTableProps> = ({
 
     const handleIndivQuestionModalOpen = (index: number) => {
         setIndivQuestionModalOpen(true);
-        setSelectedIndex(index);
+        setSelectedIndex(index); // pass into the modal state
     };
 
     const handleQuickGenerateQuestionModalClose = () => {
         setQuickGenerateModalOpen(false);
+        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
+    };
+
+    const handleQuickGenerateQuestionModalCloseOpen = () => {
+        setQuickGenerateModalOpen(true);
+        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
     };
 
     return (
@@ -136,7 +143,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         border: 0,
                                     },
                                     border:
-                                        selectedIndex + 1 === index &&
+                                        highlightIndex + 1 === index &&
                                         !indivQuestionModalOpen
                                             ? "3px solid #E4CACA"
                                             : "none",
@@ -294,13 +301,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
             <AddQuestionModal
                 open={indivQuestionModalOpen}
                 handleClose={handleIndivQuestionModalClose}
+                questions={questions}
                 setQuestions={setQuestions}
                 selectedIndex={selectedIndex} // Pass the selected index to the modal
+                setHighlightIndex={setHighlightIndex}
             />
 
             {/* modal for quick generation of questions */}
             <QuickGenerateQuestionModal
                 open={quickGenerateModalOpen}
+                setQuestions={setQuestions}
                 handleClose={handleQuickGenerateQuestionModalClose}
             />
 
@@ -316,7 +326,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                         variant: "contained",
                     }}
                     onClick={() => {
-                        setQuickGenerateModalOpen(true);
+                        handleQuickGenerateQuestionModalCloseOpen();
                     }}
                 >
                     <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>

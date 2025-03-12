@@ -16,7 +16,9 @@ import GenerateQuestionFromGPT from "./GenerateQuestionFromGPT";
 interface AddQuestionModalProps {
     open: boolean;
     handleClose: () => void;
+    questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
+    setHighlightIndex: React.Dispatch<React.SetStateAction<number>>;
     selectedIndex: number; // Add selectedIndex prop
 }
 
@@ -41,6 +43,8 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     handleClose,
     setQuestions,
     selectedIndex,
+    setHighlightIndex,
+    questions,
 }) => {
     const [method, setMethod] = useState("gpt"); // This is to handle the toggling between different mode (gpt and DB)
 
@@ -116,12 +120,15 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                         setQuestions={setQuestions}
                         selectedIndex={selectedIndex}
                         handleModalClose={handleClose}
+                        setHighlightIndex={setHighlightIndex}
                     />
                 ) : (
                     <GenerateQuestionFromDB
                         setQuestions={setQuestions}
                         selectedIndex={selectedIndex}
                         handleModalClose={handleClose}
+                        questions={questions}
+                        setHighlightIndex={setHighlightIndex}
                     />
                 )}
             </Box>

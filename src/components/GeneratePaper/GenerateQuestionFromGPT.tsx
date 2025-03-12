@@ -6,6 +6,7 @@ import { DataItemWithUUID } from "../../types/types";
 
 interface GeneratedQuestionFromGPTProps {
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
+    setHighlightIndex: React.Dispatch<React.SetStateAction<number>>;
     selectedIndex: number;
     handleModalClose: () => void;
 }
@@ -14,6 +15,7 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
     setQuestions,
     selectedIndex,
     handleModalClose,
+    setHighlightIndex,
 }) => {
     const [prompt, setPrompt] = useState("");
     const [generating, setGenerating] = useState(false);
@@ -56,6 +58,8 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
             // insert at the correct position
             updatedData.splice(selectedIndex + 1, 0, generatedQuestion);
 
+            // to trigger highlighting
+            setHighlightIndex(selectedIndex);
             return updatedData; // return statement for setQuestions
         });
     };

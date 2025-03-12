@@ -3,11 +3,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { DataItemWithUUID } from "../../types/types";
 import CreatableSelect from "react-select/creatable";
-
-interface Topic {
-    id: number;
-    title: string;
-}
+import { Topic } from "./generate.types";
+import { formatGeneratedQuestions } from "./generate.utils";
 
 // #NOTE:abstract them into common code
 interface TopicForReactSelect {
@@ -16,26 +13,19 @@ interface TopicForReactSelect {
     id: number; // this is the id for the topic in the backend
 }
 
-// Interface for questions retrieved from db. This can contain additional fields such as FK and hence != DataItem WithUUID;
-interface QuestionFromDB {
-    id: number;
-    paper_id: number;
-    question_number: number;
-    description: string;
-    topics: Topic[];
-    mark: number;
-    difficulty: number;
-}
-
 interface GenerateQuestionFromDBProps {
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
+    setHighlightIndex: React.Dispatch<React.SetStateAction<number>>;
+    questions: DataItemWithUUID[];
     selectedIndex: number;
     handleModalClose: () => void;
 }
 
 const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     setQuestions,
+    setHighlightIndex,
     selectedIndex,
+    questions,
     handleModalClose,
 }) => {
     const [selectedTopic, setSelectedTopic] = useState<Number>(0); // This is to manage the selectedTopic
@@ -100,6 +90,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
             const formattedQuestionsWithTopic =
                 formatGeneratedQuestions(questionsWithTopic);
             appendAndHandleDuplicates(formattedQuestionsWithTopic);
+
             handleModalClose();
             setIsFetchingQuestionWithTopic(false);
         } catch (error) {
@@ -116,55 +107,36 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const appendAndHandleDuplicates = (
         formattedNewQuestions: DataItemWithUUID[]
     ) => {
-        setQuestions((prevQuestions) => {
-            /**
-             * We filter questions based on description.
-             * Even if questions have the exact same description (but different paper), we still consider them as duplicates as we do not want to generate the same questions.
-             * Note that 2 question can be very similar but not duplicates due to having extra characters (e.g. new line character during different run of the paper parsing process)
-             */
-            const newQuestionsNotAlreadyInside = formattedNewQuestions.filter(
-                (fnq) => {
-                    return !prevQuestions.some(
-                        (q) => q.description === fnq.description
-                    );
-                }
-            );
-
-            // If there are no questions of this topic that is to be added to the list of questions in the table
-            if (newQuestionsNotAlreadyInside.length === 0) {
-                toast.error(
-                    "All of the questions with this topic are already included in the list of generated questions"
+        /**
+         * We filter questions based on description.
+         * Even if questions have the exact same description (but different paper), we still consider them as duplicates as we do not want to generate the same questions.
+         * Note that 2 question can be very similar but not duplicates due to having extra characters (e.g. new line character during different run of the paper parsing process)
+         */
+        const newQuestionsNotAlreadyInside = formattedNewQuestions.filter(
+            (fnq) => {
+                return !questions.some(
+                    (q) => q.description === fnq.description
                 );
-                return prevQuestions; // return original set of questions
             }
+        );
 
-            const updatedData = [...prevQuestions]; // make a copy of the old set of questions before addition
-            const toInsertQuestion = newQuestionsNotAlreadyInside[0]; // always inserting the first element that is not already inside the list
+        // If there are no questions of this topic that is to be added to the list of questions in the table
+        if (newQuestionsNotAlreadyInside.length === 0) {
+            toast.error(
+                "All of the questions with this topic are already included in the list of generated questions"
+            );
+            setHighlightIndex(-2);
+            return;
+        }
 
-            // insert at the correct position
-            updatedData.splice(selectedIndex + 1, 0, toInsertQuestion);
+        const updatedData = [...questions]; // make a copy of the old set of questions before addition
+        const toInsertQuestion = newQuestionsNotAlreadyInside[0]; // always inserting the first element that is not already inside the list
+        // insert at the correct position
+        updatedData.splice(selectedIndex + 1, 0, toInsertQuestion);
+        setQuestions(updatedData);
 
-            return updatedData; // return statement for setQuestions
-        });
-    };
-
-    /**
-     * Questions that are generated/retrieved from the database have other fields such as Foreign keys
-     * We want to format the question from QuestionFromDB to DataItemWithUUID for rendering on our table
-     * @param generatedQuestions
-     * @returns DataItemWithUUID[]
-     */ const formatGeneratedQuestions = (
-        generatedQuestions: QuestionFromDB[]
-    ) => {
-        return generatedQuestions.map((q) => {
-            return {
-                description: q.description,
-                mark: q.mark,
-                difficulty: q.difficulty,
-                uuid: String(q.id), // uuid from content table uses id from database
-                topics: q.topics.map((t: Topic) => t.title),
-            } as DataItemWithUUID;
-        });
+        // to trigger highlighting
+        setHighlightIndex(selectedIndex);
     };
 
     // Event handlers
