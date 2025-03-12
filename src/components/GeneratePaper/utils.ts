@@ -1,4 +1,4 @@
-import { Topic, QuestionFromDB } from "./generate.types";
+import { Topic, QuestionFromDB } from "./types";
 import { DataItemWithUUID } from "../../types/types";
 
 /**
@@ -10,9 +10,6 @@ import { DataItemWithUUID } from "../../types/types";
 export const formatGeneratedQuestions = (
     generatedQuestions: QuestionFromDB[]
 ) => {
-    console.log("inside util ");
-    console.log(generatedQuestions);
-
     return generatedQuestions.map((q) => {
         return {
             description: q.description,

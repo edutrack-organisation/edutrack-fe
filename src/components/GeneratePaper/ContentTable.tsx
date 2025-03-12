@@ -21,9 +21,9 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CreatableSelect from "react-select/creatable";
 import { MultiValue } from "react-select";
-import AddQuestionModal from "./AddQuestionModal";
+import AddSingleQuestionModal from "./AddSingleQuestionModal";
 import { useState } from "react";
-import QuickGenerateQuestionModal from "./QuickGenerateQuestionModal";
+import QuickGenerateQuestionsModal from "./QuickGenerateQuestionsModal";
 interface ContentTableProps {
     questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
@@ -98,12 +98,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
         setSelectedIndex(index); // pass into the modal state
     };
 
-    const handleQuickGenerateQuestionModalClose = () => {
+    const handleQuickGenerateQuestionsModalClose = () => {
         setQuickGenerateModalOpen(false);
         setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
     };
 
-    const handleQuickGenerateQuestionModalCloseOpen = () => {
+    const handleQuickGenerateQuestionsModalCloseOpen = () => {
         setQuickGenerateModalOpen(true);
         setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
     };
@@ -298,7 +298,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     </TableBody>
                 </Table>
             </TableContainer>
-            <AddQuestionModal
+            <AddSingleQuestionModal
                 open={indivQuestionModalOpen}
                 handleClose={handleIndivQuestionModalClose}
                 questions={questions}
@@ -308,10 +308,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
             />
 
             {/* modal for quick generation of questions */}
-            <QuickGenerateQuestionModal
+            <QuickGenerateQuestionsModal
                 open={quickGenerateModalOpen}
                 setQuestions={setQuestions}
-                handleClose={handleQuickGenerateQuestionModalClose}
+                handleClose={handleQuickGenerateQuestionsModalClose}
             />
 
             {/* Buttons for modal */}
@@ -326,7 +326,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                         variant: "contained",
                     }}
                     onClick={() => {
-                        handleQuickGenerateQuestionModalCloseOpen();
+                        handleQuickGenerateQuestionsModalCloseOpen();
                     }}
                 >
                     <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>

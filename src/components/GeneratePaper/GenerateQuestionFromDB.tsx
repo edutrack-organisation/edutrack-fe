@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { DataItemWithUUID } from "../../types/types";
 import CreatableSelect from "react-select/creatable";
-import { Topic } from "./generate.types";
-import { formatGeneratedQuestions } from "./generate.utils";
+import { Topic } from "./types";
+import { formatGeneratedQuestions } from "./utils";
 
-// #NOTE:abstract them into common code
 interface TopicForReactSelect {
     label: string;
     value: string;
@@ -34,7 +33,12 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
         useState(false); // This is for fetching the questions with topic
 
-    // TODO: abstract them into commmon function
+    //// Helper functions
+
+    /**
+     * Formats topics for react-select dropdown, mapping database fields
+     * to required select options format (label, value) plus ID for API calls.
+     */
     const formatTopicsForReactSelect = (topics: Topic[]) => {
         return topics.map((topic) => {
             return {

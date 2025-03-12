@@ -2,50 +2,16 @@ import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
-import { formatGeneratedQuestions } from "./generate.utils";
+import { formatGeneratedQuestions } from "./utils";
 import { DataItemWithUUID } from "../../types/types";
+import { modalVariants, scrollbarStyle } from "./styles";
+import { Topic } from "./types";
+import { generatePaperApi } from "./generatePaperApi";
 
 interface QuickGenerateModalProps {
     open: boolean;
     handleClose: () => void;
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
-    // selectedIndex: number; // Add selectedIndex prop
-}
-
-// This is the style for the outer box container
-const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "40%",
-    minHeight: { xs: "80%", xl: "60%" },
-    bgcolor: "background.paper",
-    borderRadius: "1rem",
-    boxShadow: 24,
-    display: "flex",
-    flexDirection: "column",
-    p: 4,
-};
-
-const scrollbarStyle = {
-    "::-webkit-scrollbar": {
-        width: "6px",
-    },
-    "::-webkit-scrollbar-track": {
-        background: "#ebebeb",
-        borderRadius: "8px",
-    },
-    "::-webkit-scrollbar-thumb": {
-        background: "#c2c2c2",
-        borderRadius: "8px",
-    },
-};
-
-// interface for topic retrieved from database
-interface Topic {
-    id: number;
-    title: string;
 }
 
 // interface for topic for rendering for React Select
@@ -56,7 +22,7 @@ interface TopicForReactSelect {
     topicId: number; // to send to the backend for processing
 }
 
-const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
+const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     open,
     handleClose,
     setQuestions,
@@ -87,23 +53,14 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
     /**
      * This method fetch the full list of topics from the database.
      */
-    // #TODO: clean up code and aabstract them into common method
     const fetchAndSetTopics = async () => {
         try {
             setIsFetchingTopics(true);
-            const response = await fetch("http://127.0.0.1:8000/topics/", {
-                method: "GET",
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch list of topics");
-            }
-
-            setTopics(await response.json());
-            setIsFetchingTopics(false);
-            return;
+            const topics = await generatePaperApi.fetchTopics();
+            setTopics(topics);
         } catch (error) {
             toast.error("Failed to fetch list of topics");
+        } finally {
             setIsFetchingTopics(false);
         }
     };
@@ -132,10 +89,6 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
 
         setIsSubmitting(false);
 
-        // Proceed with form submission
-        // Your submission logic here
-        // #TODO: send the selected topics to the backend for processing
-
         // send to backend
         quickGenerateQuestions(selectedTopics);
     };
@@ -144,33 +97,14 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
         selectedTopics: TopicForReactSelect[]
     ) => {
         try {
-            const requestBody = {
-                topics: selectedTopics.map((topic) => ({
-                    topic_id: topic.topicId,
-                    max_allocated_marks: topic.marksAllocated,
-                })),
-            };
+            const topics = selectedTopics.map((topic) => ({
+                topic_id: topic.topicId,
+                max_allocated_marks: topic.marksAllocated,
+            }));
 
-            const response = await fetch(
-                "http://127.0.0.1:8000/quick-generate/",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(requestBody),
-                }
-            );
+            const generatedQuestions =
+                await generatePaperApi.quickGenerateQuestions(topics);
 
-            if (!response.ok) {
-                toast.error("Error in quick generating questions");
-                // return;
-            }
-
-            const generatedQuestions = await response.json();
-
-            console.log(generatedQuestions);
-            // add to list etc
             const formattedQuestionsWithTopic =
                 formatGeneratedQuestions(generatedQuestions);
             setQuestions(formattedQuestionsWithTopic);
@@ -194,7 +128,11 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
-            <Box sx={style} component="form" onSubmit={handleSubmit}>
+            <Box
+                sx={modalVariants.quickGenerate}
+                component="form"
+                onSubmit={handleSubmit}
+            >
                 <Box display={"flex"}>
                     <Typography
                         fontWeight={"bolder"}
@@ -326,4 +264,4 @@ const QuickGenerateQuestionModal: React.FC<QuickGenerateModalProps> = ({
     );
 };
 
-export default QuickGenerateQuestionModal;
+export default QuickGenerateQuestionsModal;
