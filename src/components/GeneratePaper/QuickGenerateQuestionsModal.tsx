@@ -36,9 +36,94 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     const [marksErrors, setMarksErrors] = useState<boolean[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Helper functions to format topics properly for react-select rendering
-    // React-select requires the value to be in the format {label: string, value: string}
-    // #TODO: clean up, this is different from the one in content table because that one takes in array of string
+    const ModalHeader = () => (
+        <>
+            <Box display={"flex"}>
+                <Typography
+                    fontWeight={"bolder"}
+                    sx={{
+                        fontSize: { xs: "1.5rem", xl: "1.8rem" },
+                        mb: "0.5rem",
+                    }}
+                >
+                    Quick Generate Questions
+                </Typography>
+            </Box>
+
+            <Typography
+                fontWeight={"bolder"}
+                sx={{
+                    fontSize: "17px",
+                }}
+            >
+                Instructions
+            </Typography>
+            <Typography
+                fontWeight={"bolder"}
+                sx={{ opacity: "0.7", mt: "0.2rem" }}
+                fontSize={"15px"}
+            >
+                This tool will help you quickly generate a set of questions from
+                database. Simply choose the topics that you wish to generate
+                questions from and enter the total marks worth of questions that
+                you wish to generate for each topic.
+            </Typography>
+        </>
+    );
+
+    const SelectedTopicsSection = () => (
+        <Box
+            sx={{
+                height: { lg: "8rem", xl: "17rem" },
+                overflowY: "auto", // Enable vertical scrolling
+                ...scrollbarStyle,
+            }}
+        >
+            {selectedTopics.map((t, index) => (
+                <Box
+                    display="flex"
+                    sx={{
+                        alignItems: "center",
+                        gap: 2,
+                    }}
+                >
+                    {/* hard coded mt value based on MUI margin for their input components */}
+                    <Typography
+                        sx={{
+                            mt: "20px",
+                            width: { xs: "95%", lgxl: "80%" },
+                        }}
+                    >
+                        {t.label}
+                    </Typography>
+                    <TextField
+                        required
+                        id="standard-basic"
+                        label="Marks Allocated"
+                        type="number"
+                        variant="standard"
+                        sx={{ ml: "auto" }} // This will push the TextField to the righ}}
+                        InputProps={{
+                            inputProps: { min: 0 },
+                        }}
+                        onChange={(event) =>
+                            handleMarksChange(
+                                index,
+                                parseInt(event.target.value)
+                            )
+                        }
+                    />
+                </Box>
+            ))}
+        </Box>
+    );
+
+    //// Helper functions
+
+    /**
+     * Formats topics for react-select dropdown, mapping database fields
+     * to required select options format (label, value) plus marks allocated and ID for API calls.
+     */
     const formatTopicsForReactSelect = (topics: Topic[]) => {
         return topics.map((topic) => {
             return {
@@ -65,11 +150,33 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
         }
     };
 
-    useEffect(() => {
-        fetchAndSetTopics();
-    }, []);
+    /**
+     * Generates questions based on selected topics and their marks.
+     * Maps topics to API format, calls backend, and updates parent state.
+     */
+    const quickGenerateQuestions = async (
+        selectedTopics: TopicForReactSelect[]
+    ) => {
+        try {
+            const topics = selectedTopics.map((topic) => ({
+                topic_id: topic.topicId,
+                max_allocated_marks: topic.marksAllocated,
+            }));
 
-    // Event handlers
+            const generatedQuestions =
+                await generatePaperApi.quickGenerateQuestions(topics);
+
+            const formattedQuestionsWithTopic =
+                formatGeneratedQuestions(generatedQuestions);
+            setQuestions(formattedQuestionsWithTopic);
+            handleClose();
+            // #TODO: loading
+        } catch (error) {
+            toast.error("Error in quick generating questions");
+        }
+    };
+
+    //// Event handlers
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         setIsSubmitting(true);
@@ -93,33 +200,15 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
         quickGenerateQuestions(selectedTopics);
     };
 
-    const quickGenerateQuestions = async (
-        selectedTopics: TopicForReactSelect[]
-    ) => {
-        try {
-            const topics = selectedTopics.map((topic) => ({
-                topic_id: topic.topicId,
-                max_allocated_marks: topic.marksAllocated,
-            }));
-
-            const generatedQuestions =
-                await generatePaperApi.quickGenerateQuestions(topics);
-
-            const formattedQuestionsWithTopic =
-                formatGeneratedQuestions(generatedQuestions);
-            setQuestions(formattedQuestionsWithTopic);
-            handleClose();
-            // #TODO: loading
-        } catch (error) {
-            toast.error("Error in quick generating questions");
-        }
-    };
-
     const handleMarksChange = (index: number, mark: number) => {
         const updatedTopics = [...selectedTopics];
         updatedTopics[index].marksAllocated = mark;
         setSelectedTopics(updatedTopics);
     };
+
+    useEffect(() => {
+        fetchAndSetTopics();
+    }, []);
 
     return (
         <Modal
@@ -133,37 +222,7 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                 component="form"
                 onSubmit={handleSubmit}
             >
-                <Box display={"flex"}>
-                    <Typography
-                        fontWeight={"bolder"}
-                        sx={{
-                            fontSize: { xs: "1.5rem", xl: "1.8rem" },
-                            mb: "0.5rem",
-                        }}
-                    >
-                        Quick Generate Questions
-                    </Typography>
-                </Box>
-
-                <Typography
-                    fontWeight={"bolder"}
-                    sx={{
-                        fontSize: "17px",
-                    }}
-                >
-                    Instructions
-                </Typography>
-                <Typography
-                    fontWeight={"bolder"}
-                    sx={{ opacity: "0.7", mt: "0.2rem" }}
-                    fontSize={"15px"}
-                >
-                    This tool will help you quickly generate a set of questions
-                    from database. Simply choose the topics that you wish to
-                    generate questions from and enter the total marks worth of
-                    questions that you wish to generate for each topic.
-                </Typography>
-
+                <ModalHeader />
                 <CreatableSelect
                     isMulti
                     required
@@ -204,53 +263,8 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                     Selected Topics
                 </Typography>
 
-                {/* container for selected topics */}
-                <Box
-                    sx={{
-                        height: { lg: "8rem", xl: "17rem" },
-                        overflowY: "auto", // Enable vertical scrolling
-                        ...scrollbarStyle,
-                    }}
-                >
-                    {selectedTopics.map((t, index) => (
-                        <Box
-                            display="flex"
-                            sx={{
-                                alignItems: "center",
-                                gap: 2,
-                            }}
-                        >
-                            {/* hard coded mt value based on MUI margin for their input components */}
-                            <Typography
-                                sx={{
-                                    mt: "20px",
-                                    width: { xs: "95%", lgxl: "80%" },
-                                }}
-                            >
-                                {t.label}
-                            </Typography>
-                            <TextField
-                                required
-                                id="standard-basic"
-                                label="Marks Allocated"
-                                type="number"
-                                variant="standard"
-                                sx={{ ml: "auto" }} // This will push the TextField to the righ}}
-                                InputProps={{
-                                    inputProps: { min: 0 },
-                                }}
-                                onChange={(event) =>
-                                    handleMarksChange(
-                                        index,
-                                        parseInt(event.target.value)
-                                    )
-                                }
-                            />
-                        </Box>
-                    ))}
-                </Box>
+                <SelectedTopicsSection />
 
-                {/* Add submit button */}
                 <Button
                     type="submit"
                     variant="contained"
