@@ -1,5 +1,4 @@
 import { QuestionFromDB, Topic } from "./types";
-// import { TopicForReactSelect } from "./types";
 
 const BASE_URL = "http://127.0.0.1:8000";
 
@@ -20,6 +19,17 @@ export const generatePaperApi = {
         });
         if (!response.ok)
             throw new Error("Error in quick generating questions");
+        return response.json();
+    },
+
+    generateQuestionByTopic: async (
+        topicId: number
+    ): Promise<QuestionFromDB[]> => {
+        const response = await fetch(
+            `${BASE_URL}/questions?topic_id=${topicId}`
+        );
+        if (!response.ok)
+            throw new Error("Failed to fetch questions with this topic");
         return response.json();
     },
 };

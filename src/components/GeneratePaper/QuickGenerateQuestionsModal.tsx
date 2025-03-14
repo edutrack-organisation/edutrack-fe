@@ -22,6 +22,58 @@ interface TopicForReactSelect {
     topicId: number; // to send to the backend for processing
 }
 
+interface SelectedTopicsSectionProps {
+    selectedTopics: TopicForReactSelect[];
+    onMarksChange: (index: number, mark: number) => void;
+}
+
+const SelectedTopicsSection: React.FC<SelectedTopicsSectionProps> = ({
+    selectedTopics,
+    onMarksChange,
+}) => (
+    <Box
+        sx={{
+            height: { lg: "8rem", xl: "17rem" },
+            overflowY: "auto", // Enable vertical scrolling
+            ...scrollbarStyle,
+        }}
+    >
+        {selectedTopics.map((t, index) => (
+            <Box
+                display="flex"
+                sx={{
+                    alignItems: "center",
+                    gap: 2,
+                }}
+            >
+                {/* hard coded mt value based on MUI margin for their input components */}
+                <Typography
+                    sx={{
+                        mt: "20px",
+                        width: { xs: "95%", lgxl: "80%" },
+                    }}
+                >
+                    {t.label}
+                </Typography>
+                <TextField
+                    required
+                    id="standard-basic"
+                    label="Marks Allocated"
+                    type="number"
+                    variant="standard"
+                    sx={{ ml: "auto" }} // This will push the TextField to the righ}}
+                    InputProps={{
+                        inputProps: { min: 0 },
+                    }}
+                    onChange={(event) =>
+                        onMarksChange(index, parseInt(event.target.value))
+                    }
+                />
+            </Box>
+        ))}
+    </Box>
+);
+
 const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     open,
     handleClose,
@@ -69,53 +121,6 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                 you wish to generate for each topic.
             </Typography>
         </>
-    );
-
-    const SelectedTopicsSection = () => (
-        <Box
-            sx={{
-                height: { lg: "8rem", xl: "17rem" },
-                overflowY: "auto", // Enable vertical scrolling
-                ...scrollbarStyle,
-            }}
-        >
-            {selectedTopics.map((t, index) => (
-                <Box
-                    display="flex"
-                    sx={{
-                        alignItems: "center",
-                        gap: 2,
-                    }}
-                >
-                    {/* hard coded mt value based on MUI margin for their input components */}
-                    <Typography
-                        sx={{
-                            mt: "20px",
-                            width: { xs: "95%", lgxl: "80%" },
-                        }}
-                    >
-                        {t.label}
-                    </Typography>
-                    <TextField
-                        required
-                        id="standard-basic"
-                        label="Marks Allocated"
-                        type="number"
-                        variant="standard"
-                        sx={{ ml: "auto" }} // This will push the TextField to the righ}}
-                        InputProps={{
-                            inputProps: { min: 0 },
-                        }}
-                        onChange={(event) =>
-                            handleMarksChange(
-                                index,
-                                parseInt(event.target.value)
-                            )
-                        }
-                    />
-                </Box>
-            ))}
-        </Box>
     );
 
     //// Helper functions
@@ -263,7 +268,10 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                     Selected Topics
                 </Typography>
 
-                <SelectedTopicsSection />
+                <SelectedTopicsSection
+                    selectedTopics={selectedTopics}
+                    onMarksChange={handleMarksChange}
+                />
 
                 <Button
                     type="submit"

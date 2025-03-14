@@ -5,6 +5,7 @@ import { DataItemWithUUID } from "../../types/types";
 import CreatableSelect from "react-select/creatable";
 import { Topic } from "./types";
 import { formatGeneratedQuestions } from "./utils";
+import { generatePaperApi } from "./generatePaperApi";
 
 interface TopicForReactSelect {
     label: string;
@@ -27,7 +28,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     questions,
     handleModalClose,
 }) => {
-    const [selectedTopic, setSelectedTopic] = useState<Number>(0); // This is to manage the selectedTopic
+    const [selectedTopic, setSelectedTopic] = useState<number>(0); // This is to manage the selectedTopic
     const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
     const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
@@ -55,19 +56,11 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const fetchAndSetTopics = async () => {
         try {
             setIsFetchingTopics(true);
-            const response = await fetch("http://127.0.0.1:8000/topics/", {
-                method: "GET",
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch list of topics");
-            }
-
-            setTopics(await response.json());
-            setIsFetchingTopics(false);
-            return;
+            const topics = await generatePaperApi.fetchTopics();
+            setTopics(topics);
         } catch (error) {
             toast.error("Failed to fetch list of topics");
+        } finally {
             setIsFetchingTopics(false);
         }
     };
@@ -76,21 +69,13 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
      * This method fetch the list of questions from the backend that topics containing selectedTopic
      * @param selectedTopic
      */
-    const getQuestionsWithTopic = async (selectedTopic: Number) => {
+    const getQuestionsWithTopic = async (selectedTopic: number) => {
         try {
             setIsFetchingQuestionWithTopic(true);
-            const response = await fetch(
-                `http://127.0.0.1:8000/questions?topic_id=${selectedTopic}`,
-                {
-                    method: "GET",
-                }
-            );
+            const questionsWithTopic =
+                await generatePaperApi.generateQuestionByTopic(selectedTopic);
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch questions with this topic");
-            }
-
-            const questionsWithTopic = await response.json();
+            // const questionsWithTopic = await response.json();
             const formattedQuestionsWithTopic =
                 formatGeneratedQuestions(questionsWithTopic);
             appendAndHandleDuplicates(formattedQuestionsWithTopic);
@@ -145,7 +130,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
 
     // Event handlers
     // This is to handle the clicking of generate button for database
-    const handleGenerateQuestionDB = (selectedTopic: Number) => {
+    const handleGenerateQuestionDB = (selectedTopic: number) => {
         getQuestionsWithTopic(selectedTopic);
     };
 
