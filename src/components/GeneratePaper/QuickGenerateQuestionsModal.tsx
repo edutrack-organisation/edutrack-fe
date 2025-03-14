@@ -28,11 +28,13 @@ interface TopicForReactSelect {
 interface SelectedTopicsSectionProps {
     selectedTopics: TopicForReactSelect[];
     onMarksChange: (index: number, mark: number) => void;
+    marksErrors: boolean[];
 }
 
 const SelectedTopicsSection: React.FC<SelectedTopicsSectionProps> = ({
     selectedTopics,
     onMarksChange,
+    marksErrors,
 }) => (
     <Box
         sx={{
@@ -64,6 +66,10 @@ const SelectedTopicsSection: React.FC<SelectedTopicsSectionProps> = ({
                     label="Marks Allocated"
                     type="number"
                     variant="standard"
+                    error={marksErrors[index]}
+                    helperText={
+                        marksErrors[index] ? "Marks must be greater than 0" : ""
+                    }
                     sx={{ ml: "auto" }} // This will push the TextField to the righ}}
                     InputProps={{
                         inputProps: { min: 0 },
@@ -195,18 +201,19 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
         setIsSubmitting(true);
 
         // Validate all fields
-        const errors = selectedTopics.map(
-            (topic) => !topic.marksAllocated || topic.marksAllocated <= 0
-        );
+        const errors = selectedTopics.map((topic) => topic.marksAllocated <= 0);
         setMarksErrors(errors);
 
         // Check if form is valid
-        if (errors.some((error) => error) || selectedTopics.length === 0) {
-            toast.error("Please fill in all required fields");
+        if (selectedTopics.length === 0) {
+            toast.error("Please select at least one topic");
+            setIsSubmitting(false);
+            return;
+        } else if (errors.some((error) => error)) {
+            toast.error("Please ensure that marks allocated is greater than 0");
             setIsSubmitting(false);
             return;
         }
-
         setIsSubmitting(false);
         // send to backend
         quickGenerateQuestions(selectedTopics);
@@ -283,6 +290,7 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                 <SelectedTopicsSection
                     selectedTopics={selectedTopics}
                     onMarksChange={handleMarksChange}
+                    marksErrors={marksErrors}
                 />
 
                 <Button
