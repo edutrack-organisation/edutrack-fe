@@ -12,7 +12,10 @@ import DatabaseIcon from "../../assets/icons/database_icon.png";
 import { DataItemWithUUID } from "../../types/types";
 import GenerateQuestionFromDB from "./GenerateQuestionFromDB";
 import GenerateQuestionFromGPT from "./GenerateQuestionFromGPT";
-import { modalStyle, modalVariants } from "./styles";
+import { modalVariants } from "./styles";
+
+// Type for question generation method
+type GenerationMethod = "db" | "gpt";
 
 interface AddSingleQuestionModalProps {
     open: boolean;
@@ -20,7 +23,7 @@ interface AddSingleQuestionModalProps {
     questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
     setHighlightIndex: React.Dispatch<React.SetStateAction<number>>;
-    selectedIndex: number; // Add selectedIndex prop
+    selectedIndex: number;
 }
 
 const AddSingleQuestionModal: React.FC<AddSingleQuestionModalProps> = ({
@@ -31,7 +34,7 @@ const AddSingleQuestionModal: React.FC<AddSingleQuestionModalProps> = ({
     setHighlightIndex,
     questions,
 }) => {
-    const [method, setMethod] = useState("gpt"); // This is to handle the toggling between different mode (gpt and DB)
+    const [method, setMethod] = useState<GenerationMethod>("db"); // This is to handle the toggling between different mode (gpt and DB)
 
     const ModalHeader = () => (
         <>
@@ -81,6 +84,8 @@ const AddSingleQuestionModal: React.FC<AddSingleQuestionModalProps> = ({
         </>
     );
 
+    // Event handlers
+
     /**
      * Handles the toggle between GPT and Database question generation methods
      * @param _ - Unused mouse event
@@ -88,7 +93,7 @@ const AddSingleQuestionModal: React.FC<AddSingleQuestionModalProps> = ({
      */
     const handleChangeMethod = (
         _: React.MouseEvent<HTMLElement>,
-        newMethod: string
+        newMethod: GenerationMethod
     ) => {
         setMethod(newMethod);
     };

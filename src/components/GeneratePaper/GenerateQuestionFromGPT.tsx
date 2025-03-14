@@ -3,6 +3,7 @@ import TextArea from "../ViewPdf/TextArea";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { DataItemWithUUID } from "../../types/types";
+import { generatePaperApi } from "./generatePaperApi";
 
 interface GeneratedQuestionFromGPTProps {
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
@@ -20,37 +21,43 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
     const [prompt, setPrompt] = useState("");
     const [generating, setGenerating] = useState(false);
 
-    const generateQuestionFromGPT = async () => {
+    const ModalHeader = () => (
+        <Box mt={"1rem"}>
+            <Typography
+                fontWeight={"bolder"}
+                sx={{
+                    fontSize: "17px",
+                    mb: "0.5rem",
+                }}
+            >
+                Generate questions from scratch (by passing in prompt to GPT-4o)
+            </Typography>
+        </Box>
+    );
+
+    /**
+     * This method fetch the question generate from GPT (via the backend) by passing in the prompt
+     * @param prompt
+     */
+    const generateQuestionFromGPT = async (prompt: string) => {
         try {
             setGenerating(true);
-            const response = await fetch(
-                "http://127.0.0.1:8000/generate-gpt/",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        prompt: prompt,
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                toast.error("Error in generating question using GPT");
-                return;
-            }
-
-            const generatedQuestion = await response.json();
+            const generatedQuestion =
+                await generatePaperApi.generateQuestionFromGPT(prompt);
             appendGeneratedQuestion(generatedQuestion);
-            setGenerating(false);
+            setPrompt(""); // reset the prompt
             handleModalClose();
         } catch (error) {
             toast.error("Error in generating question using GPT");
+        } finally {
             setGenerating(false);
         }
     };
 
+    /**
+     * This method append the newly generated question to the list of questions.
+     * @param generatedQuestion
+     */
     const appendGeneratedQuestion = (generatedQuestion: DataItemWithUUID) => {
         setQuestions((prevQuestions) => {
             const updatedData = [...prevQuestions]; // make a copy of the old set of questions before addition
@@ -67,33 +74,24 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
     // Event handlers
     // This is to handle the clicking of generate button for GPT
     const handleGenerateQuestionGPT = () => {
-        generateQuestionFromGPT();
+        generateQuestionFromGPT(prompt);
     };
 
     return (
         <>
-            <Box mt={"1rem"}>
-                <Typography
-                    fontWeight={"bolder"}
-                    sx={{
-                        fontSize: "17px",
-                        mb: "0.5rem",
-                    }}
-                >
-                    Generate questions from scratch (by passing in prompt to
-                    GPT-4o)
-                </Typography>
-                <TextArea
-                    className="textarea"
-                    placeHolder={"Type your prompt here..."}
-                    onChange={(event) => setPrompt(event.target.value)}
-                />
-            </Box>
+            <ModalHeader />
+            <TextArea
+                required
+                className="textarea"
+                placeHolder={"Type your prompt here..."}
+                onChange={(event) => setPrompt(event.target.value)}
+            />
             {generating && <CircularProgress sx={{ my: "auto", mx: "auto" }} />}
             <Button
                 variant="contained"
                 sx={{ mt: "auto", alignSelf: "flex-start" }}
                 onClick={() => handleGenerateQuestionGPT()}
+                disabled={generating || prompt === ""}
             >
                 Generate
             </Button>

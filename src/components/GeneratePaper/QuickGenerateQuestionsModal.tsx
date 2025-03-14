@@ -14,12 +14,15 @@ interface QuickGenerateModalProps {
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
 }
 
-// interface for topic for rendering for React Select
+/**
+ * Interface for topic data structure used in React Select component.
+ * Extends the base topic data with additional fields required.
+ */
 interface TopicForReactSelect {
-    label: string; // required by React Select
-    value: string; // required by React Select
-    marksAllocated: number; // this is used to keep track of allocated marks for that topic
-    topicId: number; // to send to the backend for processing
+    label: string; // Required by React Select
+    value: string; // Required by React Select
+    marksAllocated: number; // Number of marks allocated to this topic for question generation
+    topicId: number; // Database ID of the topic for backend API calls
 }
 
 interface SelectedTopicsSectionProps {
@@ -81,7 +84,6 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
 }) => {
     const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
     const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
-    // TODO: clean up the types
     const [selectedTopics, setSelectedTopics] = useState<TopicForReactSelect[]>(
         []
     );
@@ -182,6 +184,12 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     };
 
     //// Event handlers
+
+    /**
+     * Handles the form submission for generating questions.
+     *
+     * @param event - The form submission event
+     */
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         setIsSubmitting(true);
@@ -200,11 +208,15 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
         }
 
         setIsSubmitting(false);
-
         // send to backend
         quickGenerateQuestions(selectedTopics);
     };
 
+    /**
+     * Updates the marks allocated for a specific topic in the selected topics list.
+     * @param index - The array index of the topic to update
+     * @param mark - The new marks value to be allocated
+     */
     const handleMarksChange = (index: number, mark: number) => {
         const updatedTopics = [...selectedTopics];
         updatedTopics[index].marksAllocated = mark;

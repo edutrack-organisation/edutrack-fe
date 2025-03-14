@@ -6,11 +6,17 @@ import CreatableSelect from "react-select/creatable";
 import { Topic } from "./types";
 import { formatGeneratedQuestions } from "./utils";
 import { generatePaperApi } from "./generatePaperApi";
+import { scrollbarStyle } from "./styles";
+import { SingleValue } from "react-select"; // Add this import at the top
 
+/**
+ * Interface for topic data structure used in React Select component.
+ * Extends the base topic data with additional fields required.
+ */
 interface TopicForReactSelect {
-    label: string;
-    value: string;
-    id: number; // this is the id for the topic in the backend
+    label: string; // Required by React Select
+    value: string; // Required by React Select
+    id: number; // Database ID of the topic used for API calls to fetch questions
 }
 
 interface GenerateQuestionFromDBProps {
@@ -28,11 +34,11 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     questions,
     handleModalClose,
 }) => {
-    const [selectedTopic, setSelectedTopic] = useState<number>(0); // This is to manage the selectedTopic
-    const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
-    const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
+    const [selectedTopic, setSelectedTopic] = useState<number>(-1); // ID of the currently selected topic from the dropdown
+    const [topics, setTopics] = useState<Topic[]>([]); // List of available topics fetched from the database
+    const [isFetchingTopics, setIsFetchingTopics] = useState(false); // Loading state for topics fetch operation
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
-        useState(false); // This is for fetching the questions with topic
+        useState(false); // Loading state for question generation with selected topic
 
     //// Helper functions
 
@@ -43,9 +49,9 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const formatTopicsForReactSelect = (topics: Topic[]) => {
         return topics.map((topic) => {
             return {
-                label: topic.title, // required for react-select
-                value: topic.title, // required for react-select
-                id: topic.id, // for generating questions for this topic from backend
+                label: topic.title, // Required by React Select
+                value: topic.title, // Required by React Select
+                id: topic.id, // Database ID of the topic used for API calls to fetch questions
             } as TopicForReactSelect;
         });
     };
@@ -79,11 +85,10 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
             const formattedQuestionsWithTopic =
                 formatGeneratedQuestions(questionsWithTopic);
             appendAndHandleDuplicates(formattedQuestionsWithTopic);
-
             handleModalClose();
-            setIsFetchingQuestionWithTopic(false);
         } catch (error) {
             toast.error("Error in fetch questions with this topic");
+        } finally {
             setIsFetchingQuestionWithTopic(false);
         }
     };
@@ -92,7 +97,6 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
      * This method filters off the duplicates and add the first (non duplicate) question into the list. We only want to add to the list if the question is not already in the list.
      * @param formattedNewQuestions
      */
-
     const appendAndHandleDuplicates = (
         formattedNewQuestions: DataItemWithUUID[]
     ) => {
@@ -124,8 +128,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
         updatedData.splice(selectedIndex + 1, 0, toInsertQuestion);
         setQuestions(updatedData);
 
-        // to trigger highlighting
-        setHighlightIndex(selectedIndex);
+        setHighlightIndex(selectedIndex); // to trigger highlighting of newly inserted question in table
     };
 
     // Event handlers
@@ -154,7 +157,9 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                     required
                     isValidNewOption={() => false} // disable option for creating new chip on the go
                     options={formatTopicsForReactSelect(topics)}
-                    onChange={(newChip) => setSelectedTopic(newChip?.id as any)}
+                    onChange={(newChip: SingleValue<TopicForReactSelect>) =>
+                        setSelectedTopic(newChip?.id ?? -1)
+                    }
                     styles={{
                         control: (baseStyles) => ({
                             ...baseStyles,
@@ -167,33 +172,13 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                                 // below lgxl size
                                 maxHeight: "120px",
                             },
-                            "::-webkit-scrollbar": {
-                                width: "6px", // Width of the scrollbar
-                            },
-                            "::-webkit-scrollbar-track": {
-                                background: "#ebebeb", // Background of the scrollbar track
-                                borderRadius: "8px",
-                            },
-                            "::-webkit-scrollbar-thumb": {
-                                background: "#c2c2c2", // Color of the scrollbar thumb
-                                borderRadius: "8px", // Rounded corners for the scrollbar thumb
-                            },
+                            ...scrollbarStyle,
                         }),
                         menuList: (baseStyles) => ({
                             ...baseStyles,
                             maxHeight: "200px", // Set max height for the dropdown
                             overflowY: "auto", // Enable vertical scrolling
-                            "::-webkit-scrollbar": {
-                                width: "6px", // Width of the scrollbar
-                            },
-                            "::-webkit-scrollbar-track": {
-                                background: "#ebebeb", // Background of the scrollbar track
-                                borderRadius: "8px",
-                            },
-                            "::-webkit-scrollbar-thumb": {
-                                background: "#c2c2c2", // Color of the scrollbar thumb
-                                borderRadius: "8px", // Rounded corners for the scrollbar thumb
-                            },
+                            ...scrollbarStyle,
                         }),
                     }}
                 />
@@ -207,6 +192,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                 variant="contained"
                 sx={{ mt: "auto", alignSelf: "flex-start" }}
                 onClick={() => handleGenerateQuestionDB(selectedTopic)}
+                disabled={selectedTopic === -1}
             >
                 Generate
             </Button>
