@@ -8,16 +8,21 @@ import { DifficultyFrequencyAndAverageDifficultyForTopic } from "../types/types"
 import AverageDifficultyByTopic from "../components/Dashboard/AverageDifficultyByTopic";
 import TopicsNotCovered from "../components/Dashboard/TopicsNotCovered";
 
-import { DatasetElementType } from "@mui/x-charts/internals";
-import DifficultyFrequency from "../components/Dashboard/DifficultyFrequency";
 import SubcategorisedTopicsCovered from "../components/Dashboard/SubcategorisedTopicsCovered";
 import SubcategorisedTopicsNotCovered from "../components/Dashboard/SubcategorisedTopicsNotCovered";
+import DifficultyFrequency from "../components/Dashboard/DifficultyFrequency";
 
 interface Question {
     description: string;
     difficulty: number;
     topics: string[];
     uuid: string;
+}
+
+interface DifficultyFrequencyType {
+    difficulty: number;
+    frequency: number;
+    [key: string]: number; // Add index signature for MUI X Charts
 }
 
 const DashboardPage = () => {
@@ -43,7 +48,7 @@ const DashboardPage = () => {
 
     // This is the frequency of each difficulty level for the entire paper
     const [difficultyFrequency, setDifficultyFrequency] = useState<
-        DatasetElementType<string | number | Date | null | undefined>[]
+        DifficultyFrequencyType[]
     >([]);
 
     // This is the flag to further subcategories the topics
