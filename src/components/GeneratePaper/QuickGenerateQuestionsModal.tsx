@@ -53,6 +53,7 @@ const SelectedTopicsSection: React.FC<SelectedTopicsSectionProps> = ({
     >
         {selectedTopics.map((t, index) => (
             <Box
+                key={t.topicId}
                 display="flex"
                 sx={{
                     alignItems: "center",
