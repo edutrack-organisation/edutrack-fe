@@ -1,4 +1,11 @@
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Modal,
+    TextField,
+    Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
@@ -7,6 +14,7 @@ import { DataItemWithUUID } from "../../types/types";
 import { modalVariants, scrollbarStyle } from "./styles";
 import { Topic } from "./types";
 import { generatePaperApi } from "./generatePaperApi";
+import { useTopics } from "../../hooks";
 
 interface QuickGenerateModalProps {
     open: boolean;
@@ -70,7 +78,7 @@ const SelectedTopicsSection: React.FC<SelectedTopicsSectionProps> = ({
                     helperText={
                         marksErrors[index] ? "Marks must be greater than 0" : ""
                     }
-                    sx={{ ml: "auto" }} // This will push the TextField to the righ}}
+                    sx={{ ml: "auto" }}
                     InputProps={{
                         inputProps: { min: 0 },
                     }}
@@ -88,13 +96,12 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     handleClose,
     setQuestions,
 }) => {
-    const [topics, setTopics] = useState<Topic[]>([]); // This is to manage the retrived list of Topics from the database
-    const [isFetchingTopics, setIsFetchingTopics] = useState(false); // This is for fetching the list of topics from the database
+    const { topics, isFetchingTopics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
     const [selectedTopics, setSelectedTopics] = useState<TopicForReactSelect[]>(
         []
-    );
-    const [marksErrors, setMarksErrors] = useState<boolean[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    ); // Stores the selected topics with their allocated marks
+    const [marksErrors, setMarksErrors] = useState<boolean[]>([]); // Tracks validation errors for marks allocation of each topic
+    const [isSubmitting, setIsSubmitting] = useState(false); // Tracks form submission state
 
     const ModalHeader = () => (
         <>
@@ -149,21 +156,6 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     };
 
     /**
-     * This method fetch the full list of topics from the database.
-     */
-    const fetchAndSetTopics = async () => {
-        try {
-            setIsFetchingTopics(true);
-            const topics = await generatePaperApi.fetchTopics();
-            setTopics(topics);
-        } catch (error) {
-            toast.error("Failed to fetch list of topics");
-        } finally {
-            setIsFetchingTopics(false);
-        }
-    };
-
-    /**
      * Generates questions based on selected topics and their marks.
      * Maps topics to API format, calls backend, and updates parent state.
      */
@@ -183,7 +175,6 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                 formatGeneratedQuestions(generatedQuestions);
             setQuestions(formattedQuestionsWithTopic);
             handleClose();
-            // #TODO: loading
         } catch (error) {
             toast.error("Error in quick generating questions");
         }
@@ -214,9 +205,9 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
             setIsSubmitting(false);
             return;
         }
-        setIsSubmitting(false);
         // send to backend
         quickGenerateQuestions(selectedTopics);
+        setIsSubmitting(false);
     };
 
     /**
@@ -231,7 +222,7 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
     };
 
     useEffect(() => {
-        fetchAndSetTopics();
+        fetchTopics();
     }, []);
 
     return (
@@ -293,10 +284,18 @@ const QuickGenerateQuestionsModal: React.FC<QuickGenerateModalProps> = ({
                     marksErrors={marksErrors}
                 />
 
+                {isFetchingTopics && (
+                    <CircularProgress sx={{ my: "auto", mx: "auto" }} />
+                )}
+
                 <Button
                     type="submit"
                     variant="contained"
-                    disabled={isSubmitting || selectedTopics.length === 0}
+                    disabled={
+                        isFetchingTopics ||
+                        isSubmitting ||
+                        selectedTopics.length === 0
+                    }
                     sx={{ mt: 2 }}
                 >
                     Generate Questions

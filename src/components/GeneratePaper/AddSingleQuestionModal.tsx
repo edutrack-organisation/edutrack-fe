@@ -8,7 +8,6 @@ import {
 import React, { useState } from "react";
 import GptIcon from "../../assets/icons/gpt_icon.png";
 import DatabaseIcon from "../../assets/icons/database_icon.png";
-
 import { DataItemWithUUID } from "../../types/types";
 import GenerateQuestionFromDB from "./GenerateQuestionFromDB";
 import GenerateQuestionFromGPT from "./GenerateQuestionFromGPT";
@@ -36,6 +35,9 @@ const AddSingleQuestionModal: React.FC<AddSingleQuestionModalProps> = ({
 }) => {
     const [method, setMethod] = useState<GenerationMethod>("db"); // This is to handle the toggling between different mode (gpt and DB)
 
+    /**
+     * Modal header component
+     */
     const ModalHeader = () => (
         <>
             <Box display={"flex"}>

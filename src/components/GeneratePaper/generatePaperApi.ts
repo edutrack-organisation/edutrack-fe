@@ -41,8 +41,13 @@ export const generatePaperApi = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt }),
         });
-        if (!response.ok)
-            throw new Error("Failed to generate question from GPT");
-        return response.json();
+        const response_json = await response.json();
+        if (!response.ok) {
+            throw new Error(
+                response_json.detail || "Failed to generate question from GPT"
+            );
+        }
+
+        return response_json;
     },
 };

@@ -18,22 +18,8 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
     handleModalClose,
     setHighlightIndex,
 }) => {
-    const [prompt, setPrompt] = useState("");
-    const [generating, setGenerating] = useState(false);
-
-    const ModalHeader = () => (
-        <Box mt={"1rem"}>
-            <Typography
-                fontWeight={"bolder"}
-                sx={{
-                    fontSize: "17px",
-                    mb: "0.5rem",
-                }}
-            >
-                Generate questions from scratch (by passing in prompt to GPT-4o)
-            </Typography>
-        </Box>
-    );
+    const [prompt, setPrompt] = useState(""); // Stores the user's input prompt for GPT question generation
+    const [generating, setGenerating] = useState(false); // Loading state for question generation
 
     /**
      * This method fetch the question generate from GPT (via the backend) by passing in the prompt
@@ -48,7 +34,10 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
             setPrompt(""); // reset the prompt
             handleModalClose();
         } catch (error) {
-            toast.error("Error in generating question using GPT");
+            toast.error(
+                (error as Error).message ||
+                    "Error in generating question using GPT"
+            );
         } finally {
             setGenerating(false);
         }
@@ -79,7 +68,19 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
 
     return (
         <>
-            <ModalHeader />
+            <Box mt={"1rem"}>
+                <Typography
+                    fontWeight={"bolder"}
+                    sx={{
+                        fontSize: "17px",
+                        mb: "0.5rem",
+                    }}
+                >
+                    Generate questions from scratch (by passing in prompt to
+                    GPT-4o)
+                </Typography>
+            </Box>
+
             <TextArea
                 required
                 className="textarea"

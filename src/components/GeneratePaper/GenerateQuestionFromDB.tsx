@@ -8,6 +8,7 @@ import { formatGeneratedQuestions } from "./utils";
 import { generatePaperApi } from "./generatePaperApi";
 import { scrollbarStyle } from "./styles";
 import { SingleValue } from "react-select"; // Add this import at the top
+import { useTopics } from "../../hooks";
 
 /**
  * Interface for topic data structure used in React Select component.
@@ -35,12 +36,12 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     handleModalClose,
 }) => {
     const [selectedTopic, setSelectedTopic] = useState<number>(-1); // ID of the currently selected topic from the dropdown
-    const [topics, setTopics] = useState<Topic[]>([]); // List of available topics fetched from the database
-    const [isFetchingTopics, setIsFetchingTopics] = useState(false); // Loading state for topics fetch operation
+    const { topics, isFetchingTopics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
+
     const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
         useState(false); // Loading state for question generation with selected topic
 
-    //// Helper functions
+    // Helper functions
 
     /**
      * Formats topics for react-select dropdown, mapping database fields
@@ -54,21 +55,6 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                 id: topic.id, // Database ID of the topic used for API calls to fetch questions
             } as TopicForReactSelect;
         });
-    };
-
-    /**
-     * This method fetch the full list of topics from the database.
-     */
-    const fetchAndSetTopics = async () => {
-        try {
-            setIsFetchingTopics(true);
-            const topics = await generatePaperApi.fetchTopics();
-            setTopics(topics);
-        } catch (error) {
-            toast.error("Failed to fetch list of topics");
-        } finally {
-            setIsFetchingTopics(false);
-        }
     };
 
     /**
@@ -118,7 +104,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
             toast.error(
                 "All of the questions with this topic are already included in the list of generated questions"
             );
-            setHighlightIndex(-2);
+            setHighlightIndex(-2); // reset highlight index
             return;
         }
 
@@ -138,7 +124,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     };
 
     useEffect(() => {
-        fetchAndSetTopics();
+        fetchTopics();
     }, []);
     return (
         <>
