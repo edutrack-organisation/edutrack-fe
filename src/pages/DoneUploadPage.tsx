@@ -77,6 +77,12 @@ const DoneUploadPage = () => {
         setData(updatedData);
     };
 
+    const handleMarkChange = (index: number, newMark: number) => {
+        const updatedData = [...data];
+        updatedData[index].mark = newMark;
+        setData(updatedData);
+    };
+
     const handleQuestionDelete = (index: number) => {
         const updatedData = [...data];
         updatedData.splice(index, 1);
@@ -90,7 +96,8 @@ const DoneUploadPage = () => {
             uuid: uuidv4(),
             description: "",
             topics: [],
-            difficulty: 1,
+            mark: 0,
+            difficulty: 0,
         });
         setData(updatedData);
     };
@@ -150,6 +157,7 @@ const DoneUploadPage = () => {
         handleQuestionDelete,
         handleQuestionAdd,
         handleTitleChange,
+        handleMarkChange,
     };
 
     return (

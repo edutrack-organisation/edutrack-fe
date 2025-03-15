@@ -2,12 +2,18 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import TextsmsIcon from "@mui/icons-material/Textsms";
 import ContentTable from "../components/GeneratePaper/ContentTable";
 import { DataItemWithUUID } from "../types/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import export_excel from "../assets/icons/export_excel.png";
+import { useTopics } from "../hooks";
+import { Topic } from "../components/GeneratePaper/types";
 
 const GeneratePaper = () => {
     const [questions, setQuestions] = useState<DataItemWithUUID[]>([]); // this is the questions to be rendered in the ContentTable
+    const { topics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
 
+    useEffect(() => {
+        fetchTopics();
+    }, []);
     return (
         <Box
             className="outer-page-container"
@@ -96,7 +102,7 @@ const GeneratePaper = () => {
             <ContentTable
                 questions={questions}
                 setQuestions={setQuestions}
-                allTopics={[]}
+                allTopics={topics.map((t: Topic) => t.title)}
             />
         </Box>
     );
