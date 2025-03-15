@@ -1,4 +1,10 @@
-// common modal styles
+/**
+ * Styles specific to the Generate Paper feature components
+ * Contains Material-UI style configurations for:
+ * - Modal layouts and variants
+ * - Custom scrollbar appearance
+ */
+
 export const modalStyle = {
     position: "absolute",
     left: "50%",

@@ -1,3 +1,10 @@
+/**
+ * Type definitions for the Generate Paper feature
+ * Contains interfaces for:
+ * - Topics structure
+ * - Database question format
+ */
+
 export interface Topic {
     id: number;
     title: string;
