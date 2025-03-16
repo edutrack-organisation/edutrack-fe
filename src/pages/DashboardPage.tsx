@@ -11,13 +11,13 @@ import TopicsNotCovered from "../components/Dashboard/TopicsNotCovered";
 import SubcategorisedTopicsCovered from "../components/Dashboard/SubcategorisedTopicsCovered";
 import SubcategorisedTopicsNotCovered from "../components/Dashboard/SubcategorisedTopicsNotCovered";
 import DifficultyFrequency from "../components/Dashboard/DifficultyFrequency";
-
-interface Question {
-    description: string;
-    difficulty: number;
-    topics: string[];
-    uuid: string;
-}
+import {
+    calculateFrequencyForEachDifficultyLevel,
+    countDifficultyFrequencyAndAverageDifficultyForEachTopic,
+    countTopicsFrequency,
+    retrieveQuestionsForEachTopic,
+} from "../components/Dashboard/utils";
+import { Question } from "../components/Dashboard/types";
 
 interface DifficultyFrequencyType {
     difficulty: number;
@@ -25,217 +25,119 @@ interface DifficultyFrequencyType {
     [key: string]: number; // Add index signature for MUI X Charts
 }
 
+// NOTE: to render the page, current flow to pass in the questions and allTopics from the previous page
 const DashboardPage = () => {
-    // get the saved paper from previous page
-    // #TODO: to decide between retrieving or from db or from previous page?
     const location = useLocation();
     const {
         savedPaper: { title, questions, allTopics },
-    } = location.state;
+    }: {
+        savedPaper: {
+            title: string;
+            questions: Question[];
+            allTopics: string[];
+        };
+    } = location.state; // Retrieve state passed from previous page
 
-    const [topicFrequencies, setTopicsFrequencyMap] = useState<
-        TopicFrequency[]
-    >([]); // This is the frequency of each topic
-
-    const [notCoveredTopics, setNotCoveredTopics] = useState<string[]>([]); // This are the topics that are not covered by this exam papers
-    const [paperAverageDifficulty, setPaperAverageDifficulty] =
-        useState<number>(0); // This is the overall paper average difficulty
-
+    const [toSubCategorise, setToSubCategorise] = useState<boolean>(true); // Controls whether topics should be displayed in categorized or flat view
+    const [topicFrequencies, setTopicsFrequencyMap] = useState<TopicFrequency[]>([]); // This is the frequency of each topic
+    const [notCoveredTopics, setNotCoveredTopics] = useState<string[]>([]); // This are the topics that are not covered by this exam paper
+    const [paperAverageDifficulty, setPaperAverageDifficulty] = useState<number>(0); // This is the overall paper average difficulty
     const [
         difficultyFrequencyAndAverageDifficultyForEachTopic,
         setDifficultyFrequencyAndAverageDifficultyForEachTopic,
-    ] = useState<DifficultyFrequencyAndAverageDifficultyForTopic[]>([]);
-
-    // This is the frequency of each difficulty level for the entire paper
-    const [difficultyFrequency, setDifficultyFrequency] = useState<
-        DifficultyFrequencyType[]
-    >([]);
-
-    // This is the flag to further subcategories the topics
-    const [toSubCategorise, setToSubCategorise] = useState<boolean>(true);
-
-    /**
-     * This function serve to count the frequency of each difficulty level and the average difficulty for each topic
-     * @param questions
-     * @returns An object containing the formattedDifficultyFrequency and the paperAverageDifficulty
-     */
-    const countDifficultyFrequencyAndAverageDifficultyForEachTopic = (
-        questions: Question[]
-    ) => {
-        let totalDifficulty = 0;
-        const numberOfQuestionForThisTopic = questions.length;
-        const difficultyFrequency = new Map();
-        questions.forEach((question) => {
-            if (difficultyFrequency.has(question.difficulty)) {
-                difficultyFrequency.set(
-                    question.difficulty,
-                    difficultyFrequency.get(question.difficulty) + 1
-                );
-            } else {
-                difficultyFrequency.set(question.difficulty, 1);
-            }
-            totalDifficulty += question.difficulty;
-        });
-
-        // convert the difficultyFrequency map to series for BarChart for each topic
-        const topicDifficultyFrequency = Array.from(difficultyFrequency).map(
-            ([difficulty, frequency]) => ({
-                difficulty: difficulty,
-                frequency: frequency,
-            })
-        );
-
-        return {
-            topicDifficultyFrequency, // This is the [{difficulty: difficulty, frequency: frequency}] for each topic
-            topicAverageDifficulty:
-                totalDifficulty / numberOfQuestionForThisTopic,
-        };
-    };
-
-    /**
-     * This function takes in an array of questions and returns a map of [topic, questions] pairs. It's used to extract the questions for each topic.
-     * @param questions
-     * @returns An array of [topic, questions] pairs
-     */
-    const retrieveQuestionsForEachTopic = (questions: Question[]) => {
-        const questionsForEachTopic = new Map();
-
-        questions.forEach((question) => {
-            question.topics.forEach((topic: string) => {
-                if (questionsForEachTopic.has(topic)) {
-                    questionsForEachTopic.get(topic).push(question);
-                } else {
-                    questionsForEachTopic.set(topic, [question]);
-                }
-            });
-        });
-
-        // convert the map to an array of [topic, questions] pairs
-        return Array.from(questionsForEachTopic);
-    };
-
-    /**
-     * This function counts the frequency of each topic in the questions array and sets the state for the PieChart
-     * @param questions
-     */
-    function countTopicsFrequency(questions: Question[]) {
-        const localTopicsFrequencyMap = new Map();
-        questions.forEach((question) => {
-            question.topics.forEach((topic: string) => {
-                if (localTopicsFrequencyMap.has(topic)) {
-                    localTopicsFrequencyMap.set(
-                        topic,
-                        localTopicsFrequencyMap.get(topic) + 1
-                    );
-                } else {
-                    localTopicsFrequencyMap.set(topic, 1);
-                }
-            });
-        });
-
-        // convert topicsFrequencyMap to series for PieChart
-        const pieChartTopicsFrequencySeries = Array.from(
-            localTopicsFrequencyMap
-        ).map(([topic, frequency], index) => ({
-            id: index,
-            value: frequency,
-            label: topic,
-        }));
-
-        setTopicsFrequencyMap(pieChartTopicsFrequencySeries);
-
-        // get the topics that are not covered by this exam paper
-        const allTopicsSet: Set<string> = new Set(allTopics);
-        const coveredTopicsSet: Set<string> = new Set(
-            localTopicsFrequencyMap.keys()
-        );
-        const notCoveredTopics: string[] = Array.from(allTopicsSet).filter(
-            (topic) => !coveredTopicsSet.has(topic)
-        );
-        setNotCoveredTopics(notCoveredTopics);
-    }
+    ] = useState<DifficultyFrequencyAndAverageDifficultyForTopic[]>([]); // This the difficulty frequency and average difficulty for each topic
+    const [difficultyFrequency, setDifficultyFrequency] = useState<DifficultyFrequencyType[]>([]); // This is the frequency of each difficulty level for the entire paper
 
     /**
      * This function calculates the average difficulty of the paper
      * @param questions
      */
     function calculateAverageDifficulty(questions: Question[]) {
-        let totalDifficulty = 0;
-        questions.forEach((question) => {
-            totalDifficulty += question.difficulty;
-        });
+        const totalDifficulty = questions.reduce((sum, question) => sum + question.difficulty, 0);
         setPaperAverageDifficulty(totalDifficulty / questions.length);
     }
 
     /**
-     * This function calculates the frequency of each difficulty level for the entire paper
-     * @param topicsDifficultyFrequencyAndAverageDifficulty  An array of DifficultyFrequencyAndAverageDifficultyForTopic
-     * @returns An array of {difficulty: number, frequency: number}
+     * Renders the header section of the dashboard
+     * @param title - The title of the exam paper
+     * @returns JSX element containing the paper title and a fixed "Exam Paper Summary" subtitle
      */
-    function calculateFrequencyForEachDifficultyLevel(
-        topicsDifficultyFrequencyAndAverageDifficulty: DifficultyFrequencyAndAverageDifficultyForTopic[]
-    ) {
-        const difficultyFrequencyMap = new Map();
-        topicsDifficultyFrequencyAndAverageDifficulty.forEach((topic) => {
-            topic.topicDifficultyFrequency.forEach((difficultyFrequency) => {
-                if (
-                    difficultyFrequencyMap.has(difficultyFrequency.difficulty)
-                ) {
-                    difficultyFrequencyMap.set(
-                        difficultyFrequency.difficulty,
-                        difficultyFrequencyMap.get(
-                            difficultyFrequency.difficulty
-                        ) + difficultyFrequency.frequency
-                    );
-                } else {
-                    difficultyFrequencyMap.set(
-                        difficultyFrequency.difficulty,
-                        difficultyFrequency.frequency
-                    );
-                }
-            });
-        });
+    const DashboardPageHeader = ({ title }: { title: string }) => {
+        return (
+            <>
+                <Typography
+                    fontWeight={"bolder"}
+                    sx={{
+                        fontSize: { xs: "1.5rem", xl: "1.8rem" },
+                    }}
+                >
+                    {title}
+                </Typography>
 
-        // convert the difficultyFrequency map to series for BarChart
-        return Array.from(difficultyFrequencyMap).map(
-            ([difficulty, frequency]) => ({
-                difficulty,
-                frequency,
-            })
+                <Typography fontWeight={"bolder"} fontSize={"22px"} marginTop={"1rem"}>
+                    Exam Paper Summary
+                </Typography>
+            </>
         );
-    }
+    };
+
+    /**
+     * Renders the topics covered section with toggle functionality
+     * Switches between categorized and flat view based on toSubCategorise state
+     * @returns JSX element containing either SubcategorisedTopicsCovered or TopicsCovered component
+     */
+    const TopicsCoveredSection = () => (
+        <>
+            {toSubCategorise ? (
+                <SubcategorisedTopicsCovered topicFrequencies={topicFrequencies} onChange={setToSubCategorise} />
+            ) : (
+                <TopicsCovered topicFrequencies={topicFrequencies} onChange={setToSubCategorise} />
+            )}
+        </>
+    );
+
+    /**
+     * Renders the topics not covered section with toggle functionality
+     * Switches between categorized and flat view based on toSubCategorise state
+     * @returns JSX element containing either SubcategorisedTopicsNotCovered or TopicsNotCovered component
+     */
+    const NotCoveredTopicsSection = () => (
+        <>
+            {toSubCategorise ? (
+                <SubcategorisedTopicsNotCovered notCoveredTopics={notCoveredTopics} onChange={setToSubCategorise} />
+            ) : (
+                <TopicsNotCovered notCoveredTopics={notCoveredTopics} onChange={setToSubCategorise} />
+            )}
+        </>
+    );
 
     useEffect(() => {
-        countTopicsFrequency(questions);
+        // Calculate topic frequencies and not covered topics
+        const { pieChartTopicsFrequencySeries, notCoveredTopics } = countTopicsFrequency(questions, allTopics);
+        setTopicsFrequencyMap(pieChartTopicsFrequencySeries);
+        setNotCoveredTopics(notCoveredTopics);
+
+        // Calculate average difficulty of the paper
         calculateAverageDifficulty(questions);
 
+        // Retrieves the questions for each topic
         const questionsForEachTopic = retrieveQuestionsForEachTopic(questions);
-        const topicsDifficultyFrequencyAndAverageDifficulty =
-            questionsForEachTopic.map(
-                ([topic, questions]: [string, Question[]]) => {
-                    const details =
-                        countDifficultyFrequencyAndAverageDifficultyForEachTopic(
-                            questions
-                        );
-
-                    //return type of DifficultyFrequencyAndAverageDifficultyForTopic
-                    return {
-                        label: topic,
-                        ...details,
-                    };
-                }
-            );
-
-        setDifficultyFrequencyAndAverageDifficultyForEachTopic(
-            topicsDifficultyFrequencyAndAverageDifficulty
+        // Calculate difficulty frequency and average difficulty for each topic
+        const topicsDifficultyFrequencyAndAverageDifficulty = questionsForEachTopic.map(
+            ([topic, questions]: [string, Question[]]) => {
+                const details = countDifficultyFrequencyAndAverageDifficultyForEachTopic(questions);
+                return {
+                    label: topic,
+                    ...details,
+                };
+            }
         );
+        setDifficultyFrequencyAndAverageDifficultyForEachTopic(topicsDifficultyFrequencyAndAverageDifficulty);
 
         // count the frequency of each difficulty level
-        const frequencyForEachDifficultyLevel =
-            calculateFrequencyForEachDifficultyLevel(
-                topicsDifficultyFrequencyAndAverageDifficulty
-            );
-
+        const frequencyForEachDifficultyLevel = calculateFrequencyForEachDifficultyLevel(
+            topicsDifficultyFrequencyAndAverageDifficulty
+        );
         setDifficultyFrequency(frequencyForEachDifficultyLevel);
     }, [questions]);
 
@@ -253,14 +155,7 @@ const DashboardPage = () => {
                 borderRadius: "3rem",
             }}
         >
-            <Typography
-                fontWeight={"bolder"}
-                sx={{
-                    fontSize: { xs: "1.5rem", xl: "1.8rem" },
-                }}
-            >
-                {title}
-            </Typography>
+            <DashboardPageHeader title={title} />
             <Box
                 className="dashboard-widget-container"
                 display={"flex"}
@@ -272,47 +167,15 @@ const DashboardPage = () => {
                     gap: "1.3rem",
                 }}
             >
-                <Typography fontWeight={"bolder"} fontSize={"22px"}>
-                    Exam Paper Summary
-                </Typography>
-                <OverallDifficulty
-                    paperAverageDifficulty={paperAverageDifficulty}
-                />
-                {toSubCategorise && (
-                    <SubcategorisedTopicsCovered
-                        topicFrequencies={topicFrequencies}
-                        onChange={setToSubCategorise}
-                    />
-                )}
-
-                {!toSubCategorise && (
-                    <TopicsCovered
-                        topicFrequencies={topicFrequencies}
-                        onChange={setToSubCategorise}
-                    />
-                )}
-
+                <OverallDifficulty paperAverageDifficulty={paperAverageDifficulty} />
+                <TopicsCoveredSection />
                 <AverageDifficultyByTopic
                     difficultyFrequencyAndAverageDifficultyForEachTopic={
                         difficultyFrequencyAndAverageDifficultyForEachTopic
                     }
                 />
-                {toSubCategorise && (
-                    <SubcategorisedTopicsNotCovered
-                        notCoveredTopics={notCoveredTopics}
-                        onChange={setToSubCategorise}
-                    />
-                )}
-
-                {!toSubCategorise && (
-                    <TopicsNotCovered
-                        notCoveredTopics={notCoveredTopics}
-                        onChange={setToSubCategorise}
-                    />
-                )}
-                <DifficultyFrequency
-                    difficultyFrequency={difficultyFrequency}
-                />
+                <NotCoveredTopicsSection />
+                <DifficultyFrequency difficultyFrequency={difficultyFrequency} />
             </Box>
         </Box>
     );
