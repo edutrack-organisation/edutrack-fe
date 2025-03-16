@@ -1,3 +1,15 @@
+/**
+ * @file ContentTable.tsx
+ * @description Interactive table component for managing exam questions (for Generate Paper feature)
+ * Features:
+ * - Display and edit question details (description, topics, marks, difficulty)
+ * - Add/delete individual questions
+ * - Quick generate multiple questions
+ * - Topic management with creatable select
+ * - Question highlighting for newly added items
+ * - Modal integration for question operations
+ */
+
 import {
     Box,
     Button,
@@ -24,8 +36,8 @@ import { MultiValue } from "react-select";
 import AddSingleQuestionModal from "./AddSingleQuestionModal";
 import { useState } from "react";
 import QuickGenerateQuestionsModal from "./QuickGenerateQuestionsModal";
-import { scrollbarStyle } from "./styles";
-import { tableStyles } from "../../styles";
+import { scrollbarStyle, tableStyles } from "../../styles";
+import { deformatTopicsForReactSelect, formatTopicsForReactSelect } from "../../utils";
 
 interface ActionButtonsProps {
     onQuickGenerate: () => void;
@@ -78,25 +90,6 @@ const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, al
      * n: Highlights the (n+1)th question with a red border
      */
     const [highlightIndex, setHighlightIndex] = useState<number>(-2);
-
-    /**
-     * Formats topics for react-select dropdown, mapping string format
-     * to required select options format (label, value)
-     */
-    const formatTopicsForReactSelect = (topics: string[]) => {
-        return topics.map((topic) => {
-            return { label: topic, value: topic };
-        });
-    };
-
-    /**
-     * Converts the format of topics from react-select dropdown to string format
-     */
-    const deformatTopicsForReactSelect = (topicsLabelValue: MultiValue<{ label: string; value: string }>) => {
-        return topicsLabelValue.map((t) => {
-            return t.label;
-        });
-    };
 
     /**
      * Resets the highlightIndex to -2 to remove the highlight

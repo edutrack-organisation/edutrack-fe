@@ -7,7 +7,7 @@
  */
 
 import { Box, Card, styled } from "@mui/material";
-import { scrollbarStyle } from "../GeneratePaper/styles";
+import { scrollbarStyle } from "../../styles";
 
 export const GradientCardBlue = styled(Card)(({}) => ({
     padding: "1rem",

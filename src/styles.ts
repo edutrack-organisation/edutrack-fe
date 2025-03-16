@@ -34,3 +34,17 @@ export const tableStyles = {
         width: "2rem",
     },
 };
+
+export const scrollbarStyle = {
+    "::-webkit-scrollbar": {
+        width: "6px",
+    },
+    "::-webkit-scrollbar-track": {
+        background: "#ebebeb",
+        borderRadius: "8px",
+    },
+    "::-webkit-scrollbar-thumb": {
+        background: "#c2c2c2",
+        borderRadius: "8px",
+    },
+};

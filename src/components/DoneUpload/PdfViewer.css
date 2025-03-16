@@ -1,3 +1,7 @@
+/* CSS for PDF Viewer
+* React-pdf library does not pass props to the pdf viewer and hence we need to css variables to pass the width
+*/
+
 .react-pdf__Document {
     /* width: 450px; */
     width: var(--pdf-width, 400px); /* Default width is 400px */

@@ -29,17 +29,3 @@ export const modalVariants = {
         top: "40%",
     },
 };
-
-export const scrollbarStyle = {
-    "::-webkit-scrollbar": {
-        width: "6px",
-    },
-    "::-webkit-scrollbar-track": {
-        background: "#ebebeb",
-        borderRadius: "8px",
-    },
-    "::-webkit-scrollbar-thumb": {
-        background: "#c2c2c2",
-        borderRadius: "8px",
-    },
-};

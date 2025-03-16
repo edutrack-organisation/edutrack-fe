@@ -1,3 +1,14 @@
+/**
+ * @file DoneUploadPage.tsx
+ * @description Page component for reviewing and editing parsed PDF questions
+ * Features:
+ * - PDF viewer integration
+ * - Editable title and questions
+ * - Question management (add, delete, modify)
+ * - Debounced updates for performance
+ * - Save functionality with backend integration
+ */
+
 import { Box, Button, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
@@ -12,13 +23,41 @@ import "react-pdf/dist/Page/TextLayer.css"; // Required for PDF Viewer
 import PdfViewer from "../components/DoneUpload/PdfViewer";
 import TextArea from "../components/DoneUpload/TextArea";
 import EditIcon from "@mui/icons-material/Edit";
+import { parsedPdfApi } from "../components/DoneUpload/doneUploadAPI";
+
+// Constants
+const DEBOUNCE_DELAY = 300;
+interface TitleSectionProps {
+    title: string;
+    isEditingTitle: boolean;
+    setisEditingTitle: (value: boolean) => void;
+    handlers: Handlers;
+}
+
+const TitleSection: React.FC<TitleSectionProps> = ({ title, isEditingTitle, setisEditingTitle, handlers }) =>
+    !isEditingTitle ? (
+        <Box display="flex" sx={{ width: { xs: "60%", xl: "75%" } }}>
+            <Typography fontWeight="bolder" sx={{ fontSize: { xs: "1.2rem", xl: "1.8rem" } }}>
+                {title}
+            </Typography>
+            <EditIcon
+                onClick={() => setisEditingTitle(true)}
+                sx={{ cursor: "pointer", ml: { xs: "1rem", xl: "3rem" } }}
+            />
+        </Box>
+    ) : (
+        <TextArea
+            className="textarea-title"
+            textContent={title}
+            onChange={(event) => handlers.handleTitleChange(event.target.value)}
+        />
+    );
 
 const DoneUploadPage = () => {
-    // get the response from the previous page
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { response, file } = location.state;
+    const { response, file } = location.state; // get the response from the previous page
     const [data, setData] = useState<DataItemWithUUID[]>([]);
     const [title, setTitle] = useState<string>("");
     const [allTopics, setAllTopics] = useState<string[]>([]);
@@ -26,35 +65,14 @@ const DoneUploadPage = () => {
     const [pdffile, setPDFFile] = useState<File | null>(null);
     const [showPDF, setShowPDF] = useState<boolean>(false);
 
-    // set the data to the response
-    useEffect(() => {
-        if (response) {
-            // #NOTE: the item type may not be DataItem as it does not have uuid
-            const dataWithUUIDs = response.questions.map((item: DataItem) => ({
-                ...item,
-                uuid: uuidv4(),
-            }));
-            setData(dataWithUUIDs);
-            setTitle(response.title);
-            setAllTopics(response.all_topics);
-        }
-        if (file) {
-            setPDFFile(file);
-        }
-    }, [response]);
-
-    // Debounced setData function
+    // Debounced functions
     const debouncedSetData = useCallback(
-        debounce((updatedData: DataItemWithUUID[]) => {
-            setData(updatedData);
-        }, 300),
+        debounce((updatedData: DataItemWithUUID[]) => setData(updatedData), DEBOUNCE_DELAY),
         []
     );
 
     const debouncedSetTitle = useCallback(
-        debounce((newTitle: string) => {
-            setTitle(newTitle);
-        }, 300),
+        debounce((newTitle: string) => setTitle(newTitle), DEBOUNCE_DELAY),
         []
     );
 
@@ -107,28 +125,25 @@ const DoneUploadPage = () => {
         setisEditingTitle(true);
     };
 
-    // #TODO: Desmond: Refactor into API routes
+    const handlers: Handlers = {
+        handleTopicsChange,
+        handleDescriptionChange,
+        handleDifficultyChange,
+        handleQuestionDelete,
+        handleQuestionAdd,
+        handleTitleChange,
+        handleMarkChange,
+    };
+
     const sendParsedToBackend = async () => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/saveParsedPDF/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title: title,
-                    questions: data,
-                }),
+            await parsedPdfApi.saveParsedPDF({
+                title,
+                questions: data,
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail);
-            }
 
             toast.success("Paper saved successfully!");
 
-            // Redirect after done saving to database
             navigate("/dashboard", {
                 state: {
                     savedPaper: {
@@ -139,23 +154,34 @@ const DoneUploadPage = () => {
                 },
             });
         } catch (error) {
-            if (error instanceof Error) {
-                toast.error("Error: " + error.message);
-            } else {
-                toast.error("An unknown error occurred.");
-            }
+            toast.error(error instanceof Error ? `Error: ${error.message}` : "Error in saving paper");
         }
     };
 
-    const handlers: Handlers = {
-        handleTopicsChange,
-        handleDescriptionChange,
-        handleDifficultyChange,
-        handleQuestionDelete,
-        handleQuestionAdd,
-        handleTitleChange,
-        handleMarkChange,
-    };
+    /**
+     * Initialize page data from navigation state
+     * - Transforms question data by adding UUIDs for unique row identification
+     * - Sets initial title from parsed PDF
+     * - Sets available topics for topic selection
+     * - Sets PDF file for viewer if available
+     *
+     * This effect runs only when response changes, handling the initial data setup
+     * from the PDF parsing results passed through react-router navigation state.
+     */
+    useEffect(() => {
+        if (response) {
+            const dataWithUUIDs = response.questions.map((item: DataItem) => ({
+                ...item,
+                uuid: uuidv4(),
+            }));
+            setData(dataWithUUIDs);
+            setTitle(response.title);
+            setAllTopics(response.all_topics);
+        }
+        if (file) {
+            setPDFFile(file);
+        }
+    }, [response, file]);
 
     return (
         <Box
@@ -180,33 +206,12 @@ const DoneUploadPage = () => {
                     zIndex: 2,
                 }}
             >
-                {/* This is the uploaded paper title */}
-                {!isEditingTitle ? (
-                    <Box display={"flex"} sx={{ width: { xs: "60%", xl: "75%" } }}>
-                        <Typography
-                            fontWeight={"bolder"}
-                            sx={{
-                                fontSize: { xs: "1.2rem", xl: "1.8rem" },
-                            }}
-                        >
-                            {title}
-                        </Typography>
-                        <EditIcon
-                            onClick={() => setisEditingTitle(true)}
-                            sx={{
-                                cursor: "pointer",
-                                ml: { xs: "1rem", xl: "3rem" },
-                            }}
-                        />
-                    </Box>
-                ) : (
-                    <TextArea
-                        className="textarea-title"
-                        textContent={title}
-                        onChange={(event) => handlers.handleTitleChange(event.target.value)}
-                    />
-                )}
-
+                <TitleSection
+                    title={title}
+                    isEditingTitle={isEditingTitle}
+                    setisEditingTitle={setisEditingTitle}
+                    handlers={handlers}
+                />
                 {!showPDF && <Button onClick={() => setShowPDF(!showPDF)}>Open PDF</Button>}
                 <Box width={"13rem"} padding={"1rem"} borderRadius={"0.5rem"} sx={{ background: "rgb(222, 242, 255)" }}>
                     <Typography textAlign={"start"} sx={{ fontSize: { xs: "0.8rem", xl: "1rem" } }}>

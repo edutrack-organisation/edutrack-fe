@@ -1,7 +1,5 @@
 // React component from https://www.npmjs.com/package/react-pdf?activeTab=readme, which internally using pdf.js
 // Customised with zoom feature
-// TODO: Responsiveness on bigger screens
-
 import { Box, Pagination, styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -10,11 +8,19 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import CloseIcon from "@mui/icons-material/Close";
 
-// required for pdf.js to work
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-).toString();
+// PDF.js worker configuration - required for pdf.js to work
+pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+
+interface PdfViewerProps {
+    pdffile: File | null;
+    showPDF: boolean;
+    setShowPDF: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+// Constants
+const INITIAL_SIZE = 400;
+const ZOOM_STEP = 50;
+const MIN_SIZE = 400;
 
 // Styled components to style icons for better code reusability
 const StyledMuiIcon = styled("div")(({}) => ({
@@ -51,39 +57,28 @@ const StyledPagination = styled(Pagination)(({}) => ({
     transition: "opacity 0.3s ease-in-out",
 }));
 
-const PdfViewer = ({
-    pdffile,
-    showPDF,
-    setShowPDF,
-}: {
-    pdffile: File | null;
-    showPDF: boolean;
-    setShowPDF: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+const PdfViewer: React.FC<PdfViewerProps> = ({ pdffile, showPDF, setShowPDF }) => {
     const [pdfPageNumber, setPdfPageNumber] = useState<number>(1); // Page state for Pagination
     const [numPages, setNumPages] = useState<number>(0); // Total number of pages in PDF
-    const [size, setSize] = useState<number>(400); // Zoom in state for PDF
+    const [size, setSize] = useState<number>(INITIAL_SIZE); // Zoom in state for PDF
 
     // Helper functions
     function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
         setNumPages(numPages);
     }
 
-    const handlePDFPageChange = (
-        event: React.ChangeEvent<unknown>,
-        value: number
-    ) => {
+    const handlePDFPageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
         setPdfPageNumber(value);
     };
 
     // Zoom in for PDF
-    const increaseSize = () => {
-        setSize((prevSize) => prevSize + 50); // Increase size by 50px
+    const handleZoomIn = (): void => {
+        setSize((prevSize) => prevSize + ZOOM_STEP);
     };
 
     // Zoom out for PDF
-    const decreaseSize = () => {
-        setSize((prevSize) => Math.max(prevSize - 50, 400)); // Decrease size by 50px
+    const handleZoomOut = (): void => {
+        setSize((prevSize) => Math.max(prevSize - ZOOM_STEP, MIN_SIZE));
     };
 
     // Use effect for setting the size of the PDF.
@@ -94,6 +89,8 @@ const PdfViewer = ({
         root.style.setProperty("--pdf-width", `${size}px`);
     }, [size]);
 
+    if (!showPDF) return null;
+
     return (
         <>
             {showPDF && (
@@ -101,22 +98,9 @@ const PdfViewer = ({
                 <StyledOuterContainer className="pdf-viewer-outer-container">
                     {/* Container for relative position to align inner absolute elements */}
                     <Box position={"relative"}>
-                        <StyledMuiIcon
-                            as={ZoomInIcon}
-                            sx={{ right: 90 }}
-                            onClick={() => increaseSize()}
-                        />
-                        <StyledMuiIcon
-                            as={ZoomOutIcon}
-                            sx={{ right: 55 }}
-                            onClick={() => decreaseSize()}
-                        />
-
-                        <StyledMuiIcon
-                            as={CloseIcon}
-                            sx={{ right: 25 }}
-                            onClick={() => setShowPDF(false)}
-                        />
+                        <StyledMuiIcon as={ZoomInIcon} sx={{ right: 90 }} onClick={handleZoomIn} />
+                        <StyledMuiIcon as={ZoomOutIcon} sx={{ right: 55 }} onClick={handleZoomOut} />
+                        <StyledMuiIcon as={CloseIcon} sx={{ right: 25 }} onClick={() => setShowPDF(false)} />
 
                         {/* Box container for PDF viewer itself */}
                         <Box
@@ -129,10 +113,7 @@ const PdfViewer = ({
                                 height: { xs: "440px", xl: "570px" }, // Height of the PDF viewer
                             }}
                         >
-                            <Document
-                                file={pdffile}
-                                onLoadSuccess={onDocumentLoadSuccess}
-                            >
+                            <Document file={pdffile} onLoadSuccess={onDocumentLoadSuccess}>
                                 <Page
                                     pageNumber={pdfPageNumber}
                                     renderTextLayer={false}
