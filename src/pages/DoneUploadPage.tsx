@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
-import ContentTable from "../components/ViewPdf/ContentTable";
+import ContentTable from "../components/DoneUpload/ContentTable";
 import { useLocation, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
@@ -9,8 +9,8 @@ import { debounce } from "lodash";
 
 import "react-pdf/dist/Page/AnnotationLayer.css"; // Required for PDF Viewer
 import "react-pdf/dist/Page/TextLayer.css"; // Required for PDF Viewer
-import PdfViewer from "../components/ViewPdf/PdfViewer";
-import TextArea from "../components/ViewPdf/TextArea";
+import PdfViewer from "../components/DoneUpload/PdfViewer";
+import TextArea from "../components/DoneUpload/TextArea";
 import EditIcon from "@mui/icons-material/Edit";
 
 const DoneUploadPage = () => {
@@ -110,19 +110,16 @@ const DoneUploadPage = () => {
     // #TODO: Desmond: Refactor into API routes
     const sendParsedToBackend = async () => {
         try {
-            const response = await fetch(
-                "http://127.0.0.1:8000/saveParsedPDF/",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        title: title,
-                        questions: data,
-                    }),
-                }
-            );
+            const response = await fetch("http://127.0.0.1:8000/saveParsedPDF/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: title,
+                    questions: data,
+                }),
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -168,11 +165,7 @@ const DoneUploadPage = () => {
             sx={{ width: { lg: "90%", xl: "78%" } }}
             mx={"auto"}
         >
-            <PdfViewer
-                pdffile={pdffile}
-                showPDF={showPDF}
-                setShowPDF={setShowPDF}
-            />
+            <PdfViewer pdffile={pdffile} showPDF={showPDF} setShowPDF={setShowPDF} />
 
             <Box
                 display={"flex"}
@@ -189,10 +182,7 @@ const DoneUploadPage = () => {
             >
                 {/* This is the uploaded paper title */}
                 {!isEditingTitle ? (
-                    <Box
-                        display={"flex"}
-                        sx={{ width: { xs: "60%", xl: "75%" } }}
-                    >
+                    <Box display={"flex"} sx={{ width: { xs: "60%", xl: "75%" } }}>
                         <Typography
                             fontWeight={"bolder"}
                             sx={{
@@ -213,38 +203,20 @@ const DoneUploadPage = () => {
                     <TextArea
                         className="textarea-title"
                         textContent={title}
-                        onChange={(event) =>
-                            handlers.handleTitleChange(event.target.value)
-                        }
+                        onChange={(event) => handlers.handleTitleChange(event.target.value)}
                     />
                 )}
 
-                {!showPDF && (
-                    <Button onClick={() => setShowPDF(!showPDF)}>
-                        Open PDF
-                    </Button>
-                )}
-                <Box
-                    width={"13rem"}
-                    padding={"1rem"}
-                    borderRadius={"0.5rem"}
-                    sx={{ background: "rgb(222, 242, 255)" }}
-                >
-                    <Typography
-                        textAlign={"start"}
-                        sx={{ fontSize: { xs: "0.8rem", xl: "1rem" } }}
-                    >
+                {!showPDF && <Button onClick={() => setShowPDF(!showPDF)}>Open PDF</Button>}
+                <Box width={"13rem"} padding={"1rem"} borderRadius={"0.5rem"} sx={{ background: "rgb(222, 242, 255)" }}>
+                    <Typography textAlign={"start"} sx={{ fontSize: { xs: "0.8rem", xl: "1rem" } }}>
                         Please Check Through The Parsed Paper Before Proceeding.
                     </Typography>
                 </Box>
             </Box>
 
             {/* This is the table of questions and its details */}
-            <ContentTable
-                data={data}
-                handlers={handlers}
-                allTopics={allTopics}
-            />
+            <ContentTable data={data} handlers={handlers} allTopics={allTopics} />
 
             <Button
                 sx={{ alignSelf: "flex-end", margin: "1rem" }}

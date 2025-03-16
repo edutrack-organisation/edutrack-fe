@@ -10,7 +10,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import TextArea from "./ViewPdf/TextArea";
+import TextArea from "./DoneUpload/TextArea";
 import { MuiChipsInput } from "mui-chips-input";
 import { DataItem, Handlers } from "../types/types";
 import { useEffect, useState } from "react";
@@ -95,9 +95,7 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ width: "10%" }}>
-                                Question Number
-                            </TableCell>
+                            <TableCell sx={{ width: "10%" }}>Question Number</TableCell>
                             <TableCell sx={{ width: "50%" }} align="left">
                                 Description
                             </TableCell>
@@ -125,22 +123,14 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                         className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
-                                            handlers.handleDescriptionChange(
-                                                index,
-                                                event.target.value
-                                            )
+                                            handlers.handleDescriptionChange(index, event.target.value)
                                         }
                                     />
                                 </TableCell>
                                 <TableCell align="left">
                                     <MuiChipsInput
                                         value={row.topics}
-                                        onChange={(newChip) =>
-                                            handlers.handleTopicsChange(
-                                                index,
-                                                newChip
-                                            )
-                                        }
+                                        onChange={(newChip) => handlers.handleTopicsChange(index, newChip)}
                                         sx={{
                                             width: "350px",
                                             "& .MuiOutlinedInput-root": {
@@ -164,10 +154,7 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
                                         onChange={(event) =>
-                                            handlers.handleDifficultyChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
+                                            handlers.handleDifficultyChange(index, parseInt(event.target.value))
                                         }
                                         sx={{
                                             "& .MuiTextField-root": {
@@ -187,9 +174,7 @@ const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
                                 <TableCell>
                                     <Button
                                         onClick={() => {
-                                            handlers.handleQuestionDelete(
-                                                index
-                                            );
+                                            handlers.handleQuestionDelete(index);
                                         }}
                                         sx={{
                                             alignSelf: "flex-end",

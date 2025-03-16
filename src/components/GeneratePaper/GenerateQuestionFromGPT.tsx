@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import TextArea from "../ViewPdf/TextArea";
+import TextArea from "../DoneUpload/TextArea";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { DataItemWithUUID } from "../../types/types";
@@ -28,16 +28,12 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
     const generateQuestionFromGPT = async (prompt: string) => {
         try {
             setGenerating(true);
-            const generatedQuestion =
-                await generatePaperApi.generateQuestionFromGPT(prompt);
+            const generatedQuestion = await generatePaperApi.generateQuestionFromGPT(prompt);
             appendGeneratedQuestion(generatedQuestion);
             setPrompt(""); // reset the prompt
             handleModalClose();
         } catch (error) {
-            toast.error(
-                (error as Error).message ||
-                    "Error in generating question using GPT"
-            );
+            toast.error((error as Error).message || "Error in generating question using GPT");
         } finally {
             setGenerating(false);
         }
@@ -76,8 +72,7 @@ const GenerateQuestionFromGPT: React.FC<GeneratedQuestionFromGPTProps> = ({
                         mb: "0.5rem",
                     }}
                 >
-                    Generate questions from scratch (by passing in prompt to
-                    GPT-4o)
+                    Generate questions from scratch (by passing in prompt to GPT-4o)
                 </Typography>
             </Box>
 

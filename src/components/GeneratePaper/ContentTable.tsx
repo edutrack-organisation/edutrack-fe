@@ -13,7 +13,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import TextArea from "../ViewPdf/TextArea";
+import TextArea from "../DoneUpload/TextArea";
 import { DataItemWithUUID } from "../../types/types";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -46,16 +46,9 @@ interface ContentTableProps {
  * @param onQuickGenerate - Callback function for quick generate button click
  * @param onAddQuestion - Callback function for add question button click
  */
-const ActionButtons: React.FC<ActionButtonsProps> = ({
-    onQuickGenerate,
-    onAddQuestion,
-}) => (
+const ActionButtons: React.FC<ActionButtonsProps> = ({ onQuickGenerate, onAddQuestion }) => (
     <Box display="flex">
-        <Button
-            variant="text"
-            sx={tableStyles.button}
-            onClick={onQuickGenerate}
-        >
+        <Button variant="text" sx={tableStyles.button} onClick={onQuickGenerate}>
             <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
                 Quick Generate
             </Typography>
@@ -71,11 +64,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     </Box>
 );
 
-const ContentTable: React.FC<ContentTableProps> = ({
-    questions,
-    setQuestions,
-    allTopics,
-}) => {
+const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, allTopics }) => {
     const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // Controls the visibility of the individual question modal
     const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // Controls the visibility of the quick generate questions modal
     /**
@@ -103,9 +92,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
     /**
      * Converts the format of topics from react-select dropdown to string format
      */
-    const deformatTopicsForReactSelect = (
-        topicsLabelValue: MultiValue<{ label: string; value: string }>
-    ) => {
+    const deformatTopicsForReactSelect = (topicsLabelValue: MultiValue<{ label: string; value: string }>) => {
         return topicsLabelValue.map((t) => {
             return t.label;
         });
@@ -176,9 +163,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                 <Table sx={tableStyles.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ width: "10%" }}>
-                                Question Number
-                            </TableCell>
+                            <TableCell sx={{ width: "10%" }}>Question Number</TableCell>
                             <TableCell sx={{ width: "50%" }} align="left">
                                 Description
                             </TableCell>
@@ -200,8 +185,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         border: 0,
                                     },
                                     border:
-                                        highlightIndex + 1 === index &&
-                                        !indivQuestionModalOpen
+                                        highlightIndex + 1 === index && !indivQuestionModalOpen
                                             ? "3px solid #E4CACA"
                                             : "none",
                                 }}
@@ -213,30 +197,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <TextArea
                                         className="textarea"
                                         textContent={row.description}
-                                        onChange={(event) =>
-                                            handleDescriptionChange(
-                                                index,
-                                                event.target.value
-                                            )
-                                        }
+                                        onChange={(event) => handleDescriptionChange(index, event.target.value)}
                                     />
                                 </TableCell>
                                 <TableCell align="left">
                                     <CreatableSelect
                                         isMulti
-                                        value={formatTopicsForReactSelect(
-                                            row.topics
-                                        )}
-                                        options={formatTopicsForReactSelect(
-                                            allTopics
-                                        )}
+                                        value={formatTopicsForReactSelect(row.topics)}
+                                        options={formatTopicsForReactSelect(allTopics)}
                                         onChange={(newChip) =>
-                                            handleTopicsChange(
-                                                index,
-                                                deformatTopicsForReactSelect(
-                                                    newChip
-                                                )
-                                            )
+                                            handleTopicsChange(index, deformatTopicsForReactSelect(newChip))
                                         }
                                         styles={{
                                             control: (baseStyles) => ({
@@ -258,12 +228,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         id="outlined-basic"
                                         defaultValue={row.mark || 0}
                                         variant="outlined"
-                                        onChange={(event) =>
-                                            handleMarkChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
-                                        }
+                                        onChange={(event) => handleMarkChange(index, parseInt(event.target.value))}
                                         sx={tableStyles.textField}
                                     />
                                 </TableCell>
@@ -274,10 +239,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
                                         onChange={(event) =>
-                                            handleDifficultyChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
+                                            handleDifficultyChange(index, parseInt(event.target.value))
                                         }
                                         sx={tableStyles.textField}
                                     />
@@ -289,9 +251,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                                 handleQuestionDelete(index);
                                             }}
                                         >
-                                            <DeleteOutlineIcon
-                                                sx={tableStyles.icon}
-                                            />
+                                            <DeleteOutlineIcon sx={tableStyles.icon} />
                                         </IconButton>
                                     </Tooltip>
                                 </TableCell>
@@ -299,14 +259,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <Tooltip title="Add Question">
                                         <IconButton
                                             onClick={() => {
-                                                handleIndivQuestionModalOpen(
-                                                    index
-                                                );
+                                                handleIndivQuestionModalOpen(index);
                                             }}
                                         >
-                                            <AddCircleOutlineIcon
-                                                sx={tableStyles.icon}
-                                            />
+                                            <AddCircleOutlineIcon sx={tableStyles.icon} />
                                         </IconButton>
                                     </Tooltip>
                                 </TableCell>
