@@ -7,7 +7,7 @@ export const pdfApi = {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(`${BASE_URL}/parsePDF/`, {
+        const response = await fetch(`${BASE_URL}/papers/parse/`, {
             method: "POST",
             body: formData,
         });

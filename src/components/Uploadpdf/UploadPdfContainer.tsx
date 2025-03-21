@@ -53,7 +53,6 @@ const UploadPdfContainer = () => {
                 state: { response: result, file },
             });
         } catch (error) {
-            console.log(error);
             toast.error("Error in parsing PDF");
         } finally {
             setIsProcessingFile(false);

@@ -137,9 +137,10 @@ const DoneUploadPage = () => {
 
     const sendParsedToBackend = async () => {
         try {
+            const questionsWithoutUUID = data.map(({ uuid, ...rest }) => rest);
             await parsedPdfApi.saveParsedPDF({
                 title,
-                questions: data,
+                questions: questionsWithoutUUID,
             });
 
             toast.success("Paper saved successfully!");
