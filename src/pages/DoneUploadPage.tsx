@@ -135,7 +135,8 @@ const DoneUploadPage = () => {
         handleMarkChange,
     };
 
-    const sendParsedToBackend = async () => {
+    const sendParsedToBackend = async (e: React.FormEvent) => {
+        e.preventDefault(); // Prevent default form submission
         try {
             const questionsWithoutUUID = data.map(({ uuid, ...rest }) => rest);
             await parsedPdfApi.saveParsedPDF({
@@ -186,6 +187,8 @@ const DoneUploadPage = () => {
 
     return (
         <Box
+            component="form"
+            onSubmit={sendParsedToBackend}
             display={"flex"}
             alignItems={"center"}
             flexDirection={"column"}
@@ -224,12 +227,7 @@ const DoneUploadPage = () => {
             {/* This is the table of questions and its details */}
             <ContentTable data={data} handlers={handlers} allTopics={allTopics} />
 
-            <Button
-                sx={{ alignSelf: "flex-end", margin: "1rem" }}
-                variant="contained"
-                size="large"
-                onClick={() => sendParsedToBackend()}
-            >
+            <Button type="submit" sx={{ alignSelf: "flex-end", margin: "1rem" }} variant="contained" size="large">
                 Continue
             </Button>
         </Box>
