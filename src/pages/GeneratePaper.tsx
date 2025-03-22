@@ -6,10 +6,20 @@ import { useEffect, useState } from "react";
 import export_excel from "../assets/icons/export_excel.png";
 import { useTopics } from "../hooks";
 import { Topic } from "../components/GeneratePaper/types";
+import toast from "react-hot-toast";
+import { exportToExcel } from "../components/GeneratePaper/utils";
 
 const GeneratePaper = () => {
     const [questions, setQuestions] = useState<DataItemWithUUID[]>([]); // this is the questions to be rendered in the ContentTable
     const { topics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
+
+    const handleExportExcel = () => {
+        if (questions.length === 0) {
+            toast.error("No questions to export!");
+            return;
+        }
+        exportToExcel(questions);
+    };
 
     const PageHeader = () => {
         return (
@@ -29,16 +39,9 @@ const GeneratePaper = () => {
                         fontSize: "17px",
                     }}
                 >
-                    Take questions from the database or generate them using
-                    GPT-4o
+                    Take questions from the database or generate them using GPT-4o
                 </Typography>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    gap={"1rem"}
-                    textAlign={"center"}
-                    mt={"1rem"}
-                >
+                <Box display={"flex"} flexDirection={"row"} gap={"1rem"} textAlign={"center"} mt={"1rem"}>
                     <Box
                         display={"flex"}
                         justifyContent={"center"}
@@ -55,11 +58,7 @@ const GeneratePaper = () => {
                             }}
                         />
                     </Box>
-                    <Box
-                        display={"flex"}
-                        flexDirection={"column"}
-                        alignItems={"flex-start"}
-                    >
+                    <Box display={"flex"} flexDirection={"column"} alignItems={"flex-start"}>
                         <Typography
                             fontWeight={"bolder"}
                             sx={{
@@ -79,10 +78,7 @@ const GeneratePaper = () => {
                         </Typography>
                     </Box>
                     <Tooltip title="Export as Excel Spreadsheet">
-                        <img
-                            src={export_excel}
-                            style={{ marginLeft: "1rem" }}
-                        />
+                        <img src={export_excel} style={{ marginLeft: "1rem" }} onClick={handleExportExcel} />
                     </Tooltip>
                 </Box>
             </>
