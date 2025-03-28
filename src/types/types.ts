@@ -7,6 +7,7 @@ export type Handlers = {
 export interface DataItem {
     description: string;
     topics: string[];
+    mark: number;
     difficulty: number;
 }
 
