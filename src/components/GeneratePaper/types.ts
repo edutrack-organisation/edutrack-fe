@@ -19,3 +19,9 @@ export interface QuestionFromDB {
     mark: number;
     difficulty: number;
 }
+
+export interface PieChartData {
+    id: number;
+    value: number;
+    label: string;
+}

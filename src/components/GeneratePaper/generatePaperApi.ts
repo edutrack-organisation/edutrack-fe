@@ -22,7 +22,6 @@ export const generatePaperApi = {
 
     generateQuestionByTopic: async (topicId: number): Promise<QuestionFromDB[]> => {
         const response = await fetch(`${BASE_URL}/questions?topic_id=${topicId}`);
-        console.log(response);
         if (!response.ok) throw new Error("Failed to fetch questions with this topic");
 
         return response.json();

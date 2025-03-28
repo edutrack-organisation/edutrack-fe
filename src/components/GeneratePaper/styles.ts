@@ -26,6 +26,6 @@ export const modalVariants = {
     },
     addQuestion: {
         ...modalStyle,
-        top: "40%",
+        top: "50%",
     },
 };

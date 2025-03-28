@@ -75,6 +75,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers, allTopics }
                                 </TableCell>
                                 <TableCell align="left">
                                     <TextArea
+                                        required
                                         className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
@@ -84,6 +85,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers, allTopics }
                                 </TableCell>
                                 <TableCell align="left">
                                     <CreatableSelect
+                                        required
                                         isMulti
                                         value={formatTopicsForReactSelect(row.topics)}
                                         options={formatTopicsForReactSelect(allTopics)}
@@ -107,6 +109,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers, allTopics }
                                 <TableCell align="left">
                                     <TextField
                                         type="number"
+                                        required
+                                        inputProps={{ min: 1 }}
                                         id="outlined-basic"
                                         defaultValue={row.mark || 0}
                                         variant="outlined"
@@ -119,6 +123,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers, allTopics }
                                 <TableCell align="right">
                                     <TextField
                                         type="number"
+                                        required
+                                        inputProps={{ min: 1, max: 5 }}
                                         id="outlined-basic"
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
