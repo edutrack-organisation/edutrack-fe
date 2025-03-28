@@ -1,3 +1,12 @@
+/**
+ * @file UploadButton.tsx
+ * @description A custom button component for PDF file uploads
+ * Features:
+ * - Styled as a Material-UI button with cloud upload icon
+ * - Hidden file input for better UX
+ * - Supports single PDF file selection
+ */
+
 import styled from "@emotion/styled";
 import { CloudUploadOutlined } from "@mui/icons-material";
 import { Button, Typography } from "@mui/material";
@@ -7,10 +16,7 @@ interface UploadPdfButtonProps {
     handleUpload: (file: File | null) => void;
 }
 
-const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
-    label,
-    handleUpload,
-}) => {
+const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({ label, handleUpload }) => {
     const VisuallyHiddenInput = styled("input")({
         clip: "rect(0 0 0 0)",
         clipPath: "inset(50%)",
@@ -24,16 +30,16 @@ const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
     });
 
     const setUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0] || null;
+        const file = event.target.files?.[0] || null; // only select the first file as support single file upload
         handleUpload(file);
     };
 
     return (
         <Button
             component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
+            role={undefined} // Removes ARIA role as this button acts as a label
+            variant="contained" // Sets the button's visual style to filled variant
+            tabIndex={-1} // Excludes the button from keyboard navigation sequence
             startIcon={<CloudUploadOutlined />}
             sx={{
                 fontSize: "1.3rem",
@@ -44,12 +50,7 @@ const UploadPdfButton: React.FC<UploadPdfButtonProps> = ({
             }}
         >
             <Typography fontWeight={"medium"}>{label}</Typography>
-            {/* NOTE: temporary accept mark down as well just for testing */}
-            <VisuallyHiddenInput
-                type="file"
-                // accept="application/pdf"
-                onChange={setUploadFile}
-            />
+            <VisuallyHiddenInput type="file" accept="application/pdf" onChange={setUploadFile} />
         </Button>
     );
 };

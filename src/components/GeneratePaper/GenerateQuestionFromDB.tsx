@@ -6,9 +6,9 @@ import CreatableSelect from "react-select/creatable";
 import { Topic } from "./types";
 import { formatGeneratedQuestions } from "./utils";
 import { generatePaperApi } from "./generatePaperApi";
-import { scrollbarStyle } from "./styles";
 import { SingleValue } from "react-select"; // Add this import at the top
 import { useTopics } from "../../hooks";
+import { scrollbarStyle } from "../../styles";
 
 /**
  * Interface for topic data structure used in React Select component.
@@ -38,8 +38,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const [selectedTopic, setSelectedTopic] = useState<number>(-1); // ID of the currently selected topic from the dropdown
     const { topics, isFetchingTopics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
 
-    const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] =
-        useState(false); // Loading state for question generation with selected topic
+    const [isFetchingQuestionsWithTopic, setIsFetchingQuestionWithTopic] = useState(false); // Loading state for question generation with selected topic
 
     // Helper functions
 
@@ -64,12 +63,10 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
     const getQuestionsWithTopic = async (selectedTopic: number) => {
         try {
             setIsFetchingQuestionWithTopic(true);
-            const questionsWithTopic =
-                await generatePaperApi.generateQuestionByTopic(selectedTopic);
+            const questionsWithTopic = await generatePaperApi.generateQuestionByTopic(selectedTopic);
 
             // const questionsWithTopic = await response.json();
-            const formattedQuestionsWithTopic =
-                formatGeneratedQuestions(questionsWithTopic);
+            const formattedQuestionsWithTopic = formatGeneratedQuestions(questionsWithTopic);
             appendAndHandleDuplicates(formattedQuestionsWithTopic);
             handleModalClose();
         } catch (error) {
@@ -83,27 +80,19 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
      * This method filters off the duplicates and add the first (non duplicate) question into the list. We only want to add to the list if the question is not already in the list.
      * @param formattedNewQuestions
      */
-    const appendAndHandleDuplicates = (
-        formattedNewQuestions: DataItemWithUUID[]
-    ) => {
+    const appendAndHandleDuplicates = (formattedNewQuestions: DataItemWithUUID[]) => {
         /**
          * We filter questions based on description.
          * Even if questions have the exact same description (but different paper), we still consider them as duplicates as we do not want to generate the same questions.
          * Note that 2 question can be very similar but not duplicates due to having extra characters (e.g. new line character during different run of the paper parsing process)
          */
-        const newQuestionsNotAlreadyInside = formattedNewQuestions.filter(
-            (fnq) => {
-                return !questions.some(
-                    (q) => q.description === fnq.description
-                );
-            }
-        );
+        const newQuestionsNotAlreadyInside = formattedNewQuestions.filter((fnq) => {
+            return !questions.some((q) => q.description === fnq.description);
+        });
 
         // If there are no questions of this topic that is to be added to the list of questions in the table
         if (newQuestionsNotAlreadyInside.length === 0) {
-            toast.error(
-                "All of the questions with this topic are already included in the list of generated questions"
-            );
+            toast.error("All of the questions with this topic are already included in the list of generated questions");
             setHighlightIndex(-2); // reset highlight index
             return;
         }
@@ -143,9 +132,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                     required
                     isValidNewOption={() => false} // disable option for creating new chip on the go
                     options={formatTopicsForReactSelect(topics)}
-                    onChange={(newChip: SingleValue<TopicForReactSelect>) =>
-                        setSelectedTopic(newChip?.id ?? -1)
-                    }
+                    onChange={(newChip: SingleValue<TopicForReactSelect>) => setSelectedTopic(newChip?.id ?? -1)}
                     styles={{
                         control: (baseStyles) => ({
                             ...baseStyles,
@@ -169,10 +156,7 @@ const GenerateQuestionFromDB: React.FC<GenerateQuestionFromDBProps> = ({
                     }}
                 />
             </Box>
-            {isFetchingTopics ||
-                (isFetchingQuestionsWithTopic && (
-                    <CircularProgress sx={{ my: "auto", mx: "auto" }} />
-                ))}
+            {isFetchingTopics || (isFetchingQuestionsWithTopic && <CircularProgress sx={{ my: "auto", mx: "auto" }} />)}
 
             <Button
                 variant="contained"

@@ -1,3 +1,10 @@
+/**
+ * Utility functions for the Generate Paper feature
+ * Contains helper functions for:
+ * - Data transformation
+ * - Format conversion
+ */
+
 import { Topic, QuestionFromDB } from "./types";
 import { DataItemWithUUID } from "../../types/types";
 

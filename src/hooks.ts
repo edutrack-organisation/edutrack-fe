@@ -1,3 +1,11 @@
+/**
+ * Global custom hooks used throughout the application
+ * Contains reusable React hooks for:
+ * - Data fetching
+ * - State management
+ * - API interactions
+ */
+
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Topic } from "./components/GeneratePaper/types";

@@ -1,3 +1,15 @@
+/**
+ * @file ContentTable.tsx
+ * @description Interactive table component for managing exam questions (for Generate Paper feature)
+ * Features:
+ * - Display and edit question details (description, topics, marks, difficulty)
+ * - Add/delete individual questions
+ * - Quick generate multiple questions
+ * - Topic management with creatable select
+ * - Question highlighting for newly added items
+ * - Modal integration for question operations
+ */
+
 import {
     Box,
     Button,
@@ -13,7 +25,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import TextArea from "../ViewPdf/TextArea";
+import TextArea from "../DoneUpload/TextArea";
 import { DataItemWithUUID } from "../../types/types";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -24,37 +36,66 @@ import { MultiValue } from "react-select";
 import AddSingleQuestionModal from "./AddSingleQuestionModal";
 import { useState } from "react";
 import QuickGenerateQuestionsModal from "./QuickGenerateQuestionsModal";
+import { scrollbarStyle, tableStyles } from "../../styles";
+import { deformatTopicsForReactSelect, formatTopicsForReactSelect } from "../../utils";
+
+interface ActionButtonsProps {
+    onQuickGenerate: () => void;
+    onAddQuestion: () => void;
+}
+
 interface ContentTableProps {
     questions: DataItemWithUUID[];
     setQuestions: React.Dispatch<React.SetStateAction<DataItemWithUUID[]>>;
     allTopics: string[];
 }
 
-const ContentTable: React.FC<ContentTableProps> = ({
-    questions,
-    setQuestions,
-    allTopics,
-}) => {
-    const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // indicates whether the modal for adding individual question is open or close
-    const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // indicates whether the modal for quick generation of questions is open or close
-    const [selectedIndex, setSelectedIndex] = useState<number>(-2); // this is the index of the selected question
-    const [highlightIndex, setHighlightIndex] = useState<number>(-2); // this is the index of the highlight question
+/**
+ * ActionButtons component renders two buttons for question management:
+ * 1. Quick Generate - Opens modal for quick question generation
+ * 2. Add a question - Opens modal for adding individual questions
+ *
+ * @param onQuickGenerate - Callback function for quick generate button click
+ * @param onAddQuestion - Callback function for add question button click
+ */
+const ActionButtons: React.FC<ActionButtonsProps> = ({ onQuickGenerate, onAddQuestion }) => (
+    <Box display="flex">
+        <Button variant="text" sx={tableStyles.button} onClick={onQuickGenerate}>
+            <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
+                Quick Generate
+            </Typography>
+            <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
+        </Button>
 
-    // Helper functions to format topics properly for react-select rendering
-    // React-select requires the value to be in the format {label: string, value: string}
-    const formatTopicsForReactSelect = (topics: string[]) => {
-        return topics.map((topic) => {
-            return { label: topic, value: topic };
-        });
-    };
+        <Button variant="text" sx={tableStyles.button} onClick={onAddQuestion}>
+            <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
+                Add a question
+            </Typography>
+            <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
+        </Button>
+    </Box>
+);
 
-    // Helper function to deformat topics for react-select (from {label: string, value: string} to string[])
-    const deformatTopicsForReactSelect = (
-        topicsLabelValue: MultiValue<{ label: string; value: string }>
-    ) => {
-        return topicsLabelValue.map((t) => {
-            return t.label;
-        });
+const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, allTopics }) => {
+    const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // Controls the visibility of the individual question modal
+    const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // Controls the visibility of the quick generate questions modal
+    /**
+     * Tracks the index of the currently selected question
+     * -2: No question selected
+     */
+    const [selectedIndex, setSelectedIndex] = useState<number>(-2);
+    /**
+     * Tracks the index of the question to highlight in the table
+     * -2: No highlight
+     * n: Highlights the (n+1)th question with a red border
+     */
+    const [highlightIndex, setHighlightIndex] = useState<number>(-2);
+
+    /**
+     * Resets the highlightIndex to -2 to remove the highlight
+     */
+    const resetHighlight = () => {
+        setHighlightIndex(-2);
     };
 
     // Event Handlers
@@ -86,7 +127,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
         const updatedData = [...questions];
         updatedData.splice(index, 1);
         setQuestions(updatedData);
-        setHighlightIndex(-2); // reset selected index to -2 to remove the highlight
+        resetHighlight();
     };
 
     const handleIndivQuestionModalClose = () => {
@@ -96,32 +137,26 @@ const ContentTable: React.FC<ContentTableProps> = ({
     const handleIndivQuestionModalOpen = (index: number) => {
         setIndivQuestionModalOpen(true);
         setSelectedIndex(index); // pass into the modal state
+        resetHighlight();
     };
 
     const handleQuickGenerateQuestionsModalClose = () => {
         setQuickGenerateModalOpen(false);
-        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
+        resetHighlight();
     };
 
     const handleQuickGenerateQuestionsModalCloseOpen = () => {
         setQuickGenerateModalOpen(true);
-        setSelectedIndex(-2); // reset selected index to -2 to remove the highlight
+        resetHighlight();
     };
 
     return (
         <>
-            <TableContainer
-                component={Paper}
-                sx={{
-                    mt: "2rem",
-                }}
-            >
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableContainer component={Paper} sx={tableStyles.container}>
+                <Table sx={tableStyles.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ width: "10%" }}>
-                                Question Number
-                            </TableCell>
+                            <TableCell sx={{ width: "10%" }}>Question Number</TableCell>
                             <TableCell sx={{ width: "50%" }} align="left">
                                 Description
                             </TableCell>
@@ -143,8 +178,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         border: 0,
                                     },
                                     border:
-                                        highlightIndex + 1 === index &&
-                                        !indivQuestionModalOpen
+                                        highlightIndex + 1 === index && !indivQuestionModalOpen
                                             ? "3px solid #E4CACA"
                                             : "none",
                                 }}
@@ -156,30 +190,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <TextArea
                                         className="textarea"
                                         textContent={row.description}
-                                        onChange={(event) =>
-                                            handleDescriptionChange(
-                                                index,
-                                                event.target.value
-                                            )
-                                        }
+                                        onChange={(event) => handleDescriptionChange(index, event.target.value)}
                                     />
                                 </TableCell>
                                 <TableCell align="left">
                                     <CreatableSelect
                                         isMulti
-                                        value={formatTopicsForReactSelect(
-                                            row.topics
-                                        )}
-                                        options={formatTopicsForReactSelect(
-                                            allTopics
-                                        )}
+                                        value={formatTopicsForReactSelect(row.topics)}
+                                        options={formatTopicsForReactSelect(allTopics)}
                                         onChange={(newChip) =>
-                                            handleTopicsChange(
-                                                index,
-                                                deformatTopicsForReactSelect(
-                                                    newChip
-                                                )
-                                            )
+                                            handleTopicsChange(index, deformatTopicsForReactSelect(newChip))
                                         }
                                         styles={{
                                             control: (baseStyles) => ({
@@ -190,17 +210,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                                 ...baseStyles,
                                                 maxHeight: "200px", // Set max height for the dropdown
                                                 overflowY: "auto", // Enable vertical scrolling
-                                                "::-webkit-scrollbar": {
-                                                    width: "6px", // Width of the scrollbar
-                                                },
-                                                "::-webkit-scrollbar-track": {
-                                                    background: "#ebebeb", // Background of the scrollbar track
-                                                    borderRadius: "8px",
-                                                },
-                                                "::-webkit-scrollbar-thumb": {
-                                                    background: "#c2c2c2", // Color of the scrollbar thumb
-                                                    borderRadius: "8px", // Rounded corners for the scrollbar thumb
-                                                },
+                                                ...scrollbarStyle, // Apply custom scrollbar styles
                                             }),
                                         }}
                                     />
@@ -211,25 +221,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         id="outlined-basic"
                                         defaultValue={row.mark || 0}
                                         variant="outlined"
-                                        onChange={(event) =>
-                                            handleMarkChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
-                                        }
-                                        sx={{
-                                            "& .MuiTextField-root": {
-                                                "& fieldset": {
-                                                    borderColor: "#E5EAF2", // Custom border color
-                                                },
-                                                "&:hover fieldset": {
-                                                    borderColor: "#B0BEC5", // Border color on hover
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#1E88E5", // Border color when focused
-                                                },
-                                            },
-                                        }}
+                                        onChange={(event) => handleMarkChange(index, parseInt(event.target.value))}
+                                        sx={tableStyles.textField}
                                     />
                                 </TableCell>
                                 <TableCell align="right">
@@ -239,24 +232,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
                                         onChange={(event) =>
-                                            handleDifficultyChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
+                                            handleDifficultyChange(index, parseInt(event.target.value))
                                         }
-                                        sx={{
-                                            "& .MuiTextField-root": {
-                                                "& fieldset": {
-                                                    borderColor: "#E5EAF2", // Custom border color
-                                                },
-                                                "&:hover fieldset": {
-                                                    borderColor: "#B0BEC5", // Border color on hover
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#1E88E5", // Border color when focused
-                                                },
-                                            },
-                                        }}
+                                        sx={tableStyles.textField}
                                     />
                                 </TableCell>
                                 <TableCell>
@@ -266,12 +244,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                                 handleQuestionDelete(index);
                                             }}
                                         >
-                                            <DeleteOutlineIcon
-                                                sx={{
-                                                    height: "2rem",
-                                                    width: "2rem",
-                                                }}
-                                            />
+                                            <DeleteOutlineIcon sx={tableStyles.icon} />
                                         </IconButton>
                                     </Tooltip>
                                 </TableCell>
@@ -279,17 +252,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                     <Tooltip title="Add Question">
                                         <IconButton
                                             onClick={() => {
-                                                handleIndivQuestionModalOpen(
-                                                    index
-                                                );
+                                                handleIndivQuestionModalOpen(index);
                                             }}
                                         >
-                                            <AddCircleOutlineIcon
-                                                sx={{
-                                                    height: "2rem",
-                                                    width: "2rem",
-                                                }}
-                                            />
+                                            <AddCircleOutlineIcon sx={tableStyles.icon} />
                                         </IconButton>
                                     </Tooltip>
                                 </TableCell>
@@ -298,6 +264,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Modal for adding individual question */}
             <AddSingleQuestionModal
                 open={indivQuestionModalOpen}
                 handleClose={handleIndivQuestionModalClose}
@@ -307,7 +275,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                 setHighlightIndex={setHighlightIndex}
             />
 
-            {/* modal for quick generation of questions */}
+            {/* Modal for quick generation of questions */}
             <QuickGenerateQuestionsModal
                 open={quickGenerateModalOpen}
                 setQuestions={setQuestions}
@@ -315,46 +283,13 @@ const ContentTable: React.FC<ContentTableProps> = ({
             />
 
             {/* Buttons for modal */}
-            <Box display="flex">
-                {/* button for quick generation of questions */}
-                <Button
-                    variant="text"
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mt: "1rem",
-                        variant: "contained",
-                    }}
-                    onClick={() => {
-                        handleQuickGenerateQuestionsModalCloseOpen();
-                    }}
-                >
-                    <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
-                        Quick Generate
-                    </Typography>
-                    <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
-                </Button>
-
-                {/* button for adding new question */}
-                <Button
-                    variant="text"
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mt: "1rem",
-                        variant: "contained",
-                    }}
-                    onClick={() => {
-                        setSelectedIndex(questions.length - 1); // selectedIndex set to -1 as after adding we want to highlight index 0 element
-                        setIndivQuestionModalOpen(true);
-                    }}
-                >
-                    <Typography fontWeight={"bolder"} sx={{ opacity: "0.8" }}>
-                        Add a question
-                    </Typography>
-                    <AddCircleIcon sx={{ opacity: "0.8", ml: "0.2rem" }} />
-                </Button>
-            </Box>
+            <ActionButtons
+                onQuickGenerate={handleQuickGenerateQuestionsModalCloseOpen}
+                onAddQuestion={() => {
+                    setSelectedIndex(questions.length - 1);
+                    setIndivQuestionModalOpen(true);
+                }}
+            />
         </>
     );
 };

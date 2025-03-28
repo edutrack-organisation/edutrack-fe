@@ -1,4 +1,10 @@
-// common modal styles
+/**
+ * Styles specific to the Generate Paper feature components
+ * Contains Material-UI style configurations for:
+ * - Modal layouts and variants
+ * - Custom scrollbar appearance
+ */
+
 export const modalStyle = {
     position: "absolute",
     left: "50%",
@@ -21,19 +27,5 @@ export const modalVariants = {
     addQuestion: {
         ...modalStyle,
         top: "40%",
-    },
-};
-
-export const scrollbarStyle = {
-    "::-webkit-scrollbar": {
-        width: "6px",
-    },
-    "::-webkit-scrollbar-track": {
-        background: "#ebebeb",
-        borderRadius: "8px",
-    },
-    "::-webkit-scrollbar-thumb": {
-        background: "#c2c2c2",
-        borderRadius: "8px",
     },
 };
