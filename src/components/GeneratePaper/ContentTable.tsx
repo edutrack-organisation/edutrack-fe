@@ -32,12 +32,15 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CreatableSelect from "react-select/creatable";
-import { MultiValue } from "react-select";
 import AddSingleQuestionModal from "./AddSingleQuestionModal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import QuickGenerateQuestionsModal from "./QuickGenerateQuestionsModal";
 import { scrollbarStyle, tableStyles } from "../../styles";
 import { deformatTopicsForReactSelect, formatTopicsForReactSelect } from "../../utils";
+import { debounce } from "lodash";
+
+// Constants
+const DEBOUNCE_DELAY = 300;
 
 interface ActionButtonsProps {
     onQuickGenerate: () => void;
@@ -99,6 +102,12 @@ const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, al
     };
 
     // Event Handlers
+    // Debounced functions
+    const debouncedSetQuestions = useCallback(
+        debounce((updatedData: DataItemWithUUID[]) => setQuestions(updatedData), DEBOUNCE_DELAY),
+        []
+    );
+
     const handleTopicsChange = (index: number, newChips: string[]) => {
         const updatedData = [...questions];
         updatedData[index].topics = newChips;
@@ -108,7 +117,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, al
     const handleDescriptionChange = (index: number, newDescription: string) => {
         const updatedData = [...questions];
         updatedData[index].description = newDescription;
-        setQuestions(updatedData);
+        debouncedSetQuestions(updatedData);
     };
 
     const handleMarkChange = (index: number, newMark: number) => {
