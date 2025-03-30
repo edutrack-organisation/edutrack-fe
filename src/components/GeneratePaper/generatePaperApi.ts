@@ -1,5 +1,6 @@
 import { DataItemWithUUID } from "../../types/types";
 import { QuestionFromDB, Topic } from "./types";
+import { v4 as uuidv4 } from "uuid";
 
 const BASE_URL = "http://127.0.0.1:8000";
 
@@ -38,6 +39,9 @@ export const generatePaperApi = {
             throw new Error(response_json.detail || "Failed to generate question from GPT");
         }
 
-        return response_json;
+        return {
+            ...response_json,
+            uuid: uuidv4(), // Add UUID to the response
+        };
     },
 };
