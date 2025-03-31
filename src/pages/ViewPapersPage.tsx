@@ -6,6 +6,7 @@ import Api from "../api/Api";
 import PaperInspector from "../components/ViewPaper/PaperInspector";
 import { COLORS } from "../constants/constants";
 import type { PaperItem } from "../types/types";
+import SecondaryNavBar from "../components/SecondaryNavBar";
 
 const ViewPapersPage = () => {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ const ViewPapersPage = () => {
 
     const fetchPapers = (courseId: number) => {
         setIsFetchingPapers(true);
-        Api.getCoursePapers(courseId).then((response) => {
+        Api.getCoursePaperTitles(courseId).then((response) => {
             if (response.success) {
                 setPaperList(response.data);
             } else {
@@ -43,45 +44,48 @@ const ViewPapersPage = () => {
     };
 
     return (
-        <Box sx={containerStyle}>
-            {/* Left portion for selection */}
-            <Box sx={scrollboxStyle}>
-                {isFetchingPapers ? (
-                    <CircularProgress size={"100px"} sx={{ color: COLORS.HIGHLIGHT, alignSelf: "center" }} />
-                ) : (
-                    <Stack flex={1} divider={<Divider flexItem />}>
-                        {paperList!.map((paper: PaperItem, index) => (
-                            <Button
-                                key={`Paper${index}`}
-                                sx={{
-                                    textAlign: "left",              // Aligns text to the left
-                                    justifyContent: "flex-start",   // Aligns multi-line text to the left
-                                    minHeight: "5rem",              // Ensures minimum height
-                                    flexShrink: 0,                  // Prevents the button from shrinking
-                                }}
-                                onClick={() => setSelectedPaper(index)}
-                            >
-                                {paper.paperTitle}
-                            </Button>
-                        ))}
-                    </Stack>
-                )}
-            </Box>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <SecondaryNavBar />
+            <Box sx={containerStyle}>
+                {/* Left portion for selection */}
+                <Box sx={scrollboxStyle}>
+                    {isFetchingPapers ? (
+                        <CircularProgress size={"100px"} sx={{ color: COLORS.HIGHLIGHT, alignSelf: "center" }} />
+                    ) : (
+                        <Stack flex={1} divider={<Divider flexItem />}>
+                            {paperList!.map((paper: PaperItem, index) => (
+                                <Button
+                                    key={`Paper${index}`}
+                                    sx={{
+                                        textAlign: "left",              // Aligns text to the left
+                                        justifyContent: "flex-start",   // Aligns multi-line text to the left
+                                        minHeight: "5rem",              // Ensures minimum height
+                                        flexShrink: 0,                  // Prevents the button from shrinking
+                                    }}
+                                    onClick={() => setSelectedPaper(index)}
+                                >
+                                    {paper.paperTitle}
+                                </Button>
+                            ))}
+                        </Stack>
+                    )}
+                </Box>
 
-            {/* Vertical Divider */}
-            <Divider orientation="vertical" flexItem sx={{ backgroundColor: COLORS.HIGHLIGHT, width: "0.25rem", borderRadius: 3, margin: 1, }} />
+                {/* Vertical Divider */}
+                <Divider orientation="vertical" flexItem sx={{ backgroundColor: COLORS.HIGHLIGHT, width: "0.25rem", borderRadius: 3, margin: 1, }} />
 
-            {/* Right portion for content */}
-            <Box sx={displayboxStyle}>
-                {(selectedPaper !== undefined) ? (
-                    <PaperInspector paper={paperList![selectedPaper]} />
-                ) : (
-                    <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Typography fontSize={"2rem"} fontWeight={"bold"} fontFamily={"monospace"}>
-                            No paper selected.
-                        </Typography>
-                    </Box>
-                )}
+                {/* Right portion for content */}
+                <Box sx={displayboxStyle}>
+                    {(selectedPaper !== undefined) ? (
+                        <PaperInspector paper={paperList![selectedPaper]} />
+                    ) : (
+                        <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Typography fontSize={"2rem"} fontWeight={"bold"} fontFamily={"monospace"}>
+                                No paper selected.
+                            </Typography>
+                        </Box>
+                    )}
+                </Box>
             </Box>
         </Box>
     );

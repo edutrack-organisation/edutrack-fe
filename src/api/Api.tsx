@@ -140,6 +140,32 @@ const Api = {
         }
     },
 
+    getCoursePaperTitles: async (courseId: number): Promise<ApiResponse<PaperItem[]>> => {
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(`http://127.0.0.1:8000/courses/${courseId}`);
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            const data = (await response.json()).papers.map((paper) => ({
+                paperId: paper.id,
+                paperTitle: paper.title,
+            }));
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
     getCoursePapers: async (courseId: number): Promise<ApiResponse<PaperItem[]>> => {
         try {
             // Send the file to the FastAPI endpoint
@@ -154,6 +180,15 @@ const Api = {
             const data = (await response.json()).papers.map((paper) => ({
                 paperId: paper.id,
                 paperTitle: paper.title,
+                questions: paper.questions.map((question) => ({
+                    questionId: question.id,
+                    questionNumber: question.question_number,
+                    description: question.description,
+                    topics: question.topics.map((topic) => (topic.title)),
+                    marks: question.marks,
+                    difficulty: question.difficulty,
+                })),
+                studentScores: paper.student_scores,
             }));
 
             return {

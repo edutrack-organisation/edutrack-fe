@@ -52,15 +52,11 @@ function App() {
                     <Box sx={{ display: "flex", marginTop: "5rem", minHeight: "calc(100vh - 5rem)", background: COLORS.WHITE }} >
                         <Routes>
                             <Route path="/" element={<LandingPage />} />
-                            <Route path="/uploadpdf" element={<UploadPdfPage />} />
+                            <Route path="/courses/:courseId/uploadpdf" element={<UploadPdfPage />} />
                             <Route path="/doneupload" element={<DoneUploadPage />} />
                             <Route path="/courses" element={<CourseSelectPage />} />
                             <Route path="/courses/:courseId" element={<ViewPapersPage />} />
-
-                            {/* Use the version with course id in the future*/}
-                            {/* <Route path="/knowledgegraph/:courseId" element={<KnowledgeGraphPage />} /> */}
-                            <Route path="/knowledgegraph" element={<KnowledgeGraphPage />} />
-                            <Route path="/questionbank" element={<QuestionBankPage />} />
+                            <Route path="/courses/:courseId/knowledgegraph" element={<KnowledgeGraphPage />} />
 
                             <Route path="/signup" element={<SignupPage />} />
                             <Route path="/login" element={<LoginPage />} />

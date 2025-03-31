@@ -35,6 +35,16 @@ export interface QuestionItem {
     difficulty: number;
 };
 
+// Topic stats
+export interface TopicStats {
+    [mainTopic: string]: {
+      average: number; // Average of its subtopics’ percentages.
+      subtopics: {
+        [subtopic: string]: number; // Final percentage value for that subtopic.
+      };
+    };
+  }
+
 // Context
 export interface AuthContextType {
     userId: number | null;

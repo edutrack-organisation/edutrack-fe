@@ -232,14 +232,112 @@ const ApiMock = {
         }
     },
 
+    // getTopicStatistics: async (): Promise<ApiResponse> => {
+    //     const originalData = [
+    //         { topic: "Basic Networking Concepts: Host, packet, protocol, throughput, store-and-forward, autonomous system", value: 30 },
+    //         { topic: "Basic Networking Concepts: Packet switching, circuit switching", value: 60 },
+    //         { topic: "Basic Networking Concepts: End-to-end delay components (bandwidth, packet size, distance, propagation speed, queue size)", value: 80 },
+    //         { topic: "Basic Networking Concepts: Logical architecture of the Internet (five protocol layers)", value: 45 },
+    //         { topic: "Basic Networking Concepts: Physical architecture of the Internet (network of ASes)", value: 90 },
+    //         { topic: "Application Layer: HTTP interactions (GET, head fields, persistent connection, parallel connections, stateless protocol)", value: 70 },
+    //         { topic: "Application Layer: DNS services and query resolution", value: 55 },
+    //         { topic: "Application Layer: Cookies", value: 20 },
+    //         { topic: "Socket Programming: Concept of socket", value: 85 },
+    //         { topic: "Socket Programming: Writing simple client/server programs", value: 40 },
+    //         { topic: "Transport Layer: UDP and its simplicity", value: 95 },
+    //         { topic: "Transport Layer: Reliable protocols (ACK, NAK, sequence numbers, timeout, retransmission)", value: 65 },
+    //         { topic: "Transport Layer: TCP vs UDP", value: 25 },
+    //         { topic: "Transport Layer: TCP operations (sequence number, acknowledgment number, retransmission, connection setup/termination)", value: 50 },
+    //         { topic: "Transport Layer: Go-Back-N and Selective Repeat protocols", value: 75 },
+    //         { topic: "Transport Layer: Checksum calculation", value: 35 },
+    //         { topic: "Network Layer: IP address, subnet, subnet mask, address allocation", value: 80 },
+    //         { topic: "Network Layer: DHCP and its operation", value: 45 },
+    //         { topic: "Network Layer: Longest prefix forwarding in routers", value: 90 },
+    //         { topic: "Network Layer: Internet Protocol (IP): datagram fragmentation, IPv4 datagram format", value: 70 },
+    //         { topic: "Network Layer: NAT (purpose and operation)", value: 55 },
+    //         { topic: "Network Layer: Routing protocols (Bellman-Ford equation, Distance vector algorithm)", value: 20 },
+    //         { topic: "Network Layer: ICMP, Ping, Traceroute", value: 85 },
+    //         { topic: "Link Layer: Role and services provided by the link layer", value: 40 },
+    //         { topic: "Link Layer: Parity and CRC schemes", value: 95 },
+    //         { topic: "Link Layer: Medium access methods", value: 65 },
+    //         { topic: "Link Layer: Switches in interconnecting subnets in LAN, Switch Forwarding Table", value: 25 },
+    //         { topic: "Link Layer: Mac Address", value: 50 },
+    //         { topic: "Link Layer: ARP (Address Resolution Protocol)", value: 75 },
+    //         { topic: "Link Layer: Local Area Network (LAN), Ethernet, Ethernet Standards, Ethernet Frame Structure, Ethernet Topology", value: 35 },
+    //         { topic: "Network Security: Principles of confidentiality, authentication, message integrity", value: 80 },
+    //         { topic: "Network Security: Principles of cryptography", value: 45 },
+    //         { topic: "Network Security: Firewall", value: 90 },
+    //         { topic: "Multimedia Networking: Buffering and streaming multimedia", value: 70 },
+    //         { topic: "Multimedia Networking: VOIP", value: 55 },
+    //         { topic: "Multimedia Networking: DASH streaming", value: 20 },
+    //         { topic: "Multimedia Networking: Content Distribution Networks (CDNs)", value: 85 },
+    //     ];
+    
+    //     const studentIds = ["A0236875L", "A0745961C", "A0024876L"];
+    
+    //     const transformedData = originalData.map(item => {
+    //         const studentValues = studentIds.map(studentId => ({
+    //             studentId: studentId,
+    //             value: Math.floor(Math.random() * 101), // Generate random value between 0 and 100
+    //         }));
+    
+    //         return {
+    //             topic: item.topic,
+    //             students: studentValues,
+    //         };
+    //     });
+    
+    //     return {
+    //         success: true,
+    //         data: transformedData,
+    //     };
+    // },
+
     getTopicStatistics: async (): Promise<ApiResponse> => {
-        return { success: true, data: [
-            {topic: "Test Topic 1", value: 0},
-            {topic: "Test Topic 2", value: 15},
-            {topic: "Test Topic 3", value: 50},
-            {topic: "Test Topic 4", value: 75},
-            {topic: "Test Topic 5", value: 100},
-        ]};
+        const originalData = [
+            { topic: "Basic Networking Concepts: Host, packet, protocol, throughput, store-and-forward, autonomous system", value: 30 },
+            { topic: "Basic Networking Concepts: Packet switching, circuit switching", value: 60 },
+            { topic: "Basic Networking Concepts: End-to-end delay components (bandwidth, packet size, distance, propagation speed, queue size)", value: 80 },
+            { topic: "Basic Networking Concepts: Logical architecture of the Internet (five protocol layers)", value: 45 },
+            { topic: "Basic Networking Concepts: Physical architecture of the Internet (network of ASes)", value: 90 },
+            { topic: "Application Layer: HTTP interactions (GET, head fields, persistent connection, parallel connections, stateless protocol)", value: 70 },
+            { topic: "Application Layer: DNS services and query resolution", value: 55 },
+            { topic: "Application Layer: Cookies", value: 20 },
+            { topic: "Socket Programming: Concept of socket", value: 85 },
+            { topic: "Socket Programming: Writing simple client/server programs", value: 40 },
+            { topic: "Transport Layer: UDP and its simplicity", value: 95 },
+            { topic: "Transport Layer: Reliable protocols (ACK, NAK, sequence numbers, timeout, retransmission)", value: 65 },
+            { topic: "Transport Layer: TCP vs UDP", value: 25 },
+            { topic: "Transport Layer: TCP operations (sequence number, acknowledgment number, retransmission, connection setup/termination)", value: 50 },
+            { topic: "Transport Layer: Go-Back-N and Selective Repeat protocols", value: 75 },
+            { topic: "Transport Layer: Checksum calculation", value: 35 },
+            { topic: "Network Layer: IP address, subnet, subnet mask, address allocation", value: 80 },
+            { topic: "Network Layer: DHCP and its operation", value: 45 },
+            { topic: "Network Layer: Longest prefix forwarding in routers", value: 90 },
+            { topic: "Network Layer: Internet Protocol (IP): datagram fragmentation, IPv4 datagram format", value: 70 },
+            { topic: "Network Layer: NAT (purpose and operation)", value: 55 },
+            { topic: "Network Layer: Routing protocols (Bellman-Ford equation, Distance vector algorithm)", value: 20 },
+            { topic: "Network Layer: ICMP, Ping, Traceroute", value: 85 },
+            { topic: "Link Layer: Role and services provided by the link layer", value: 40 },
+            { topic: "Link Layer: Parity and CRC schemes", value: 95 },
+            { topic: "Link Layer: Medium access methods", value: 65 },
+            { topic: "Link Layer: Switches in interconnecting subnets in LAN, Switch Forwarding Table", value: 25 },
+            { topic: "Link Layer: Mac Address", value: 50 },
+            { topic: "Link Layer: ARP (Address Resolution Protocol)", value: 75 },
+            { topic: "Link Layer: Local Area Network (LAN), Ethernet, Ethernet Standards, Ethernet Frame Structure, Ethernet Topology", value: 35 },
+            { topic: "Network Security: Principles of confidentiality, authentication, message integrity", value: 80 },
+            { topic: "Network Security: Principles of cryptography", value: 45 },
+            { topic: "Network Security: Firewall", value: 90 },
+            { topic: "Multimedia Networking: Buffering and streaming multimedia", value: 70 },
+            { topic: "Multimedia Networking: VOIP", value: 55 },
+            { topic: "Multimedia Networking: DASH streaming", value: 20 },
+            { topic: "Multimedia Networking: Content Distribution Networks (CDNs)", value: 85 },
+        ];
+    
+        return {
+            success: true,
+            data: originalData,
+        };
     },
 };
 

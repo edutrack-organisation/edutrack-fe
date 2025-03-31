@@ -77,36 +77,6 @@ const NavBar = () => {
                 Course Select
             </Button>,
 
-        uploadPdf:
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="UploadPdf Button"
-                onClick={() => handleNavigate("/uploadpdf")}
-            >
-                Upload PDf
-            </Button>,
-
-        knowledgeGraph:
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="KnowledgeGraph Button"
-                onClick={() => handleNavigate("/knowledgegraph")} // Use the version with courseid in the future
-            >
-                Knowledge Graph
-            </Button>,
-
-        questionBank:
-            <Button
-                variant="text"
-                sx={buttonStyle}
-                key="QuestionBank Button"
-                onClick={() => handleNavigate("/questionbank")} // Use the version with courseid in the future
-            >
-                Question Bank
-            </Button>,
-
         login:
             <Button
                 variant="text"
@@ -142,9 +112,6 @@ const NavBar = () => {
     const loggedInMenuItems = [
         menuItems.home,
         menuItems.courseSelect,
-        menuItems.uploadPdf,
-        menuItems.knowledgeGraph,
-        menuItems.questionBank,
     ];
 
     // The buttons in the menu when user is logged out
