@@ -35,7 +35,7 @@ const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
                                 <TableCell>{question.questionNumber}</TableCell>
                                 <TableCell>{question.description}</TableCell>
                                 <TableCell>{question.marks}</TableCell>
-                                <TableCell>
+                                <TableCell style={{ width: "150px", textAlign: "center" }}>
                                     <BoxAndPointerDiagram data={studentScores[index]} max_value={question.marks} />
                                 </TableCell>
                             </TableRow>

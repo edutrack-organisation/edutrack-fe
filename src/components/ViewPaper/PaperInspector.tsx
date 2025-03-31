@@ -6,6 +6,7 @@ import type { PaperItem, QuestionItem } from "../../types/types";
 import ScoreAnalysis from "./ScoreAnalysis";
 import Api from "../../api/Api";
 import { csvFileToNumberArray, csvFileToNumberMatrix, transposeMatrix } from "../../utility/utility";
+import toast from "react-hot-toast";
 
 interface PaperInspectorProps {
     paper: PaperItem;
@@ -23,6 +24,7 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
                 setHasScores(response.data);
             }
         });
+        setPaperQuestions(paper.questions);
         setTabValue(0); // Set to default tab // Note: Sets the initial rendering tab here to prevent double rendering
     };
 
@@ -83,12 +85,14 @@ const PaperInspector: React.FC<PaperInspectorProps> = ({ paper }) => {
         setIsSavingPaper(true);
         Api.updatePaper({ ...paper, questions: paperQuestions }).then((response) => {
             if (response.success == true) {
-                alert("Paper saved!"); // TODO: Use toast
+                toast.success("Paper saved!");
+                paper.questions = paperQuestions; // Updates locally if successful
                 setIsEditing(false);
             } else {
-                // TODO: Use toast when encountering upload error
-                alert("Error");
+                toast.error(`Failed to save changes. Denied by server.`);
             }
+        }).catch((error) => {
+            toast.error(`Failed to save changes: ${error.message}`);
         }).finally(() => {
             setIsSavingPaper(false);
         });

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
+import { Box, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ const CourseSelectPage = () => {
     const [isFetchingCourses, setIsFetchingCourses] = useState<boolean>(true);
     const [courseTitleToAdd, setCourseTitleToAdd] = useState<string>('');
     const [isAddingCourse, setIsAddingCourse] = useState<boolean>(false);
+    const [isApiError, setIsApiError] = useState<boolean>(false);
     const [courses, setCourses] = useState<CourseItem[]>();
 
     useEffect(() => {
@@ -45,6 +46,7 @@ const CourseSelectPage = () => {
                 fetchCourses();
             } else {
                 toast.error("Failed to add course");
+                setIsApiError(true);
             }
         }).finally(() => {
             setIsAddingCourse(false);
@@ -61,15 +63,19 @@ const CourseSelectPage = () => {
                     <Button variant="contained" onClick={() => {handleAddCourse(courseTitleToAdd)}} sx={{ width: "15%", marginLeft: 3 }}>Add Course</Button>
                 </Box>
             )}
-            {isFetchingCourses
-                ? <CircularProgress size={"100px"} sx={{ color: COLORS.HIGHLIGHT, alignSelf: "center", margin: 3 }} />
-                : <Stack sx={{ width: "100%", alignItems: 'center' }}>
+            {isFetchingCourses ? (
+                <CircularProgress size={"100px"} sx={{ color: COLORS.HIGHLIGHT, alignSelf: "center", margin: 3 }} />
+            ) : isApiError ? (
+                <Typography>Server error.</Typography>
+            ) : (
+                <Stack sx={{ width: "100%", alignItems: 'center' }}>
                     {courses!.map((course) =>
                         <Button key={`Course ${course.courseId}`} variant='outlined' sx={{ width: "70%", marginY: 1 }} onClick={() => handleCourseSelect(course.courseId)}>
                             {course.courseTitle}
                         </Button>
                     )}
-                </Stack>}
+                </Stack>
+            )}
         </Box>
     );
 };

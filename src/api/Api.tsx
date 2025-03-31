@@ -14,46 +14,6 @@ export class ApiError extends Error {
 }
 
 const Api = {
-    // ================= APIs to be implemented =================
-    changePaperQuestionTopics: async (
-        title: String,
-        index: number,
-        newTopics: String[]
-    ): Promise<ApiResponse> => {
-        return { success: true };
-    },
-
-    changePaperQuestionDescription: async (
-        title: String,
-        index: number,
-        newDescription: String
-    ): Promise<ApiResponse> => {
-        return { success: true };
-    },
-
-    changePaperQuestionMarks: async (
-        title: String,
-        index: number,
-        newMarks: number
-    ): Promise<ApiResponse> => {
-        return { success: true };
-    },
-
-    changePaperQuestionDifficulty: async (
-        title: String,
-        index: number,
-        newDifficulty: number
-    ): Promise<ApiResponse> => {
-        return { success: true };
-    },
-
-    deletePaperQuestion: async (
-        title: String,
-        index: number
-    ): Promise<ApiResponse> => {
-        return { success: true };
-    },
-
     getPaperStudentScores: async (paperId: number): Promise<ApiResponse<number[][]>> => {
         // TODO: Can be optimized in the backend to simply return true or false
         try {
@@ -77,8 +37,6 @@ const Api = {
             throw new ApiError("Failed to reach server");
         }
     },
-
-    // ================= Working APIs =================
 
     /**
      * Adds a new course
@@ -140,32 +98,6 @@ const Api = {
         }
     },
 
-    getCoursePaperTitles: async (courseId: number): Promise<ApiResponse<PaperItem[]>> => {
-        try {
-            // Send the file to the FastAPI endpoint
-            const response = await fetch(`http://127.0.0.1:8000/courses/${courseId}`);
-
-            if (!response.ok) {
-                // Handle HTTP errors
-                const errorMessage = await response.text();
-                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
-            }
-
-            const data = (await response.json()).papers.map((paper) => ({
-                paperId: paper.id,
-                paperTitle: paper.title,
-            }));
-
-            return {
-                success: response.ok,
-                data: data,
-            };
-        } catch (error) {
-            // Handle network or other unexpected errors
-            throw new ApiError("Failed to reach server");
-        }
-    },
-
     getCoursePapers: async (courseId: number): Promise<ApiResponse<PaperItem[]>> => {
         try {
             // Send the file to the FastAPI endpoint
@@ -185,9 +117,9 @@ const Api = {
                     questionNumber: question.question_number,
                     description: question.description,
                     topics: question.topics.map((topic) => (topic.title)),
-                    marks: question.marks,
+                    marks: question.mark,
                     difficulty: question.difficulty,
-                })),
+                })).sort((a, b) => a.questionNumber - b.questionNumber), // Sort in ascending order,
                 studentScores: paper.student_scores,
             }));
 
@@ -213,7 +145,7 @@ const Api = {
                 throw new ApiError(`Error ${response.status}: ${errorMessage}`);
             }
 
-            const data = (await response.json()).student_scores.length > 0;
+            const data = Boolean((await response.json()).student_scores?.length);
 
             return {
                 success: response.ok,
@@ -242,7 +174,7 @@ const Api = {
                     questionNumber: question.question_number,
                     description: question.description,
                     topics: question.topics.map((topic) => (topic.title)), // TODO: use TopicItem in the future
-                    marks: question.marks ?? 0, // TODO: use actual marks instead of dummy marks
+                    marks: question.mark,
                     difficulty: question.difficulty,
                 }))
                 .sort((a, b) => a.questionNumber - b.questionNumber); // Sort in ascending order
@@ -272,7 +204,7 @@ const Api = {
                             id: q.questionId,
                             question_number: q.questionNumber,
                             description: q.description,
-                            marks: q.marks,
+                            mark: q.marks,
                             difficulty: q.difficulty,
                             topics_str: q.topics,
                         })) ?? [],

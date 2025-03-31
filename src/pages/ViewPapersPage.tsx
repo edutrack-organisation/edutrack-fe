@@ -16,6 +16,8 @@ const ViewPapersPage = () => {
     const [paperList, setPaperList] = useState<PaperItem[]>();
     const [selectedPaper, setSelectedPaper] = useState<number>();
 
+    const [isApiError, setIsApiError] = useState<boolean>(false);
+
     useEffect(() => {
         // TODO: Validate courseId
         // 1. Check if courseId is valid
@@ -30,7 +32,7 @@ const ViewPapersPage = () => {
 
     const fetchPapers = (courseId: number) => {
         setIsFetchingPapers(true);
-        Api.getCoursePaperTitles(courseId).then((response) => {
+        Api.getCoursePapers(courseId).then((response) => {
             if (response.success) {
                 setPaperList(response.data);
             } else {
@@ -38,6 +40,7 @@ const ViewPapersPage = () => {
             }
         }).catch((error) => {
             toast.error(`API Error getting papers: ${error.message}`);
+            setIsApiError(true);
         }).finally(() => {
             setIsFetchingPapers(false);
         });
@@ -51,6 +54,10 @@ const ViewPapersPage = () => {
                 <Box sx={scrollboxStyle}>
                     {isFetchingPapers ? (
                         <CircularProgress size={"100px"} sx={{ color: COLORS.HIGHLIGHT, alignSelf: "center" }} />
+                    ) : isApiError ? (
+                        <Typography fontSize={"1rem"} fontWeight={"bold"} fontFamily={"monospace"} sx={{ color: 'red', alignSelf: "center" }}>
+                            Failed to retrieve paper.
+                        </Typography>
                     ) : (
                         <Stack flex={1} divider={<Divider flexItem />}>
                             {paperList!.map((paper: PaperItem, index) => (

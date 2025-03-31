@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, useMediaQuery, useTheme, Slider, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { COLORS } from "../constants/constants";
-import ApiMock from "../api/ApiMock";
 import SecondaryNavBar from '../components/SecondaryNavBar';
 import { PaperItem, TopicStats } from '../types/types';
 import Api from '../api/Api';
+import { useParams } from 'react-router-dom';
 
 const KnowledgeGraphPage = () => {
     // UI values
@@ -21,18 +21,12 @@ const KnowledgeGraphPage = () => {
     // Statistics table values
     const [data, setData] = useState<TopicStats>({});
     const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
+    const courseId: number = Number(decodeURIComponent(useParams().courseId!));
     const theme = useTheme();
     const isWideScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
     useEffect(() => {
-        // ApiMock.getTopicStatistics().then((response) => {
-        //     const transformedData = transformData(response.data);
-        //     setData(transformedData);
-        // }).finally(() => {
-        //     setIsLoading(false);
-        // });
-        console.log("here")
-        Api.getCoursePapers(1).then((response) => {
+        Api.getCoursePapers(courseId).then((response) => {
             const papers: PaperItem[] = response.data;
             setPapers(papers);
             const topicStats = calculateInitialTopicStats(papers);
@@ -42,7 +36,10 @@ const KnowledgeGraphPage = () => {
         });
     }, []);
 
-    // Slider handler functions
+    /*===========================*
+     * Slider handling functions *
+     *===========================*/
+
     const handleValueChange = (_event: Event, newValue: number | number[]) => {
         if (Array.isArray(newValue)) {
             setValue(newValue as [number, number]);
@@ -58,7 +55,10 @@ const KnowledgeGraphPage = () => {
         handleClose();
     };
 
-    // Statistics table functions
+    /*============================*
+     * Statistics table functions *
+     *============================*/
+
     const toggleExpand = (topic: string) => {
         if (expandedTopics.includes(topic)) {
             setExpandedTopics(expandedTopics.filter(t => t !== topic));
@@ -67,39 +67,9 @@ const KnowledgeGraphPage = () => {
         }
     };
 
-    // Data processing functions
-    const transformData = (apiData: TopicValue[]): TopicData[] => {
-        const transformed: TopicData[] = [];
-        const mainTopicsMap = new Map<string, TopicData>();
-
-        apiData.forEach(item => {
-            const [mainTopic, subTopic] = item.topic.split(": ");
-            if (subTopic) {
-                if (!mainTopicsMap.has(mainTopic)) {
-                    mainTopicsMap.set(mainTopic, {
-                        topic: mainTopic,
-                        value: 0,
-                        subTopics: [{ topic: subTopic, value: item.value }],
-                    });
-                } else {
-                    mainTopicsMap.get(mainTopic)!.subTopics!.push({ topic: subTopic, value: item.value });
-                }
-            } else {
-                transformed.push({ topic: mainTopic, value: item.value, subTopics: [] });
-                mainTopicsMap.set(mainTopic, transformed[transformed.length - 1]);
-            }
-        });
-
-        // Calculate average values for main topics
-        mainTopicsMap.forEach(mainTopic => {
-            if (mainTopic.subTopics && mainTopic.subTopics.length > 0) {
-                const totalValue = mainTopic.subTopics.reduce((sum, subTopic) => sum + subTopic.value, 0);
-                mainTopic.value = totalValue / mainTopic.subTopics.length;
-            }
-        });
-
-        return Array.from(mainTopicsMap.values());
-    };
+    /*===========================*
+     * Data processing functions *
+     *===========================*/
 
     /**
      * Parses a topic string into its main and subtopic.

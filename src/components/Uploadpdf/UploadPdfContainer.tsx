@@ -14,12 +14,13 @@ import UploadPdfButton from "./UploadButton";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadPdfLoading from "./UploadingLoading";
-import UploadPdfImage from "../../assets/images/upload_pdf.png";
-import PdfIcon from "../../assets/icons/pdf_icon.png";
-import SaveIcon from "../../assets/icons/save_icon.png";
-import ConfirmIcon from "../../assets/icons/confirm_icon.png";
+import uploadPDFImage from "../../assets/images/upload_pdf.png";
+import pdfIcon from "../../assets/icons/pdf_icon.png";
+import saveIcon from "../../assets/icons/save_icon.png";
+import confirmIcon from "../../assets/icons/confirm_icon.png";
 import toast from "react-hot-toast";
-import { pdfApi } from "./uploadPDFApi";
+import { pdfApi } from "./uploadPDFApi.ts";
+import SecondaryNavBar from "../SecondaryNavBar.tsx";
 interface StepProps {
     icon: string;
     altText: string;
@@ -126,7 +127,8 @@ const UploadPdfContainer = () => {
     );
 
     return (
-        <>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <SecondaryNavBar />
             {isProcessingFile ? (
                 <UploadPdfLoading />
             ) : (
@@ -145,7 +147,7 @@ const UploadPdfContainer = () => {
                     </Box>
                 </Box>
             )}
-        </>
+        </Box>
     );
 };
 
