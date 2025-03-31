@@ -1,3 +1,5 @@
+import { DatasetElementType } from "@mui/x-charts/internals";
+
 export type Handlers = {
     [key: string]: (...args: any[]) => void;
 };
@@ -5,6 +7,7 @@ export type Handlers = {
 export interface DataItem {
     description: string;
     topics: string[];
+    mark: number;
     difficulty: number;
 }
 
@@ -52,3 +55,18 @@ export interface AuthContextType {
     login: (userId: number) => void;
     logout: () => void;
 };
+
+// Types for dashboard
+export interface TopicFrequency {
+    id: number;
+    value: number;
+    label: string;
+}
+// This is for each topic, rather than overall for the paper
+export interface DifficultyFrequencyAndAverageDifficultyForTopic {
+    label: string;
+    topicDifficultyFrequency: DatasetElementType<
+        string | number | Date | null | undefined
+    >[]; // [{frequency, difficulty}...]
+    topicAverageDifficulty: number;
+}

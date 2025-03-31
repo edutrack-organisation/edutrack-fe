@@ -1,5 +1,5 @@
 import {
-    IconButton,
+    Button,
     Paper,
     Table,
     TableBody,
@@ -8,35 +8,94 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Tooltip,
+    Typography,
 } from "@mui/material";
-import TextArea from "./TextArea";
+import TextArea from "./DoneUpload/TextArea";
 import { MuiChipsInput } from "mui-chips-input";
-import { DataItemWithUUID, Handlers } from "../../types/types";
+import { DataItem, Handlers } from "../types/types";
+import { useEffect, useState } from "react";
+import Api, { ApiError } from "../api/Api";
+import { v4 as uuidv4 } from "uuid";
 
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 interface ContentTableProps {
-    data: DataItemWithUUID[];
-    handlers: Handlers;
+    title: String;
 }
 
-const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
+const ContentTableFromTitle: React.FC<ContentTableProps> = ({ title }) => {
+    const [isFetchingPaper, setIsFetchingPaper] = useState<Boolean>(true);
+    const [data, setData] = useState<DataItem[]>([]);
+
+    // TODO: optimisation to event handlers(?)
+    // Event Handlers
+    const handleTopicsChange = (index: number, newChips: string[]) => {
+        const updatedData = [...data];
+        updatedData[index].topics = newChips;
+        setData(updatedData);
+        Api.changePaperQuestionTopics(title, index, newChips);
+    };
+
+    const handleDescriptionChange = (index: number, newDescription: string) => {
+        const updatedData = [...data];
+        updatedData[index].description = newDescription;
+        setData(updatedData);
+        Api.changePaperQuestionDescription(title, index, newDescription);
+    };
+
+    const handleDifficultyChange = (index: number, newDifficulty: number) => {
+        const updatedData = [...data];
+        updatedData[index].difficulty = newDifficulty;
+        setData(updatedData);
+        Api.changePaperQuestionDifficulty(title, index, newDifficulty);
+    };
+
+    const handleQuestionDelete = (index: number) => {
+        const updatedData = [...data];
+        updatedData.splice(index, 1);
+        setData(updatedData);
+        Api.deletePaperQuestion(title, index);
+    };
+
+    const handlers: Handlers = {
+        handleTopicsChange,
+        handleDescriptionChange,
+        handleDifficultyChange,
+        handleQuestionDelete,
+    };
+
+    useEffect(() => {
+        Api.getPaper(title)
+            .then((response) => {
+                setIsFetchingPaper(false);
+                setData(response.data.questionData);
+            })
+            .catch((error) => {
+                if (error instanceof ApiError) {
+                    // Handle specific API errors
+                    console.error("API Error uploading file:", error.message);
+                } else {
+                    // Handle any unexpected errors
+                    console.error("Unexpected error uploading file:", error);
+                }
+                setIsFetchingPaper(false);
+            });
+    }, []);
+
     return (
         <>
+            <Typography fontWeight={"bolder"} fontSize={"1.8rem"}>
+                {title}
+            </Typography>
             <TableContainer
                 component={Paper}
                 sx={{
                     // width: { lg: "90%", xl: "80%" },
-                    mt: "16rem",
+                    mt: "1.5rem",
                 }}
             >
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ width: "10%" }}>
-                                Question Number
-                            </TableCell>
+                            <TableCell sx={{ width: "10%" }}>Question Number</TableCell>
                             <TableCell sx={{ width: "50%" }} align="left">
                                 Description
                             </TableCell>
@@ -49,7 +108,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                     <TableBody>
                         {data.map((row, index) => (
                             <TableRow
-                                key={row.uuid}
+                                key={uuidv4()}
                                 sx={{
                                     "&:last-child td, &:last-child th": {
                                         border: 0,
@@ -64,22 +123,14 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                         className="textarea"
                                         textContent={row.description}
                                         onChange={(event) =>
-                                            handlers.handleDescriptionChange(
-                                                index,
-                                                event.target.value
-                                            )
+                                            handlers.handleDescriptionChange(index, event.target.value)
                                         }
                                     />
                                 </TableCell>
                                 <TableCell align="left">
                                     <MuiChipsInput
                                         value={row.topics}
-                                        onChange={(newChip) =>
-                                            handlers.handleTopicsChange(
-                                                index,
-                                                newChip
-                                            )
-                                        }
+                                        onChange={(newChip) => handlers.handleTopicsChange(index, newChip)}
                                         sx={{
                                             width: "350px",
                                             "& .MuiOutlinedInput-root": {
@@ -93,13 +144,6 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                                     borderColor: "#1E88E5", // Border color when focused
                                                 },
                                             },
-
-                                            "& .MuiChip-label": {
-                                                fontSize: {
-                                                    xs: "0.6rem",
-                                                    xl: "0.9rem",
-                                                },
-                                            },
                                         }}
                                     />
                                 </TableCell>
@@ -110,10 +154,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                         defaultValue={row.difficulty || 0}
                                         variant="outlined"
                                         onChange={(event) =>
-                                            handlers.handleDifficultyChange(
-                                                index,
-                                                parseInt(event.target.value)
-                                            )
+                                            handlers.handleDifficultyChange(index, parseInt(event.target.value))
                                         }
                                         sx={{
                                             "& .MuiTextField-root": {
@@ -131,40 +172,18 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    <Tooltip title="Delete Question">
-                                        <IconButton
-                                            onClick={() => {
-                                                handlers.handleQuestionDelete(
-                                                    index
-                                                );
-                                            }}
-                                        >
-                                            <DeleteOutlineIcon
-                                                sx={{
-                                                    height: "2rem",
-                                                    width: "2rem",
-                                                }}
-                                            />
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>
-                                <TableCell>
-                                    <Tooltip title="Add Question">
-                                        <IconButton
-                                            onClick={() => {
-                                                handlers.handleQuestionAdd(
-                                                    index
-                                                );
-                                            }}
-                                        >
-                                            <AddCircleOutlineIcon
-                                                sx={{
-                                                    height: "2rem",
-                                                    width: "2rem",
-                                                }}
-                                            />
-                                        </IconButton>
-                                    </Tooltip>
+                                    <Button
+                                        onClick={() => {
+                                            handlers.handleQuestionDelete(index);
+                                        }}
+                                        sx={{
+                                            alignSelf: "flex-end",
+                                            margin: "1rem",
+                                        }}
+                                        variant="contained"
+                                    >
+                                        Delete
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -175,4 +194,4 @@ const ContentTable: React.FC<ContentTableProps> = ({ data, handlers }) => {
     );
 };
 
-export default ContentTable;
+export default ContentTableFromTitle;

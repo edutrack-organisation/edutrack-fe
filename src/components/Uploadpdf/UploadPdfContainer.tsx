@@ -1,3 +1,13 @@
+/**
+ * @file UploadPdfContainer.tsx
+ * @description Container component for PDF upload functionality
+ * Handles the upload process workflow including:
+ * - PDF file upload and parsing
+ * - Progress indication
+ * - Step-by-step visual guide
+ * - Navigation to confirmation page
+ */
+
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import UploadPdfButton from "./UploadButton";
@@ -9,6 +19,18 @@ import PdfIcon from "../../assets/icons/pdf_icon.png";
 import SaveIcon from "../../assets/icons/save_icon.png";
 import ConfirmIcon from "../../assets/icons/confirm_icon.png";
 import toast from "react-hot-toast";
+import { pdfApi } from "./uploadPDFApi";
+interface StepProps {
+    icon: string;
+    altText: string;
+    label: string;
+    isActive?: boolean;
+}
+
+interface UploadHeaderProps {
+    handleUploadFile: (file: File | null) => Promise<void>;
+    uploadPDFImage: string;
+}
 
 const UploadPdfContainer = () => {
     const navigate = useNavigate();
@@ -17,43 +39,91 @@ const UploadPdfContainer = () => {
 
     const handleUploadFile = async (file: File | null) => {
         setUploadedFile(file);
+        if (!file) {
+            toast.error("Please select a PDF file");
+            return;
+        }
 
-        // post processing after uploaded, temporary log
-        if (file) {
-            console.log("File uploaded: ", file);
-            setIsProcessingFile(true);
+        setIsProcessingFile(true);
 
-            // Create a FormData object to hold the file data
-            const formData = new FormData();
-            formData.append("file", file);
-
-            try {
-                // Send the file to the FastAPI endpoint
-                const response = await fetch(
-                    "http://127.0.0.1:8000/parsePDF/",
-                    {
-                        method: "POST",
-                        body: formData,
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to upload file");
-                }
-
-                const result = await response.json();
-                toast.success("Paper parsed successfully!");
-                setIsProcessingFile(false);
-                // Redirect after done
-                navigate("/doneupload", {
-                    state: { response: result, file: file },
-                });
-            } catch (error) {
-                toast.error("Error in parsing PDF");
-                setIsProcessingFile(false);
-            }
+        try {
+            const result = await pdfApi.parsePDF(file);
+            toast.success("Paper parsed successfully!");
+            navigate("/doneupload", {
+                state: { response: result, file },
+            });
+        } catch (error) {
+            toast.error("Error in parsing PDF");
+        } finally {
+            setIsProcessingFile(false);
         }
     };
+
+    /**
+     * Renders a single step in the upload process workflow
+     * Changes appearance based on whether the step is active
+     */
+    const ProcessStep = ({ icon, altText, label, isActive = false }: StepProps) => (
+        <Box
+            className="each_step_container"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+        >
+            <Box
+                className="each_step_icon"
+                borderRadius="50%"
+                bgcolor={isActive ? "#ffafa2" : "#f9e7e4"}
+                height="7rem"
+                width="7rem"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+            >
+                <img src={icon} alt={altText} height="50rem" width="50rem" />
+            </Box>
+            <Typography
+                fontFamily="lato"
+                mt="1rem"
+                fontSize="1rem"
+                bgcolor={isActive ? "#ffafa2" : "#f9e7e4"}
+                padding="0.7rem"
+                borderRadius="1.5rem"
+                border={isActive ? "1px solid gray" : undefined}
+            >
+                {label}
+            </Typography>
+        </Box>
+    );
+
+    /**
+     * Renders the upload section header with title, description, upload button and image
+     */
+    const UploadHeader: React.FC<UploadHeaderProps> = ({ handleUploadFile, uploadPDFImage }) => (
+        <Box display={"flex"} marginTop={{ lg: "3rem", xl: "8rem" }} height={"50vh"} className="upload-pdf-description">
+            <Box height={"100vh"} width={"50%"} display={"flex"} flexDirection={"column"} alignItems={"center"}>
+                <Box className="description" mt={"2rem"}>
+                    <Typography fontSize={{ md: "2.5rem", xl: "4rem" }} ml={2} fontWeight={"bold"}>
+                        Upload PDF
+                    </Typography>
+                    <Typography fontSize={{ lg: "1.5rem", xl: "2rem" }} ml={2} fontFamily={"lato"}>
+                        Easily upload, parse and edit your PDF files
+                    </Typography>
+                </Box>
+                <UploadPdfButton label="Upload File" handleUpload={handleUploadFile} />
+            </Box>
+            <Box
+                component="img"
+                src={uploadPDFImage}
+                alt="upload_pdf_icon"
+                sx={{
+                    width: { lg: "400px", xl: "600px" },
+                    height: { lg: "300px", xl: "400px" },
+                }}
+            />
+        </Box>
+    );
 
     return (
         <>
@@ -61,50 +131,7 @@ const UploadPdfContainer = () => {
                 <UploadPdfLoading />
             ) : (
                 <Box width={{ lg: "80%", xl: "70%" }} mx={"auto"} mt={"5rem"}>
-                    <Box
-                        display={"flex"}
-                        marginTop={{ lg: "3rem", xl: "8rem" }}
-                        height={"50vh"}
-                        className="upload-pdf-description"
-                    >
-                        <Box
-                            height={"100vh"}
-                            width={"50%"}
-                            display={"flex"}
-                            flexDirection={"column"}
-                            alignItems={"center"}
-                        >
-                            <Box className="description" mt={"2rem"}>
-                                <Typography
-                                    fontSize={{ md: "2.5rem", xl: "4rem" }}
-                                    ml={2}
-                                    fontWeight={"bold"}
-                                >
-                                    Upload PDF
-                                </Typography>
-                                <Typography
-                                    fontSize={{ lg: "1.5rem", xl: "2rem" }}
-                                    ml={2}
-                                    fontFamily={"lato"}
-                                >
-                                    Easily upload, parse and edit your PDF files
-                                </Typography>
-                            </Box>
-                            <UploadPdfButton
-                                label="Upload File"
-                                handleUpload={handleUploadFile}
-                            />
-                        </Box>
-                        <Box
-                            component="img"
-                            src={UploadPdfImage}
-                            alt="upload_pdf_icon"
-                            sx={{
-                                width: { lg: "400px", xl: "600px" },
-                                height: { lg: "300px", xl: "400px" },
-                            }}
-                        />
-                    </Box>
+                    <UploadHeader handleUploadFile={handleUploadFile} uploadPDFImage={uploadPDFImage} />
                     <Box
                         className="current-steps-bar"
                         display={"flex"}
@@ -112,112 +139,9 @@ const UploadPdfContainer = () => {
                         mx={"auto"}
                         justifyContent={"space-around"}
                     >
-                        <Box
-                            className="each_step_container"
-                            display={"flex"}
-                            flexDirection={"column"}
-                            alignItems={"center"}
-                            justifyContent={"center"}
-                        >
-                            <Box
-                                className="each_step_icon"
-                                borderRadius={"50%"}
-                                bgcolor={"#ffafa2"}
-                                height={"7rem"}
-                                width={"7rem"}
-                                display={"flex"}
-                                justifyContent={"center"}
-                                alignItems={"center"}
-                            >
-                                <img
-                                    src={PdfIcon}
-                                    alt="pdf_icn"
-                                    height={"50rem"}
-                                    width={"50rem"}
-                                />
-                            </Box>
-                            <Typography
-                                fontFamily={"lato"}
-                                mt={"1rem"}
-                                fontSize={"1rem"}
-                                bgcolor={"#ffafa2"}
-                                padding={"0.7rem"}
-                                borderRadius={"1.5rem"}
-                                border={"1px solid gray"}
-                            >
-                                Upload your PDF
-                            </Typography>
-                        </Box>
-                        <Box
-                            className="each_step_container "
-                            display={"flex"}
-                            flexDirection={"column"}
-                            alignItems={"center"}
-                            justifyContent={"center"}
-                        >
-                            <Box
-                                className="each_step_icon"
-                                borderRadius={"50%"}
-                                bgcolor={"#f9e7e4"}
-                                height={"7rem"}
-                                width={"7rem"}
-                                display={"flex"}
-                                justifyContent={"center"}
-                                alignItems={"center"}
-                            >
-                                <img
-                                    src={ConfirmIcon}
-                                    alt="confirm_icon"
-                                    height={"50rem"}
-                                    width={"50rem"}
-                                />
-                            </Box>
-                            <Typography
-                                fontFamily={"lato"}
-                                mt={"1rem"}
-                                fontSize={"1rem"}
-                                bgcolor={"#f9e7e4"}
-                                padding={"0.7rem"}
-                                borderRadius={"1.5rem"}
-                            >
-                                Confirm parsed pdf
-                            </Typography>
-                        </Box>
-                        <Box
-                            className="each_step_container"
-                            display={"flex"}
-                            flexDirection={"column"}
-                            alignItems={"center"}
-                            justifyContent={"center"}
-                        >
-                            <Box
-                                className="each_step_icon"
-                                borderRadius={"50%"}
-                                bgcolor={"#f9e7e4"}
-                                height={"7rem"}
-                                width={"7rem"}
-                                display={"flex"}
-                                justifyContent={"center"}
-                                alignItems={"center"}
-                            >
-                                <img
-                                    src={SaveIcon}
-                                    alt="save_icon"
-                                    height={"50rem"}
-                                    width={"50rem"}
-                                />
-                            </Box>
-                            <Typography
-                                fontFamily={"lato"}
-                                mt={"1rem"}
-                                fontSize={"1rem"}
-                                bgcolor={"#f9e7e4"}
-                                padding={"0.7rem"}
-                                borderRadius={"1.5rem"}
-                            >
-                                Save your PDF
-                            </Typography>
-                        </Box>
+                        <ProcessStep icon={pdfIcon} altText="pdf_icon" label="Upload your PDF" isActive={true} />
+                        <ProcessStep icon={confirmIcon} altText="confirm_icon" label="Confirm parsed pdf" />
+                        <ProcessStep icon={saveIcon} altText="save_icon" label="Save your PDF" />
                     </Box>
                 </Box>
             )}

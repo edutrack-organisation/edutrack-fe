@@ -15,7 +15,8 @@ import SignupPage from "./pages/SignupPage.tsx";
 import UploadPdfPage from "./pages/UploadPdfPage";
 import ViewPapersPage from "./pages/ViewPapersPage.tsx";
 import KnowledgeGraphPage from "./pages/KnowledgeGraphPage.tsx";
-import QuestionBankPage from "./pages/QuestionBankPage.tsx";
+import GeneratePaper from "./pages/GeneratePaper";
+import DashboardPage from "./pages/DashboardPage";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -63,6 +64,8 @@ function App() {
                             <Route path="/logout" element={<LogoutPage />} />
                             {/* Fallback page */}
                             <Route path="*" element={<LandingPage />} />
+                            <Route path="/generate" element={<GeneratePaper />} />
+                            <Route path="/dashboard" element={<DashboardPage />} />
                         </Routes>
                         <Toaster position="top-right" reverseOrder={false} />
                     </Box>
