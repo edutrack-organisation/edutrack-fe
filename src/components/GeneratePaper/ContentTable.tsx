@@ -82,6 +82,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onQuickGenerate, onAddQue
 const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, allTopics }) => {
     const [indivQuestionModalOpen, setIndivQuestionModalOpen] = useState(false); // Controls the visibility of the individual question modal
     const [quickGenerateModalOpen, setQuickGenerateModalOpen] = useState(false); // Controls the visibility of the quick generate questions modal
+
     /**
      * Tracks the index of the currently selected question
      * -2: No question selected
@@ -161,8 +162,13 @@ const ContentTable: React.FC<ContentTableProps> = ({ questions, setQuestions, al
 
     return (
         <>
-            <TableContainer component={Paper} sx={tableStyles.container}>
-                <Table sx={tableStyles.table} aria-label="simple table">
+            <TableContainer component={Paper} sx={{ ...tableStyles.container, overflow: "visible" }}>
+                <Table
+                    sx={{
+                        ...tableStyles.table,
+                    }}
+                    aria-label="simple table"
+                >
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ width: "10%" }}>Question Number</TableCell>
