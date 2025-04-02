@@ -1,0 +1,52 @@
+import { useEffect, useState } from "react";
+import { QuestionItem } from "../../types/types";
+import Api, { ApiResponse } from "../../api/Api";
+import BoxAndPointerDiagram from "../BoxAndPointerDiagram";
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+
+const ScoreAnalysis: React.FC<{ paperId: number }> = ({ paperId }) => {
+    const [questions, setQuestions] = useState<QuestionItem[]>();
+    const [studentScores, setStudentScores] = useState<number[][]>();
+
+    useEffect(() => {
+        Api.getPaperQuestions(paperId).then((response: ApiResponse) => {
+            setQuestions(response.data);
+        });
+        Api.getPaperStudentScores(paperId).then((response: ApiResponse) => {
+            setStudentScores(response.data);
+        });
+    }, [paperId])
+
+    return (
+        (questions && studentScores) ? (
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Question Number</TableCell>
+                            <TableCell>Description</TableCell>
+                            <TableCell>Marks</TableCell>
+                            <TableCell>Statistics</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {questions.map((question, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{question.questionNumber}</TableCell>
+                                <TableCell>{question.description}</TableCell>
+                                <TableCell>{question.marks}</TableCell>
+                                <TableCell style={{ width: "150px", textAlign: "center" }}>
+                                    <BoxAndPointerDiagram data={studentScores[index]} max_value={question.marks} />
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        ) : (
+            <CircularProgress />
+        )
+    );
+};
+
+export default ScoreAnalysis;

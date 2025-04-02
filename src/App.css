@@ -67,3 +67,6 @@
     scrollbar-color: #007bff #f0f0f0; /* thumb color and track color */
 }
 
+*:focus {
+    outline: none !important; /* Disables focus ripple on buttons and such when clicked */
+}

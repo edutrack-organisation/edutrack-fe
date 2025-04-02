@@ -1,9 +1,9 @@
-import { DataItem, DataItemWithUUID } from "../types/types";
+import type { CourseItem, PaperItem, QuestionItem } from "../types/types";
 
-interface ApiResponse {
+export interface ApiResponse<T = any> {
     success: boolean; // Whether the API call is successful
     message?: string; // Optional message field
-    data?: any; // Data from API call
+    data?: T; // Data from API call
 }
 
 export class ApiError extends Error {
@@ -14,23 +14,11 @@ export class ApiError extends Error {
 }
 
 const Api = {
-    /**
-     * API call to upload a PDF paper to be scanned.
-     *
-     * @param file The file to scan
-     * @returns An ApiResponse object with the data being a JSON object containing { title: String, questionData: DataItem[] }
-     */
-    uploadPdfPaper: async (file: File): Promise<ApiResponse> => {
-        // Create a FormData object to hold the file data
-        const formData = new FormData();
-        formData.append("file", file);
-
+    getPaperStudentScores: async (paperId: number): Promise<ApiResponse<number[][]>> => {
+        // TODO: Can be optimized in the backend to simply return true or false
         try {
             // Send the file to the FastAPI endpoint
-            const response = await fetch("http://127.0.0.1:8000/parsePDF/", {
-                method: "POST",
-                body: formData,
-            });
+            const response = await fetch(`http://127.0.0.1:8000/papers/${paperId}`);
 
             if (!response.ok) {
                 // Handle HTTP errors
@@ -38,247 +26,276 @@ const Api = {
                 throw new ApiError(`Error ${response.status}: ${errorMessage}`);
             }
 
-            return await response.json(); // Return the parsed JSON response
+            const data = (await response.json()).student_scores;
+
+            return {
+                success: response.ok,
+                data: data,
+            };
         } catch (error) {
             // Handle network or other unexpected errors
-            throw new ApiError(
-                `Failed to upload PDF: ${
-                    error instanceof Error ? error.message : "Unknown error"
-                }`
-            );
+            throw new ApiError("Failed to reach server");
         }
-
-        // function createData(
-        //     question_uuid: number,
-        //     description: string,
-        //     topics: string[],
-        //     difficulty: number
-        // ): DataItem {
-        //     return { question_uuid, description, topics, difficulty };
-        // }
-
-        // const dummyData = [
-        //     createData(
-        //         1,
-        //         "What is the function of a router in a network, and how does it differ from other networking devices like switches and hubs?",
-        //         ["Routing", "Networking Devices"],
-        //         3
-        //     ),
-        //     createData(
-        //         2,
-        //         "Explain the differences between TCP (Transmission Control Protocol) and UDP (User Datagram Protocol), including their use cases and how their characteristics affect data transmission.",
-        //         ["Protocols", "TCP/IP"],
-        //         5
-        //     ),
-        //     createData(
-        //         3,
-        //         "What is an IP address, and how is it structured in terms of its components? Include an explanation of IPv4 and IPv6 addressing formats and their significance.",
-        //         ["IP Addressing", "Networking"],
-        //         2
-        //     ),
-        //     createData(
-        //         4,
-        //         "What are the main differences between IPv4 and IPv6, and how do these differences impact network configuration, address space, and overall internet functionality?",
-        //         ["IP Addressing", "IPv4 vs IPv6"],
-        //         6
-        //     ),
-        //     createData(
-        //         5,
-        //         "Describe the OSI (Open Systems Interconnection) model and its seven layers. Explain the function of each layer and how they interact to enable network communication.",
-        //         ["OSI Model", "Networking Architecture"],
-        //         7
-        //     ),
-        //     createData(
-        //         6,
-        //         "What is a subnet mask, and how is it used in the process of subnetting IP addresses? Include an explanation of how subnet masks help in dividing a network into smaller sub-networks.",
-        //         ["Subnetting", "IP Addressing"],
-        //         8
-        //     ),
-        //     createData(
-        //         7,
-        //         "Explain how the Domain Name System (DNS) works to translate domain names into IP addresses. Discuss the role of DNS servers and how they contribute to the resolution process.",
-        //         ["DNS", "Name Resolution"],
-        //         4
-        //     ),
-        //     createData(
-        //         8,
-        //         "What is a MAC (Media Access Control) address, and how does it differ from an IP address? Provide details on how MAC addresses are used in network communication and their importance in local network management.",
-        //         ["MAC Address", "Networking"],
-        //         3
-        //     ),
-        //     createData(
-        //         9,
-        //         "What is Network Address Translation (NAT), and how does it enable multiple devices on a local network to share a single public IP address? Discuss different types of NAT and their implications for network security and communication.",
-        //         ["NAT", "Networking"],
-        //         5
-        //     ),
-        //     createData(
-        //         10,
-        //         "Explain the purpose of a Virtual Private Network (VPN) in a network environment. Describe how VPNs secure data transmission and provide privacy by creating a secure tunnel over the internet.",
-        //         ["VPN", "Network Security"],
-        //         6
-        //     ),
-        // ];
-
-        // return { success: true, data: { title: "CS2105 - Computer Networks Finals 2023/2024 Semester 2", questionData: dummyData } };
     },
 
     /**
-     * API call to submit the confirmed fields of the paper.
-     *
-     * @param title The title of the paper
-     * @param questionData The list of questions in the paper
-     * @returns An ApiResponse object with the data being a JSON object containing { title: String } // TODO: to be discussed, this should redirect user to view the paper
+     * Adds a new course
+     * @param courseTitle The title of the course to be added
      */
-    submitPdfData: async (
-        title: String,
-        questionData: DataItem[]
-    ): Promise<ApiResponse> => {
-        // TODO: To be implemented
-        return {
-            success: true,
-            data: {
-                title: "CS2105 - Computer Networks Finals 2023/2024 Semester 2",
-            },
-        };
-    },
+    addCourse: async (courseTitle: string): Promise<ApiResponse<CourseItem>> => {
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(
+                "http://127.0.0.1:8000/courses/",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        course_title: courseTitle
+                    }),
+                }
+            );
 
-    getPdfTitleList: async (): Promise<ApiResponse> => {
-        // TODO: To be implemented
-        return {
-            success: true,
-            data: [
-                "Paper 1",
-                "Paper 2",
-                "Paper 3",
-                "Paper 4",
-                "CS2105 - Computer Networks Finals 2023/2024 Semester 2",
-                "Paper 5",
-                "Paper 6",
-                "Paper 200",
-            ],
-        };
-    },
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
 
-    getPaper: async (title: String): Promise<ApiResponse> => {
-        // TODO: To be implemented
-        function createData(
-            uuid: string,
-            description: string,
-            topics: string[],
-            mark: number,
-            difficulty: number
-        ): DataItemWithUUID {
-            return { uuid, description, topics, mark, difficulty };
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
         }
-
-        const dummyData = [
-            createData(
-                "1",
-                "What is the function of a router in a network, and how does it differ from other networking devices like switches and hubs?",
-                ["Routing", "Networking Devices"],
-                0,
-                3
-            ),
-            createData(
-                "2",
-                "Explain the differences between TCP (Transmission Control Protocol) and UDP (User Datagram Protocol), including their use cases and how their characteristics affect data transmission.",
-                ["Protocols", "TCP/IP"],
-                0,
-                5
-            ),
-            createData(
-                "3",
-                "What is an IP address, and how is it structured in terms of its components? Include an explanation of IPv4 and IPv6 addressing formats and their significance.",
-                ["IP Addressing", "Networking"],
-                0,
-                2
-            ),
-            createData(
-                "4",
-                "What are the main differences between IPv4 and IPv6, and how do these differences impact network configuration, address space, and overall internet functionality?",
-                ["IP Addressing", "IPv4 vs IPv6"],
-                0,
-                6
-            ),
-            createData(
-                "5",
-                "Describe the OSI (Open Systems Interconnection) model and its seven layers. Explain the function of each layer and how they interact to enable network communication.",
-                ["OSI Model", "Networking Architecture"],
-                0,
-                7
-            ),
-            createData(
-                "6",
-                "What is a subnet mask, and how is it used in the process of subnetting IP addresses? Include an explanation of how subnet masks help in dividing a network into smaller sub-networks.",
-                ["Subnetting", "IP Addressing"],
-                0,
-                8
-            ),
-            createData(
-                "7",
-                "Explain how the Domain Name System (DNS) works to translate domain names into IP addresses. Discuss the role of DNS servers and how they contribute to the resolution process.",
-                ["DNS", "Name Resolution"],
-                0,
-                4
-            ),
-            createData(
-                "8",
-                "What is a MAC (Media Access Control) address, and how does it differ from an IP address? Provide details on how MAC addresses are used in network communication and their importance in local network management.",
-                ["MAC Address", "Networking"],
-                0,
-                3
-            ),
-            createData(
-                "9",
-                "What is Network Address Translation (NAT), and how does it enable multiple devices on a local network to share a single public IP address? Discuss different types of NAT and their implications for network security and communication.",
-                ["NAT", "Networking"],
-                0,
-                5
-            ),
-            createData(
-                "9",
-                "Explain the purpose of a Virtual Private Network (VPN) in a network environment. Describe how VPNs secure data transmission and provide privacy by creating a secure tunnel over the internet.",
-                ["VPN", "Network Security"],
-                0,
-                6
-            ),
-        ];
-        return {
-            success: true,
-            data: { title: title, questionData: dummyData },
-        };
     },
 
-    changePaperQuestionTopics: async (
-        title: String,
-        index: number,
-        newTopics: String[]
-    ): Promise<ApiResponse> => {
-        return { success: true };
+    getCourses: async (): Promise<ApiResponse<CourseItem[]>> => {
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch("http://127.0.0.1:8000/courses/");
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            const data = (await response.json()).map((course) => ({
+                courseId: course.id,
+                courseTitle: course.title,
+            }));
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
     },
 
-    changePaperQuestionDescription: async (
-        title: String,
-        index: number,
-        newDescription: String
-    ): Promise<ApiResponse> => {
-        return { success: true };
+    getCoursePapers: async (courseId: number): Promise<ApiResponse<PaperItem[]>> => {
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(`http://127.0.0.1:8000/courses/${courseId}`);
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            const data = (await response.json()).papers.map((paper) => ({
+                paperId: paper.id,
+                paperTitle: paper.title,
+                questions: paper.questions.map((question) => ({
+                    questionId: question.id,
+                    questionNumber: question.question_number,
+                    description: question.description,
+                    topics: question.topics.map((topic) => (topic.title)),
+                    marks: question.mark,
+                    difficulty: question.difficulty,
+                })).sort((a, b) => a.questionNumber - b.questionNumber), // Sort in ascending order,
+                studentScores: paper.student_scores,
+            }));
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
     },
 
-    changePaperQuestionDifficulty: async (
-        title: String,
-        index: number,
-        newDifficulty: number
-    ): Promise<ApiResponse> => {
-        return { success: true };
+    getIsPaperScoresAvailable: async (paperId: number): Promise<ApiResponse<boolean>> => {
+        // TODO: Can be optimized in the backend to simply return true or false
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(`http://127.0.0.1:8000/papers/${paperId}`);
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            const data = Boolean((await response.json()).student_scores?.length);
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
     },
 
-    deletePaperQuestion: async (
-        title: String,
-        index: number
-    ): Promise<ApiResponse> => {
-        return { success: true };
+    getPaperQuestions: async (paperId: number): Promise<ApiResponse<QuestionItem[]>> => {
+        try {
+            // Send the file to the FastAPI endpoint
+            const response = await fetch(`http://127.0.0.1:8000/papers/${paperId}`);
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            const data = (await response.json()).questions
+                .map((question) => ({
+                    questionId: question.id,
+                    questionNumber: question.question_number,
+                    description: question.description,
+                    topics: question.topics.map((topic) => (topic.title)), // TODO: use TopicItem in the future
+                    marks: question.mark,
+                    difficulty: question.difficulty,
+                }))
+                .sort((a, b) => a.questionNumber - b.questionNumber); // Sort in ascending order
+
+            return {
+                success: response.ok,
+                data: data,
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    updatePaper: async (paper: PaperItem): Promise<ApiResponse> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/papers/${paper.paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: paper.paperId,
+                        title: paper.paperTitle,
+                        questions: paper.questions?.map((q) => ({
+                            id: q.questionId,
+                            question_number: q.questionNumber,
+                            description: q.description,
+                            mark: q.marks,
+                            difficulty: q.difficulty,
+                            topics_str: q.topics,
+                        })) ?? [],
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    /**
+     * Updates student scores for a paper
+     * @param paperId The id of the paper to update scores
+     * @param studentScores The student score values to update to
+     */
+    updateStudentScores: async (paperId: number, studentScores: number[][]): Promise<ApiResponse<CourseItem>> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/studentScores/${paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_scores: studentScores
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
+    },
+
+    /**
+     * Update difficulty for all questions a paper
+     * @param paperId The id of the paper to update question difficulty
+     * @param difficulty The difficulty values to update to for the questions
+     */
+    updatePaperQuestionDifficulties: async (paperId: number, questionDifficulties: number[]): Promise<ApiResponse<CourseItem>> => {
+        try {
+            // Send the student scores to the FastAPI endpoint
+            const response = await fetch(
+                `http://127.0.0.1:8000/questionDifficulties/${paperId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question_difficulties: questionDifficulties
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                // Handle HTTP errors
+                const errorMessage = await response.text();
+                throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+            }
+
+            return {
+                success: response.ok,
+                data: await response.json(),
+            };
+        } catch (error) {
+            // Handle network or other unexpected errors
+            throw new ApiError("Failed to reach server");
+        }
     },
 };
 
