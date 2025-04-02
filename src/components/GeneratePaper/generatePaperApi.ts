@@ -5,9 +5,17 @@ import { v4 as uuidv4 } from "uuid";
 const BASE_URL = "http://127.0.0.1:8000";
 
 export const generatePaperApi = {
+    // fetch the topics in database
     fetchTopics: async (): Promise<Topic[]> => {
         const response = await fetch(`${BASE_URL}/topics/`);
         if (!response.ok) throw new Error("Failed to fetch list of topics");
+        return response.json();
+    },
+
+    // fetch complete list of predefined topics from Excel file
+    fetchPredefinedTopics: async (): Promise<string[]> => {
+        const response = await fetch(`${BASE_URL}/topics/available/`);
+        if (!response.ok) throw new Error("Failed to fetch predefined list of topics");
         return response.json();
     },
 

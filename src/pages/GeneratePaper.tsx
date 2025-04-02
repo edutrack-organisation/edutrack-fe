@@ -4,15 +4,15 @@ import ContentTable from "../components/GeneratePaper/ContentTable";
 import { DataItemWithUUID } from "../types/types";
 import { useEffect, useState } from "react";
 import export_excel from "../assets/icons/export_excel.png";
-import { useTopics } from "../hooks";
-import { PieChartData, Topic } from "../components/GeneratePaper/types";
+import { usePredefinedTopics } from "../hooks";
+import { PieChartData } from "../components/GeneratePaper/types";
 import toast from "react-hot-toast";
 import { countGeneratedQuestionStatistic, exportToExcel } from "../components/GeneratePaper/utils";
 import GeneratedQuestionStatistic from "../components/GeneratePaper/GeneratedQuestionStatistic";
 
 const GeneratePaper = () => {
     const [questions, setQuestions] = useState<DataItemWithUUID[]>([]); // this is the questions to be rendered in the ContentTable
-    const { topics, fetchTopics } = useTopics(); // Custom react hook to fetch full list of topics from the database
+    const { predefinedTopics, fetchPredefinedTopics } = usePredefinedTopics(); // Custom react hook to fetch full list of topics from the database
 
     const [pieChartTopicsMarksSeries, setPieChartTopicsMarksSeries] = useState<PieChartData[]>([]);
     const [pieChartWeightedTopicsMarksSeries, setPieChartWeightedTopicsMarksSeries] = useState<PieChartData[]>([]);
@@ -98,7 +98,7 @@ const GeneratePaper = () => {
     };
 
     useEffect(() => {
-        fetchTopics();
+        fetchPredefinedTopics();
     }, []);
 
     useEffect(() => {
@@ -126,11 +126,7 @@ const GeneratePaper = () => {
             <PageHeader />
 
             {/* content table: includes content table component and logic for modal popup */}
-            <ContentTable
-                questions={questions}
-                setQuestions={setQuestions}
-                allTopics={topics.map((t: Topic) => t.title)}
-            />
+            <ContentTable questions={questions} setQuestions={setQuestions} allTopics={predefinedTopics} />
         </Box>
     );
 };
