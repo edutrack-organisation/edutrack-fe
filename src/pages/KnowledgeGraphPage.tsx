@@ -1,36 +1,41 @@
+
 import React, { useEffect, useState } from 'react';
-import { Box, Chip, CircularProgress, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, useMediaQuery, useTheme, Slider, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Chip, CircularProgress, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, useMediaQuery, useTheme, Slider, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { COLORS } from "../constants/constants";
 import SecondaryNavBar from '../components/SecondaryNavBar';
-import { PaperItem, TopicStats } from '../types/types';
+import { PaperItem, QuestionItem } from '../types/types';
 import Api from '../api/Api';
 import { useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const KnowledgeGraphPage = () => {
-    // UI values
+    // UI and other values
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isApiError, setIsApiError] = useState<boolean>(false);
+    const courseId: number = Number(decodeURIComponent(useParams().courseId!));
+    const theme = useTheme();
+    const isWideScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
     // Filter slider values
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<[number, number]>([0, 100]);
 
-    // Store fetched papers for reuse during filtering
-    const [papers, setPapers] = useState<PaperItem[]>([]);
-
     // Statistics table values
-    const [data, setData] = useState<TopicStats>({});
+    const [studentContributions, setStudentContributions] = useState<StudentContribution[]>([]);
+    const [data, setData] = useState<TopicData[]>([]);
     const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
-    const courseId: number = Number(decodeURIComponent(useParams().courseId!));
-    const theme = useTheme();
-    const isWideScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
     useEffect(() => {
         Api.getCoursePapers(courseId).then((response) => {
             const papers: PaperItem[] = response.data;
-            setPapers(papers);
-            const topicStats = calculateInitialTopicStats(papers);
-            setData(topicStats);
+            const { studentContributions, topicData } = processData(papers);
+            setStudentContributions(studentContributions);
+            setData(topicData);
+            console.log(studentContributions)
+        }).catch((error) => {
+            toast.error(`Failed to retrieve statistics. ${error.message}`);
+            setIsApiError(true);
         }).finally(() => {
             setIsLoading(false);
         });
@@ -50,8 +55,8 @@ const KnowledgeGraphPage = () => {
     const handleClose = () => setOpen(false);
 
     const handleOk = () => {
-        const filteredStats = calculateFilteredTopicStats(papers, value[0], value[1]);
-        setData(filteredStats);
+        const filteredData = calculateFilteredData(studentContributions, data, value[0], value[1]);
+        setData(filteredData);
         handleClose();
     };
 
@@ -84,163 +89,185 @@ const KnowledgeGraphPage = () => {
     };
 
     /**
-     * Computes the indices of students that fall within a specific percentile range for a given paper.
-     * 
-     * @param paper - The paper containing student scores.
-     * @param lowerPercentile - The lower bound of the percentile range (e.g., 25).
-     * @param upperPercentile - The upper bound of the percentile range (e.g., 50).
-     * @returns An array of indices of students that fall within the range.
+     * Process papers and calculate student contributions and topic data.
      */
-    const getFilteredIndicesForPaper = (paper: PaperItem, lowerPercentile: number, upperPercentile: number): number[] => {
-        if (!paper.studentScores || !paper.questions) return [];
-
-        const numStudents = paper.studentScores.length;
-        if (numStudents === 0) return [];
-
-        const totalMaxMarks = paper.questions.reduce((sum, q) => sum + q.marks, 0);
-
-        // Compute overall grade for each student.
-        const studentGrades: { index: number; grade: number }[] = [];
-        for (let i = 0; i < numStudents; i++) {
-            const scores = paper.studentScores[i] || [];
-            const totalScore = paper.questions.reduce((sum, q, idx) => {
-                const score = idx < scores.length ? scores[idx] : 0;
-                return sum + score;
-            }, 0);
-            const grade = totalMaxMarks > 0 ? (totalScore / totalMaxMarks) * 100 : 0;
-            studentGrades.push({ index: i, grade });
+    const processData = (papers: PaperItem[]): { studentContributions: StudentContribution[]; topicData: TopicData[] } => {
+        // Determine the maximum number of students across all papers.
+        let maxStudents = 0;
+        for (const paper of papers) {
+            if (paper.studentScores) {
+                paper.studentScores.forEach((scoreRow) => {
+                    maxStudents = Math.max(maxStudents, scoreRow.length);
+                });
+            }
         }
 
-        // Sort students by grade descending.
-        studentGrades.sort((a, b) => b.grade - a.grade);
+        // Initialize student contributions
+        const studentContributions: StudentContribution[] = [];
+        for (let i = 0; i < maxStudents; i++) {
+            studentContributions.push({ grade: 0, topicContributions: {} });
+        }
 
-        // Determine the index range for filtering.
-        const lowerIndex = Math.floor((lowerPercentile / 100) * numStudents);
-        const upperIndex = Math.floor((upperPercentile / 100) * numStudents);
+        // Map to store total difficulty per subtopic
+        const topicTotalDifficulty: Record<string, number> = {};
+        // Map to store the main topic for each subtopic (for topicData grouping)
+        const subtopicToMain: Record<string, string> = {};
 
-        return studentGrades.slice(lowerIndex, upperIndex).map((item) => item.index);
-    };
+        // Process each paper
+        for (const paper of papers) {
+            if (!paper.studentScores) {
+                continue; // Ignore papers with no scores uploaded
+            }
 
-    /**
-     * Calculates the topic statistics across all papers using the provided filtered mapping.
-     * 
-     * @param papers - Array of PaperItem objects.
-     * @param filteredMapping - An object mapping paperId to an array of filtered student indices.
-     *                          For papers not present in the mapping, assume all students are included.
-     * @returns TopicStats object that aggregates the data.
-     */
-    const calculateTopicStats = (papers: PaperItem[], filteredMapping: { [paperId: number]: number[] }): TopicStats => {
-        // Intermediate structure:
-        // stats[mainTopic][subtopic] = { sumWeighted: number, totalDifficulty: number, countQuestions: number }
-        const stats: {
-            [main: string]: {
-                [sub: string]: { sumWeighted: number; totalDifficulty: number; countQuestions: number };
-            };
-        } = {};
-
-        papers.forEach((paper) => {
-            // Ensure questions and studentScores exist.
-            if (!paper.questions || !paper.studentScores) return;
-            // Get filtered student indices for this paper.
-            // If not provided, assume all students.
-            const filteredIndices = filteredMapping[paper.paperId] ||
-                paper.studentScores.map((_row, idx) => idx);
-
-            // For each question in the paper:
-            paper.questions.forEach((question, qIdx) => {
-                // Calculate the average performance for this question using filtered students.
-                // Performance = score / max marks (if a student's score is missing, treat it as 0).
-                let sumPerformance = 0;
-                filteredIndices.forEach((stuIdx) => {
-                    const scoresRow = paper.studentScores![stuIdx] || [];
-                    const score = qIdx < scoresRow.length ? scoresRow[qIdx] : 0;
-                    sumPerformance += question.marks > 0 ? score / question.marks : 0;
-                });
-                const numFiltered = filteredIndices.length;
-                const avgPerformance = numFiltered > 0 ? sumPerformance / numFiltered : 0;
-
-                // For each topic string of the question, update stats.
-                question.topics.forEach((topicStr) => {
+            // For each question in the paper
+            paper.questions.forEach((question: QuestionItem, qIndex: number) => {
+                // Process topics for this question
+                question.topics.forEach((topicStr: string) => {
                     const { main, sub } = parseTopic(topicStr);
-
-                    // Initialize structures if not present.
-                    if (!stats[main]) {
-                        stats[main] = {};
-                    }
-                    if (!stats[main][sub]) {
-                        stats[main][sub] = { sumWeighted: 0, totalDifficulty: 0, countQuestions: 0 };
-                    }
-
-                    // Add weighted contribution: weight = question difficulty.
-                    stats[main][sub].sumWeighted += avgPerformance * question.difficulty;
-                    stats[main][sub].totalDifficulty += question.difficulty;
-                    stats[main][sub].countQuestions += 1;
+                    // Record the mapping for later grouping
+                    subtopicToMain[sub] = main;
+                    // Increase the total difficulty for this subtopic
+                    topicTotalDifficulty[sub] = (topicTotalDifficulty[sub] || 0) + question.difficulty;
                 });
+
+                // For each student, using the student scores for this question row.
+                const questionScores = paper.studentScores[qIndex] || [];
+                for (let studentIndex = 0; studentIndex < maxStudents; studentIndex++) {
+                    const score = questionScores[studentIndex] ?? 0;
+                    studentContributions[studentIndex].grade += score;
+
+                    const weightedScore = (score / question.marks) * question.difficulty;
+                    // Accumulate to each topic contribution for this question
+                    question.topics.forEach((topicStr: string) => {
+                        const { sub } = parseTopic(topicStr);
+                        studentContributions[studentIndex].topicContributions[sub] =
+                            (studentContributions[studentIndex].topicContributions[sub] || 0) + weightedScore;
+                    });
+                }
             });
-        });
+        }
 
-        // Build the final TopicStats output.
-        const topicStats: TopicStats = {};
-        Object.keys(stats).forEach((mainTopic) => {
-            topicStats[mainTopic] = { average: 0, subtopics: {} };
-            const subtopics = stats[mainTopic];
-            let subtopicSum = 0;
-            let subtopicCount = 0;
-            Object.keys(subtopics).forEach((subTopic) => {
-                const { sumWeighted, totalDifficulty } = subtopics[subTopic];
-                // Calculate percentage for this subtopic.
-                const percentage = totalDifficulty > 0 ? (sumWeighted / totalDifficulty) * 100 : 0;
-                topicStats[mainTopic].subtopics[subTopic] = percentage;
-                subtopicSum += percentage;
-                subtopicCount++;
-            });
-            // The main topic's average is the average of its subtopics.
-            topicStats[mainTopic].average = subtopicCount > 0 ? subtopicSum / subtopicCount : 0;
-        });
-
-        return topicStats;
-    };
-
-    /**
-     * Calculates the initial topic statistics across all papers using all students.
-     *
-     * @param papers - Array of PaperItem objects.
-     * @returns TopicStats computed with all student data.
-     */
-    const calculateInitialTopicStats = (papers: PaperItem[]): TopicStats => {
-        // For initial calculation, include all students in each paper.
-        const allStudentsMapping: { [paperId: number]: number[] } = {};
-        papers.forEach((paper) => {
-            if (paper.studentScores) {
-                allStudentsMapping[paper.paperId] = paper.studentScores.map((_row, idx) => idx);
+        // Normalize each student's topic contributions (scale to 0-100 per subtopic)
+        studentContributions.forEach((student) => {
+            for (const subtopic in student.topicContributions) {
+                const totalDiff = topicTotalDifficulty[subtopic] || 1;
+                student.topicContributions[subtopic] = (student.topicContributions[subtopic] / totalDiff) * 100;
             }
         });
-        return calculateTopicStats(papers, allStudentsMapping);
-    };
 
-    /**
-     * Computes topic statistics for a given percentile range across all papers.
-     *
-     * @param papers - Array of PaperItem objects.
-     * @param lowerPercentile - The lower bound of the percentile range (e.g., 25).
-     * @param upperPercentile - The upper bound of the percentile range (e.g., 50).
-     * @returns TopicStats computed based on the selected percentile range.
-     */
-    const calculateFilteredTopicStats = (papers: PaperItem[], lowerPercentile: number, upperPercentile: number): TopicStats => {
-        const filteredMapping: { [paperId: number]: number[] } = {};
+        // Sort students by overall grade in ascending order
+        studentContributions.sort((a, b) => a.grade - b.grade);
 
-        papers.forEach((paper) => {
-            filteredMapping[paper.paperId] = getFilteredIndicesForPaper(paper, lowerPercentile, upperPercentile);
+        // Compute average contribution per subtopic across all students
+        const subtopicAverages: Record<string, number> = {};
+        for (const sub in topicTotalDifficulty) {
+            let sum = 0;
+            for (const student of studentContributions) {
+                sum += student.topicContributions[sub] || 0;
+            }
+            subtopicAverages[sub] = sum / studentContributions.length;
+        }
+
+        // Group subtopics by their main topic
+        const mainTopicMap: Record<string, { subtopics: { topic: string; value: number }[] }> = {};
+        for (const sub in subtopicAverages) {
+            const main = subtopicToMain[sub] || sub;
+            if (!mainTopicMap[main]) {
+                mainTopicMap[main] = { subtopics: [] };
+            }
+            mainTopicMap[main].subtopics.push({ topic: sub, value: subtopicAverages[sub] });
+        }
+
+        // Build the topic data list.
+        // If a main topic has only one subtopic that is the same as the main topic, treat it as standalone.
+        const topicData: TopicData[] = [];
+        for (const main in mainTopicMap) {
+            const group = mainTopicMap[main];
+            if (group.subtopics.length === 1 && group.subtopics[0].topic === main) {
+                topicData.push({ topic: main, value: group.subtopics[0].value });
+            } else {
+                const avg =
+                    group.subtopics.reduce((acc, sub) => acc + sub.value, 0) / group.subtopics.length;
+                topicData.push({
+                    topic: main,
+                    value: avg,
+                    subtopics: group.subtopics.map((s) => ({ topic: s.topic, value: s.value })),
+                });
+            }
+        }
+
+        // Sort topicData by topic name and also sort subtopics if present.
+        topicData.sort((a, b) => a.topic.localeCompare(b.topic));
+        topicData.forEach((topic) => {
+            if (topic.subtopics) {
+                topic.subtopics.sort((a, b) => a.topic.localeCompare(b.topic));
+            }
         });
 
-        return calculateTopicStats(papers, filteredMapping);
+        return { studentContributions, topicData };
+    };
+
+
+    /**
+     * Calculate filtered topic data based on a slice of student contributions.
+     * The lowerPercentile and upperPercentile are percentages (0-100) indicating the slice.
+     *
+     * This function updates the topicData values based solely on the normalized subtopic values in the filtered students.
+     */
+    const calculateFilteredData = (studentContributions: StudentContribution[], topicData: TopicData[], lowerPercentile: number, upperPercentile: number): TopicData[] => {
+        const totalStudents = studentContributions.length;
+        const lowerIndex = Math.floor((lowerPercentile / 100) * totalStudents);
+        const upperIndex = Math.ceil((upperPercentile / 100) * totalStudents);
+        const filteredStudents = studentContributions.slice(lowerIndex, upperIndex);
+
+        // Update the topicData based on the filtered student contributions.
+        const updatedTopicData: TopicData[] = topicData.map((topic) => {
+            if (topic.subtopics) {
+                // Update each subtopic average from the filtered students.
+                const updatedSubtopics = topic.subtopics.map((sub) => {
+                    let sum = 0;
+                    filteredStudents.forEach((student) => {
+                        sum += student.topicContributions[sub.topic] || 0;
+                    });
+                    const avg = filteredStudents.length ? sum / filteredStudents.length : 0;
+                    return { topic: sub.topic, value: avg };
+                });
+                // The main topic's value is the average of its subtopics.
+                const mainAvg = updatedSubtopics.reduce((acc, sub) => acc + sub.value, 0) / updatedSubtopics.length;
+                return { topic: topic.topic, value: mainAvg, subtopics: updatedSubtopics };
+            } else {
+                // Standalone subtopic.
+                let sum = 0;
+                filteredStudents.forEach((student) => {
+                    sum += student.topicContributions[topic.topic] || 0;
+                });
+                const avg = filteredStudents.length ? sum / filteredStudents.length : 0;
+                return { topic: topic.topic, value: avg };
+            }
+        });
+
+        // Sort the updated topic data by topic name and subtopics as well.
+        updatedTopicData.sort((a, b) => a.topic.localeCompare(b.topic));
+        updatedTopicData.forEach((topic) => {
+            if (topic.subtopics) {
+                topic.subtopics.sort((a, b) => a.topic.localeCompare(b.topic));
+            }
+        });
+
+        return updatedTopicData;
     };
 
     return (
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <SecondaryNavBar />
             <Box sx={containerStyle}>
-                {!isLoading && Object.keys(data).length > 0 ? (
+                {isLoading ? (
+                    <CircularProgress />
+                ) : isApiError ? (
+                    <Typography>Failed to connect to server.</Typography>
+                ) : studentContributions.length == 0 || data.length <= 0 ? (
+                    <Typography>Statistics not available.</Typography>
+                ) : (
                     <>
                         <Button sx={{ marginBottom: 3 }} variant="outlined" onClick={handleOpen}>
                             Filter
@@ -278,14 +305,17 @@ const KnowledgeGraphPage = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {Object.entries(data).map(([mainTopic, stats], index) => (
+                                    {data.map((topicDataItem, index) => (
                                         <React.Fragment key={index}>
                                             <TableRow>
                                                 <TableCell style={{ width: '70%', alignItems: 'center' }}>
-                                                    <Chip label={mainTopic} sx={{ margin: 1, fontWeight: 'bold', fontSize: '1.2rem' }} />
-                                                    {Object.keys(stats.subtopics).length > 0 && (
-                                                        <IconButton onClick={() => toggleExpand(mainTopic)}>
-                                                            {expandedTopics.includes(mainTopic) ? <ExpandLess /> : <ExpandMore />}
+                                                    <Chip
+                                                        label={topicDataItem.topic}
+                                                        sx={{ margin: 1, fontWeight: 'bold', fontSize: '1.2rem' }}
+                                                    />
+                                                    {topicDataItem.subtopics && topicDataItem.subtopics.length > 0 && (
+                                                        <IconButton onClick={() => toggleExpand(topicDataItem.topic)}>
+                                                            {expandedTopics.includes(topicDataItem.topic) ? <ExpandLess /> : <ExpandMore />}
                                                         </IconButton>
                                                     )}
                                                 </TableCell>
@@ -293,53 +323,61 @@ const KnowledgeGraphPage = () => {
                                                     <div style={{ display: 'inline-block', width: '80%', marginRight: '10px' }}>
                                                         <LinearProgress
                                                             variant="determinate"
-                                                            value={stats.average}
-                                                            sx={{ height: 15, borderRadius: 7, '& .MuiLinearProgress-bar': { backgroundColor: getColor(stats.average) } }}
+                                                            value={topicDataItem.value}
+                                                            sx={{
+                                                                height: 15,
+                                                                borderRadius: 7,
+                                                                '& .MuiLinearProgress-bar': { backgroundColor: getColor(topicDataItem.value) }
+                                                            }}
                                                         />
                                                     </div>
-                                                    <span style={{ marginLeft: '5px' }}>{stats.average.toFixed(0)}%</span>
+                                                    <span style={{ marginLeft: '5px' }}>{topicDataItem.value.toFixed(0)}%</span>
                                                 </TableCell>
                                             </TableRow>
-                                            {expandedTopics.includes(mainTopic) && Object.entries(stats.subtopics).map(([subTopic, subValue], subIndex) => (
-                                                <TableRow key={`${index}-${subIndex}`}>
-                                                    <TableCell style={{ width: '70%', paddingLeft: 32 }}>
-                                                        <Chip label={subTopic} sx={{ margin: 1, fontSize: '0.8rem' }} />
-                                                    </TableCell>
-                                                    <TableCell style={{ width: '30%', textAlign: 'right' }}>
-                                                        <div style={{ display: 'inline-block', width: '60%', marginRight: '10px' }}>
-                                                            <LinearProgress
-                                                                variant="determinate"
-                                                                value={subValue}
-                                                                sx={{ height: 10, borderRadius: 5, '& .MuiLinearProgress-bar': { backgroundColor: getColor(subValue) } }}
-                                                            />
-                                                        </div>
-                                                        <span style={{ marginLeft: '5px' }}>{subValue.toFixed(0)}%</span>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
+                                            {expandedTopics.includes(topicDataItem.topic) &&
+                                                topicDataItem.subtopics &&
+                                                topicDataItem.subtopics.map((subTopic, subIndex) => (
+                                                    <TableRow key={`${index}-${subIndex}`}>
+                                                        <TableCell style={{ width: '70%', paddingLeft: 32 }}>
+                                                            <Chip label={subTopic.topic} sx={{ margin: 1, fontSize: '0.8rem' }} />
+                                                        </TableCell>
+                                                        <TableCell style={{ width: '30%', textAlign: 'right' }}>
+                                                            <div style={{ display: 'inline-block', width: '60%', marginRight: '10px' }}>
+                                                                <LinearProgress
+                                                                    variant="determinate"
+                                                                    value={subTopic.value}
+                                                                    sx={{
+                                                                        height: 10,
+                                                                        borderRadius: 5,
+                                                                        '& .MuiLinearProgress-bar': { backgroundColor: getColor(subTopic.value) }
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <span style={{ marginLeft: '5px' }}>{subTopic.value.toFixed(0)}%</span>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
                                         </React.Fragment>
                                     ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>
                     </>
-                ) : (
-                    <CircularProgress />
                 )}
             </Box>
         </Box>
     );
 };
 
-type TopicValue = {
-    topic: string;
-    value: number;
-};
-
 type TopicData = {
     topic: string;
     value: number;
-    subTopics?: TopicValue[];
+    subtopics?: TopicData[];
+};
+
+type StudentContribution = {
+    grade: number, // The grades of the student
+    topicContributions: Record<string, number>, // The value the student contributes to a subtopic
 };
 
 function getColor(value: number) {
