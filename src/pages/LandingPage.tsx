@@ -65,9 +65,9 @@ const LandingPage = () => {
 
                 <FeatureStack
                     image={KnowledgeGraphImage}
-                    title={"Knowledge Graph"}
+                    title={"Topics Graph"}
                     desc={
-                        "This is a map of all knowledge used to infer the coverage and scope of different educational activities."
+                        "This is a map of all topics used to infer the coverage and scope of different educational activities."
                     }
                 />
 
@@ -75,7 +75,7 @@ const LandingPage = () => {
                     image={AssessmentGeneratorImage}
                     title={"Assessment Generator"}
                     desc={
-                        "The knowledge graph and the question bank would be leveraged to generate assessments."
+                        "The topics graph and the question bank would be leveraged to generate assessments."
                     }
                 />
 

@@ -135,9 +135,9 @@ const KnowledgeGraphPage = () => {
                 for (let studentIndex = 0; studentIndex < maxStudents; studentIndex++) {
                     const score = questionScores[studentIndex] ?? 0;
                     studentContributions[studentIndex].grade += score;
-
-                    const weightedScore = (score / question.marks) * question.difficulty;
+                    
                     // Accumulate to each topic contribution for this question
+                    const weightedScore = (score / question.marks) * question.difficulty;
                     question.topics.forEach((topicStr: string) => {
                         const { sub } = parseTopic(topicStr);
                         studentContributions[studentIndex].topicContributions[sub] =
@@ -203,7 +203,7 @@ const KnowledgeGraphPage = () => {
                 topic.subtopics.sort((a, b) => a.topic.localeCompare(b.topic));
             }
         });
-
+        
         return { studentContributions, topicData };
     };
 

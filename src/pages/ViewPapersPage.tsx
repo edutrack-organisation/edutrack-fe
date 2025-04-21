@@ -34,7 +34,8 @@ const ViewPapersPage = () => {
         setIsFetchingPapers(true);
         Api.getCoursePapers(courseId).then((response) => {
             if (response.success) {
-                setPaperList(response.data);
+                const sortedPaperList = response.data.sort((a, b) => b.paperId - a.paperId);
+                setPaperList(sortedPaperList);
             } else {
                 toast.error("Error fetching papers");
             }

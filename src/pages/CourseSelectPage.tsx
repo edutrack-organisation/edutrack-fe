@@ -23,7 +23,8 @@ const CourseSelectPage = () => {
         setIsFetchingCourses(true);
         Api.getCourses().then((response) => {
             if (response.success) {
-                setCourses(response.data);
+                const sortedCourseList = response.data.sort((a, b) => b.courseId - a.courseId);
+                setCourses(sortedCourseList);
             } else {
                 toast.error("Error fetching courses");
             }
