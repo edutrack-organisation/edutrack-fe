@@ -11,7 +11,7 @@
 4. CD into the directory and run `pnpm i` to install the node dependencies.
 5. Start the server by running the command `pnpm run dev`.
 
-# React + TypeScript + Vite
+# React + TypeScript + Vite (default template instructions, you can ignore this if unnecessary)
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
