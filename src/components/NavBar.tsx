@@ -28,34 +28,21 @@ const NavBar = () => {
             position={"fixed"}
         >
             <a href="./">
-                <img
-                    src={EduTrackIcon}
-                    width={60}
-                    height={60}
-                    style={{ margin: 10 }}
-                />
+                <img src={EduTrackIcon} width={60} height={60} style={{ margin: 10 }} />
             </a>
             <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/">
                 Home
             </Button>
-            <Button
-                variant="text"
-                sx={{ ...buttonTheme, margin: 1 }}
-                href="/uploadpdf"
-            >
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/uploadpdf">
                 Upload PDf
             </Button>
-            <Button
-                variant="text"
-                sx={{ ...buttonTheme, margin: 1 }}
-                href="/viewpdf"
-            >
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/generate">
+                Generate Assessment
+            </Button>
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/viewpdf">
                 View PDf
             </Button>
-            <Button
-                variant="text"
-                sx={{ ...buttonTheme, margin: 1, marginLeft: "auto" }}
-            >
+            <Button variant="text" sx={{ ...buttonTheme, margin: 1, marginLeft: "auto" }}>
                 Log In
             </Button>
             <Button variant="text" sx={{ ...buttonTheme, margin: 1 }}>
