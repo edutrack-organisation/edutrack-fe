@@ -10,6 +10,8 @@ import "@mui/material";
 import { Toaster } from "react-hot-toast";
 import GeneratePaper from "./pages/GeneratePaper";
 import DashboardPage from "./pages/DashboardPage";
+import AssessmentMetricsPage from "./pages/AssessmentMetricsPage";
+import OverviewPage from "./pages/OverviewPage";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -38,21 +40,26 @@ function App() {
     });
 
     return (
-        <ThemeProvider theme={theme}>
-            <BrowserRouter>
-                <NavBar />
-                <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/uploadpdf" element={<UploadPdfPage />} />
-                    <Route path="/doneupload" element={<DoneUploadPage />} />
-                    <Route path="/viewpdf" element={<ViewPdfPage />} />
-                    <Route path="/generate" element={<GeneratePaper />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                </Routes>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/uploadpdf" element={<UploadPdfPage />} />
+            <Route path="/doneupload" element={<DoneUploadPage />} />
+            <Route path="/viewpdf" element={<ViewPdfPage />} />
+            <Route path="/generate" element={<GeneratePaper />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/assessment-metrics"
+              element={<AssessmentMetricsPage />}
+            />
+            <Route path="/overview" element={<OverviewPage />} />
+          </Routes>
 
-                <Toaster position="top-right" reverseOrder={false} />
-            </BrowserRouter>
-        </ThemeProvider>
+          <Toaster position="top-right" reverseOrder={false} />
+        </BrowserRouter>
+      </ThemeProvider>
     );
 }
 
