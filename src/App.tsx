@@ -5,11 +5,15 @@ import LandingPage from "./pages/LandingPage";
 import UploadPdfPage from "./pages/UploadPdfPage";
 import DoneUploadPage from "./pages/DoneUploadPage";
 import ViewPdfPage from "./pages/ViewPdfPage";
+import AIAnalysisPage from "./pages/AIAnalysisPage";
 import { createTheme, ThemeProvider } from "@mui/material";
 import "@mui/material";
 import { Toaster } from "react-hot-toast";
 import GeneratePaper from "./pages/GeneratePaper";
 import DashboardPage from "./pages/DashboardPage";
+import AssessmentMetricsPage from "./pages/AssessmentMetricsPage";
+import OverviewPage from "./pages/OverviewPage";
+import ComparisonPage from "./pages/ComparisonPage";
 
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
@@ -38,21 +42,28 @@ function App() {
     });
 
     return (
-        <ThemeProvider theme={theme}>
-            <BrowserRouter>
-                <NavBar />
-                <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/uploadpdf" element={<UploadPdfPage />} />
-                    <Route path="/doneupload" element={<DoneUploadPage />} />
-                    <Route path="/viewpdf" element={<ViewPdfPage />} />
-                    <Route path="/generate" element={<GeneratePaper />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                </Routes>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/uploadpdf" element={<UploadPdfPage />} />
+            <Route path="/doneupload" element={<DoneUploadPage />} />
+            <Route path="/viewpdf" element={<ViewPdfPage />} />
+            <Route path="/generate" element={<GeneratePaper />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/assessment-metrics"
+              element={<AssessmentMetricsPage />}
+            />
+            <Route path="/overview" element={<OverviewPage />} />
+            <Route path="/ai-analysis" element={<AIAnalysisPage />} />
+            <Route path="/compare" element={<ComparisonPage />} />
+          </Routes>
 
-                <Toaster position="top-right" reverseOrder={false} />
-            </BrowserRouter>
-        </ThemeProvider>
+          <Toaster position="top-right" reverseOrder={false} />
+        </BrowserRouter>
+      </ThemeProvider>
     );
 }
 

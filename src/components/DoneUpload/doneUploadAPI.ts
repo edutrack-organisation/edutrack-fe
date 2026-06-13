@@ -4,13 +4,28 @@ const BASE_URL = "http://127.0.0.1:8000";
 
 interface SaveParsedPDFRequest {
     title: string;
-    questions: Array<{ description: string; topics: string[]; mark: number; difficulty: number }>;
+    questions: Array<{
+        description: string;
+        topics: string[];
+        mark: number;
+        difficulty: number;
+        level: string;
+        type: string;
+    }>;
+    module_code: string;
+    module_name: string;
+    academic_year: string;
+    semester: string;
 }
 
 interface SaveParsedPDFResponse {
-    id: number;
-    title: string;
-    questions: DataItemWithUUID[];
+  id: number;
+  title: string;
+  questions: DataItemWithUUID[];
+  module_code: string;
+  module_name: string;
+  academic_year: string;
+  semester: number;
 }
 
 export const parsedPdfApi = {
@@ -27,6 +42,9 @@ export const parsedPdfApi = {
             throw new Error(errorData.detail || "Failed to save parsed PDF");
         }
 
-        return response.json();
+        const savedPaper = await response.json();
+        return savedPaper;
+
+        // return response.json();
     },
 };

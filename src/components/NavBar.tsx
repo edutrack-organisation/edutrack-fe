@@ -13,42 +13,76 @@ const buttonTheme = {
 
 const NavBar = () => {
     return (
-        <Box
-            height={"5rem"}
-            width={"100%"}
-            display={"flex"}
-            alignItems={"center"}
-            sx={{
-                background: theme.colors.main,
-                flexDirection: "row",
-                flex: 1,
-                zIndex: 3,
-            }}
-            boxShadow={2}
-            position={"fixed"}
+      <Box
+        height={"5rem"}
+        width={"100%"}
+        display={"flex"}
+        alignItems={"center"}
+        sx={{
+          background: theme.colors.main,
+          flexDirection: "row",
+          flex: 1,
+          zIndex: 3,
+        }}
+        boxShadow={2}
+        position={"fixed"}
+      >
+        <a href="./">
+          <img
+            src={EduTrackIcon}
+            width={60}
+            height={60}
+            style={{ margin: 10 }}
+          />
+        </a>
+        <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/">
+          Home
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1 }}
+          href="/uploadpdf"
         >
-            <a href="./">
-                <img src={EduTrackIcon} width={60} height={60} style={{ margin: 10 }} />
-            </a>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/">
-                Home
-            </Button>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/uploadpdf">
-                Upload PDf
-            </Button>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/generate">
-                Generate Assessment
-            </Button>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }} href="/viewpdf">
-                View PDf
-            </Button>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1, marginLeft: "auto" }}>
-                Log In
-            </Button>
-            <Button variant="text" sx={{ ...buttonTheme, margin: 1 }}>
-                Sign Up
-            </Button>
-        </Box>
+          Upload PDf
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1 }}
+          href="/generate"
+        >
+          Generate Assessment
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1 }}
+          href="/viewpdf"
+        >
+          View PDf
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1 }}
+          href="/compare"
+        >
+          Compare Papers
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1 }}
+          href="/assessment-metrics"
+        >
+          Assessment Metrics
+        </Button>
+        <Button
+          variant="text"
+          sx={{ ...buttonTheme, margin: 1, marginLeft: "auto" }}
+        >
+          Log In
+        </Button>
+        <Button variant="text" sx={{ ...buttonTheme, margin: 1 }}>
+          Sign Up
+        </Button>
+      </Box>
     );
 };
 
