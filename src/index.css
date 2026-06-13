@@ -68,3 +68,64 @@ button:focus-visible {
         background-color: #f9f9f9;
     }
 }
+
+.metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.metrics-table th,
+.metrics-table td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.metrics-table th {
+    background-color: #f4f6f8;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.metrics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.metrics-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.normalized-score-cell {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #3f51b5;
+}
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.difficulty-easy {
+    background-color: #2e7d32; /* Green */
+}
+
+.difficulty-medium {
+    background-color: #ed6c02; /* Amber */
+}
+
+.difficulty-hard {
+    background-color: #d32f2f; /* Red */
+}

@@ -9,7 +9,10 @@ import {
   TopicFrequency,
   DifficultyFrequencyAndAverageDifficultyForTopic,
   QuestionChoiceStatistics,
-  StudentChoiceData
+  StudentChoiceData,
+  PaperAnalysis,
+  PaperComparisonDB,
+  PaperComparisonPayload
 } from "../types/types";
 
 interface ApiResponse {
@@ -385,7 +388,7 @@ const Api = {
       );
     }
   },
-  
+
   getDashboardData: async (paperId: number): Promise<Dashboard> => {
     try {
       const response = await fetch(
@@ -603,6 +606,110 @@ const Api = {
         `Failed to save student choice statistics: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
+      );
+    }
+  },
+
+  /**
+   * API call to generate AI insights for a specific paper.
+   */
+  generateAIAnalysis: async (paperId: number): Promise<PaperAnalysis> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/papers/${paperId}/ai-analysis`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new ApiError(`Error ${response.status}: ${errorMessage}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to generate AI analysis: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    }
+  },
+  /**
+   * Fetches the saved AI analysis for a specific paper, returning null if not found.
+   */
+  getAIAnalysis: async (paperId: number): Promise<PaperAnalysis | null> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/papers/${paperId}/ai-analysis`,
+      );
+
+      // If it hasn't been generated yet, just return null
+      if (response.status === 404) return null;
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new ApiError(`Error ${response.status}: ${text}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  },
+  // --- Comparison API Calls ---
+  getAllComparisons: async (): Promise<PaperComparisonDB[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/papers/comparisons/all`);
+      if (!response.ok) throw new ApiError(`Error ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  },
+
+  generateComparison: async (
+    baselineId: number,
+    comparisonId: number,
+  ): Promise<PaperComparisonDB> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/papers/compare/${baselineId}/${comparisonId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        throw new ApiError(`Error ${response.status}: ${text}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  },
+
+  getComparison: async (
+    baselineId: number,
+    comparisonId: number,
+  ): Promise<PaperComparisonDB | null> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/papers/compare/${baselineId}/${comparisonId}`,
+      );
+      if (response.status === 404) return null;
+      if (!response.ok) throw new ApiError(`Error ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        error instanceof Error ? error.message : "Unknown error",
       );
     }
   },
