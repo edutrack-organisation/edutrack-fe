@@ -1,7 +1,7 @@
 import { DatasetElementType } from "@mui/x-charts/internals";
 
 export type Handlers = {
-    [key: string]: (...args: any[]) => void;
+  [key: string]: (...args: any[]) => void;
 };
 
 export interface OptionOverview {
@@ -11,6 +11,7 @@ export interface OptionOverview {
 
 export interface DataItem {
   description: string;
+  type: string;
   topics: string[];
   difficulty: number;
   mark: number;
@@ -22,22 +23,20 @@ export interface DataItemWithUUID extends DataItem {
   uuid: string;
 }
 
-
 // Types for dashboard
 export interface TopicFrequency {
-    id: number;
-    value: number;
-    label: string;
+  id: number;
+  value: number;
+  label: string;
 }
 // This is for each topic, rather than overall for the paper
 export interface DifficultyFrequencyAndAverageDifficultyForTopic {
-    label: string;
-    topicDifficultyFrequency: DatasetElementType<
-        string | number | Date | null | undefined
-    >[]; // [{frequency, difficulty}...]
-    topicAverageDifficulty: number;
+  label: string;
+  topicDifficultyFrequency: DatasetElementType<
+    string | number | Date | null | undefined
+  >[]; // [{frequency, difficulty}...]
+  topicAverageDifficulty: number;
 }
-
 
 // added on 9 oct
 export interface Topic {
@@ -48,11 +47,18 @@ export interface Topic {
 export interface Question {
   id: number;
   question_number: number;
+  type: string;
+  answer?: string;
   description: string;
   mark: number;
   difficulty: number;
   topics: Topic[];
   level: string;
+  overview?: Record<string, OptionOverview>;
+  student_choice_statistics?: { [key: string]: number };
+  grade_statistics?: { [key: string]: number };
+  quartile_statistics?: any;
+  individual_choice_statistics?: { [key: string]: number };
 }
 
 export interface Paper {
@@ -76,6 +82,7 @@ export interface PaperSummary {
 
 export interface QuestionUpdate {
   question_number: number;
+  type: string;
   description: string;
   mark: number;
   difficulty: number;
@@ -106,8 +113,20 @@ export interface Statistic {
  */
 export interface QuestionChoiceStatistics {
   question_id: number;
-  statistics?: { [key: string]: number }; // e.g., {"A": 0.25, "B": 0.5}
-  grade_statistics?: { [key: string]: number }; // e.g. {"correct": 0.6, "incorrect": 0.4}
+  statistics?: { [key: string]: number };
+  grade_statistics?: { [key: string]: number };
+  quartile_statistics?: {
+    top_25: {
+      correct_rate: number;
+      choices: { [key: string]: number };
+    };
+    bottom_25: {
+      correct_rate: number;
+      choices: { [key: string]: number };
+    };
+  };
+  individual_choice_statistics?: { [key: string]: number };
+  answer?: string;
 }
 
 /**
@@ -116,4 +135,40 @@ export interface QuestionChoiceStatistics {
  */
 export interface StudentChoiceData {
   questions: QuestionChoiceStatistics[];
+}
+
+export interface AIAnalysisPayload {
+  patterns: string[];
+  distractor_analysis: string[];
+  cognitive_depth: string[];
+  assessment_quality: string[];
+  quartile_analysis: string[];
+  recommendations: string[];
+}
+
+export interface PaperAnalysis {
+  id: number;
+  paper_id: number;
+  analysis_data: AIAnalysisPayload;
+}
+
+export interface TopicInsight {
+  topic_name: string;
+  better_performing_cohort: string;
+  analysis: string;
+}
+
+export interface PaperComparisonPayload {
+  executive_summary: string;
+  performance_shift: string;
+  topic_insights: TopicInsight[];
+  cognitive_depth_analysis: string;
+  actionable_recommendations: string[];
+}
+
+export interface PaperComparisonDB {
+  id: number;
+  baseline_paper_id: number;
+  comparison_paper_id: number;
+  comparison_data: PaperComparisonPayload;
 }
