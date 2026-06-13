@@ -13,7 +13,7 @@ import {
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Api from "../api/Api";
-import { Paper, PaperSummary, GradeDistribution } from "../types/types";
+import { Paper, PaperSummary, GradeDistribution, AIAnalysisPayload } from "../types/types";
 import { theme } from "../theme";
 import ContentTableFromTitle from "../components/ContentTableFromTitle";
 import * as XLSX from "xlsx";
@@ -24,6 +24,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 import toast from "react-hot-toast";
 import "../App.css";
 
@@ -38,6 +39,9 @@ const ViewPdfPage = () => {
   const [histogramData, setHistogramData] = useState<GradeDistribution | null>(
     null,
   );
+  const [isGeneratingAI, setIsGeneratingAI] = useState<boolean>(false);
+  const [existingAnalysis, setExistingAnalysis] =
+    useState<AIAnalysisPayload | null>(null);
 
   // ✅ Edit Mode States
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
@@ -99,6 +103,13 @@ const ViewPdfPage = () => {
         if (data) setHistogramData(data);
       })
       .catch(() => console.log("No grade data found for this paper yet."));
+    setExistingAnalysis(null);
+
+    Api.getAIAnalysis(id)
+      .then((data) => {
+        if (data) setExistingAnalysis(data.analysis_data);
+      })
+      .catch(() => console.log("No AI analysis found for this paper yet."));
   };
 
   // ✅ Handle Edit/Save/Cancel Logic
@@ -242,6 +253,49 @@ const ViewPdfPage = () => {
 
     if (file.name.endsWith(".csv")) reader.readAsText(file);
     else reader.readAsBinaryString(file);
+  };
+
+  const handleAIAnalysisClick = async () => {
+    if (!selectedPaper) return;
+
+    // 1. If it already exists, just navigate immediately!
+    if (existingAnalysis) {
+      navigate("/ai-analysis", {
+        state: {
+          paperId: selectedPaper.id,
+          paperTitle: selectedPaper.title,
+          analysisData: existingAnalysis,
+        },
+      });
+      return;
+    }
+
+    // 2. If it DOES NOT exist, run the generation sequence
+    setIsGeneratingAI(true);
+    const toastId = toast.loading(
+      "Analyzing paper with AI... This may take a minute.",
+    );
+
+    try {
+      const analysisResult = await Api.generateAIAnalysis(selectedPaper.id);
+
+      // Update local state so it doesn't regenerate if they click back
+      setExistingAnalysis(analysisResult.analysis_data);
+      toast.success("AI Analysis generated successfully!", { id: toastId });
+
+      navigate("/ai-analysis", {
+        state: {
+          paperId: selectedPaper.id,
+          paperTitle: selectedPaper.title,
+          analysisData: analysisResult.analysis_data,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate AI analysis.", { id: toastId });
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const SelectPaperPanel = () => (
@@ -568,6 +622,21 @@ const ViewPdfPage = () => {
                   disabled={isEditingMetadata}
                 >
                   Grades
+                  </Button>
+                  <Button
+                  variant="contained"
+                  color="secondary" // Or primary, depending on your theme emphasis
+                  startIcon={
+                    isGeneratingAI ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />
+                  }
+                  disabled={isEditingMetadata || isGeneratingAI}
+                  onClick={handleAIAnalysisClick}
+                  sx={{
+                    background: "linear-gradient(45deg, #58bbc6 30%, #5884c6 90%)", // Optional: cool AI gradient
+                    color: "white",
+                  }}
+                >
+                  {isGeneratingAI ? "Analyzing..." : "AI Insights"}
                 </Button>
                 <Button
                   variant="contained"

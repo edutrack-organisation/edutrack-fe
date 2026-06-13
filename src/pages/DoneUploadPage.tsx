@@ -9,7 +9,7 @@
  * - Save functionality with backend integration
  */
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, TextField, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { DataItem, DataItemWithUUID, Handlers } from "../types/types";
 import ContentTable from "../components/DoneUpload/ContentTable";
@@ -24,6 +24,7 @@ import PdfViewer from "../components/DoneUpload/PdfViewer";
 import TextArea from "../components/DoneUpload/TextArea";
 import EditIcon from "@mui/icons-material/Edit";
 import { parsedPdfApi } from "../components/DoneUpload/doneUploadAPI";
+import OverviewEditor from "../components/DoneUpload/OverviewEditor";
 
 // Constants
 const DEBOUNCE_DELAY = 300;
@@ -51,187 +52,358 @@ const TitleSection: React.FC<TitleSectionProps> = ({ title, isEditingTitle, seti
             textContent={title}
             onChange={(event) => handlers.handleTitleChange(event.target.value)}
         />
-    );
+  );
+    
+const PaperMetadataInputs = ({
+  moduleCode,
+  setModuleCode,
+  moduleName,
+  setModuleName,
+  academicYear,
+  setAcademicYear,
+  semester,
+  setSemester,
+}: any) => {
+  return (
+    <Grid container spacing={2} mt={1}>
+      <Grid item xs={6} md={3}>
+        <TextField
+          label="Module Code"
+          placeholder="e.g. CS2105"
+          value={moduleCode}
+          onChange={(e) => setModuleCode(e.target.value)}
+          fullWidth
+          size="small"
+          variant="outlined"
+        />
+      </Grid>
+      <Grid item xs={6} md={3}>
+        <TextField
+          label="Module Name"
+          placeholder="e.g. Computer Networks"
+          value={moduleName}
+          onChange={(e) => setModuleName(e.target.value)}
+          fullWidth
+          size="small"
+          variant="outlined"
+        />
+      </Grid>
+      <Grid item xs={6} md={3}>
+        <TextField
+          label="Academic Year"
+          placeholder="e.g. AY23/24"
+          value={academicYear}
+          onChange={(e) => setAcademicYear(e.target.value)}
+          fullWidth
+          size="small"
+          variant="outlined"
+        />
+      </Grid>
+      <Grid item xs={6} md={3}>
+        <TextField
+          label="Semester"
+          placeholder="e.g. 1 or 2"
+          value={semester}
+          onChange={(e) => setSemester(e.target.value)}
+          fullWidth
+          size="small"
+          variant="outlined"
+        />
+      </Grid>
+    </Grid>
+  );
+};
 
 const DoneUploadPage = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const { response, file } = location.state; // get the response from the previous page
-    const [data, setData] = useState<DataItemWithUUID[]>([]);
-    const [title, setTitle] = useState<string>("");
-    const [allTopics, setAllTopics] = useState<string[]>([]);
-    const [isEditingTitle, setisEditingTitle] = useState<boolean>(false); // keep track if editing title to conditionally render textarea or typography
-    const [pdffile, setPDFFile] = useState<File | null>(null);
-    const [showPDF, setShowPDF] = useState<boolean>(false);
+  const { response, file } = location.state; // get the response from the previous page
+  const [data, setData] = useState<DataItemWithUUID[]>([]);
+  const [title, setTitle] = useState<string>("");
+  const [allTopics, setAllTopics] = useState<string[]>([]);
+  const [isEditingTitle, setisEditingTitle] = useState<boolean>(false); // keep track if editing title to conditionally render textarea or typography
+  const [pdffile, setPDFFile] = useState<File | null>(null);
+  const [showPDF, setShowPDF] = useState<boolean>(false);
 
-    // Debounced functions
-    const debouncedSetData = useCallback(
-        debounce((updatedData: DataItemWithUUID[]) => setData(updatedData), DEBOUNCE_DELAY),
-        []
-    );
+  const [moduleCode, setModuleCode] = useState<string>("");
+  const [moduleName, setModuleName] = useState<string>("");
+  const [academicYear, setAcademicYear] = useState<string>("");
+  const [semester, setSemester] = useState<string>("");
 
-    const debouncedSetTitle = useCallback(
-        debounce((newTitle: string) => setTitle(newTitle), DEBOUNCE_DELAY),
-        []
-    );
+  // Debounced functions
+  const debouncedSetData = useCallback(
+    debounce(
+      (updatedData: DataItemWithUUID[]) => setData(updatedData),
+      DEBOUNCE_DELAY,
+    ),
+    [],
+  );
 
-    // Event Handlers
-    const handleTopicsChange = (index: number, newChips: string[]) => {
-        const updatedData = [...data];
-        updatedData[index].topics = newChips;
-        setData(updatedData);
+  const debouncedSetTitle = useCallback(
+    debounce((newTitle: string) => setTitle(newTitle), DEBOUNCE_DELAY),
+    [],
+  );
+
+  // Event Handlers
+  const handleTopicsChange = (index: number, newChips: string[]) => {
+    const updatedData = [...data];
+    updatedData[index].topics = newChips;
+    setData(updatedData);
+  };
+
+  const handleDescriptionChange = (index: number, newDescription: string) => {
+    const updatedData = [...data];
+    updatedData[index].description = newDescription;
+    debouncedSetData(updatedData);
+  };
+
+  const handleDifficultyChange = (index: number, newDifficulty: number) => {
+    const updatedData = [...data];
+    updatedData[index].difficulty = newDifficulty;
+    setData(updatedData);
+  };
+
+  const handleMarkChange = (index: number, newMark: number) => {
+    const updatedData = [...data];
+    updatedData[index].mark = newMark;
+    setData(updatedData);
+  };
+
+  const handleQuestionDelete = (index: number) => {
+    const updatedData = [...data];
+    updatedData.splice(index, 1);
+    setData(updatedData);
+  };
+
+  const handleLevelChange = (index: number, newLevel: string) => {
+    const updatedData = [...data];
+    updatedData[index].level = newLevel;
+    setData(updatedData);
+  };
+
+  const handleTypeChange = (index: number, newType: string) => {
+    const updatedData = [...data];
+    updatedData[index].type = newType;
+    setData(updatedData);
+  };
+
+  // add a question (empty row) to the table
+  const handleQuestionAdd = (index: number) => {
+    const updatedData = [...data];
+    updatedData.splice(index + 1, 0, {
+      uuid: uuidv4(),
+      description: "",
+      topics: [],
+      mark: 0,
+      difficulty: 0,
+      level: "Remember",
+      type: "MCQ",
+    });
+    setData(updatedData);
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    debouncedSetTitle(newTitle);
+    setisEditingTitle(true);
+  };
+
+  const handleOverviewChange = (
+    questionIndex: number,
+    optionKey: string,
+    field: "interpretation" | "likely_misunderstanding",
+    value: string,
+  ) => {
+    const updatedData = [...data];
+    const question = updatedData[questionIndex];
+
+    if (!question.overview) return;
+
+    question.overview[optionKey] = {
+      ...question.overview[optionKey],
+      [field]: value,
     };
 
-    const handleDescriptionChange = (index: number, newDescription: string) => {
-        const updatedData = [...data];
-        updatedData[index].description = newDescription;
-        debouncedSetData(updatedData);
-    };
+    debouncedSetData(updatedData);
+  };
 
-    const handleDifficultyChange = (index: number, newDifficulty: number) => {
-        const updatedData = [...data];
-        updatedData[index].difficulty = newDifficulty;
-        setData(updatedData);
-    };
+  const handlers: Handlers = {
+    handleTopicsChange,
+    handleDescriptionChange,
+    handleDifficultyChange,
+    handleQuestionDelete,
+    handleQuestionAdd,
+    handleTitleChange,
+    handleMarkChange,
+    handleOverviewChange,
+    handleLevelChange,
+    handleTypeChange,
+  };
 
-    const handleMarkChange = (index: number, newMark: number) => {
-        const updatedData = [...data];
-        updatedData[index].mark = newMark;
-        setData(updatedData);
-    };
+  const sendParsedToBackend = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    try {
+      const questionsWithNumbers = data.map(({ uuid, ...rest }, index) => ({
+        ...rest,
+        question_number: index + 1, // Add the sequential number
+      }));
+      const savedPaper = await parsedPdfApi.saveParsedPDF({
+        title,
+        questions: questionsWithNumbers,
+        module_code: moduleCode,
+        module_name: moduleName,
+        academic_year: academicYear,
+        semester: semester,
+      });
 
-    const handleQuestionDelete = (index: number) => {
-        const updatedData = [...data];
-        updatedData.splice(index, 1);
-        setData(updatedData);
-    };
+      toast.success("Paper saved successfully!");
 
-    // add a question (empty row) to the table
-    const handleQuestionAdd = (index: number) => {
-        const updatedData = [...data];
-        updatedData.splice(index + 1, 0, {
-            uuid: uuidv4(),
-            description: "",
-            topics: [],
-            mark: 0,
-            difficulty: 0,
-        });
-        setData(updatedData);
-    };
+      navigate("/dashboard", {
+        state: {
+          paperId: savedPaper.id,
+          savedPaper: {
+            title: savedPaper.title,
+            questions: data,
+            allTopics: allTopics,
+            // You can also pass the metadata to dashboard if needed
+            moduleCode,
+            moduleName,
+            academicYear,
+            semester,
+          },
+        },
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? `Error: ${error.message}`
+          : "Error in saving paper",
+      );
+    }
+  };
 
-    const handleTitleChange = (newTitle: string) => {
-        debouncedSetTitle(newTitle);
-        setisEditingTitle(true);
-    };
+  /**
+   * Initialize page data from navigation state
+   * - Transforms question data by adding UUIDs for unique row identification
+   * - Sets initial title from parsed PDF
+   * - Sets available topics for topic selection
+   * - Sets PDF file for viewer if available
+   *
+   * This effect runs only when response changes, handling the initial data setup
+   * from the PDF parsing results passed through react-router navigation state.
+   */
+  useEffect(() => {
+    if (response) {
+      const dataWithUUIDs = response.questions.map((item: DataItem) => ({
+        ...item,
+        uuid: uuidv4(),
+      }));
+      setData(dataWithUUIDs);
+      setTitle(response.title);
+      setAllTopics(response.all_topics);
+    }
+    if (file) {
+      setPDFFile(file);
+    }
+  }, [response, file]);
 
-    const handlers: Handlers = {
-        handleTopicsChange,
-        handleDescriptionChange,
-        handleDifficultyChange,
-        handleQuestionDelete,
-        handleQuestionAdd,
-        handleTitleChange,
-        handleMarkChange,
-    };
+  return (
+    <Box
+      component="form"
+      onSubmit={sendParsedToBackend}
+      display={"flex"}
+      alignItems={"center"}
+      flexDirection={"column"}
+      sx={{ width: { lg: "90%", xl: "78%" } }}
+      mx={"auto"}
+    >
+      <PdfViewer pdffile={pdffile} showPDF={showPDF} setShowPDF={setShowPDF} />
 
-    const sendParsedToBackend = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent default form submission
-        try {
-            const questionsWithoutUUID = data.map(({ uuid, ...rest }) => rest);
-            await parsedPdfApi.saveParsedPDF({
-                title,
-                questions: questionsWithoutUUID,
-            });
-
-            toast.success("Paper saved successfully!");
-
-            navigate("/dashboard", {
-                state: {
-                    savedPaper: {
-                        title: title,
-                        questions: data,
-                        allTopics: allTopics,
-                    },
-                },
-            });
-        } catch (error) {
-            toast.error(error instanceof Error ? `Error: ${error.message}` : "Error in saving paper");
-        }
-    };
-
-    /**
-     * Initialize page data from navigation state
-     * - Transforms question data by adding UUIDs for unique row identification
-     * - Sets initial title from parsed PDF
-     * - Sets available topics for topic selection
-     * - Sets PDF file for viewer if available
-     *
-     * This effect runs only when response changes, handling the initial data setup
-     * from the PDF parsing results passed through react-router navigation state.
-     */
-    useEffect(() => {
-        if (response) {
-            const dataWithUUIDs = response.questions.map((item: DataItem) => ({
-                ...item,
-                uuid: uuidv4(),
-            }));
-            setData(dataWithUUIDs);
-            setTitle(response.title);
-            setAllTopics(response.all_topics);
-        }
-        if (file) {
-            setPDFFile(file);
-        }
-    }, [response, file]);
-
-    return (
+      {/* ✅ Fixed Header Section - Modified to fit new inputs */}
+      <Box
+        display={"flex"}
+        flexDirection={"column"} // Changed to column to stack title and inputs
+        justifyContent={"flex-start"}
+        mt={"5rem"}
+        pt={"1.5rem"}
+        pb={"1rem"}
+        px={"2rem"}
+        position={"fixed"}
+        sx={{
+          width: { lg: "91%", xl: "79%" },
+          height: "auto", // ✅ Changed to auto to fit content
+          minHeight: "15%", // ensure enough space
+          backgroundColor: "white",
+          zIndex: 2,
+          boxShadow: "0px 4px 10px rgba(0,0,0,0.05)", // Optional: adds subtle separation
+          borderRadius: "0 0 1rem 1rem",
+        }}
+      >
+        {/* Top Row: Title + Buttons */}
         <Box
-            component="form"
-            onSubmit={sendParsedToBackend}
-            display={"flex"}
-            alignItems={"center"}
-            flexDirection={"column"}
-            sx={{ width: { lg: "90%", xl: "78%" } }}
-            mx={"auto"}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          width="100%"
         >
-            <PdfViewer pdffile={pdffile} showPDF={showPDF} setShowPDF={setShowPDF} />
+          <Box flex={1}>
+            <TitleSection
+              title={title}
+              isEditingTitle={isEditingTitle}
+              setisEditingTitle={setisEditingTitle}
+              handlers={handlers}
+            />
+          </Box>
 
+          <Box display="flex" gap={2} alignItems="center">
+            {!showPDF && (
+              <Button onClick={() => setShowPDF(!showPDF)} variant="outlined">
+                Open PDF
+              </Button>
+            )}
             <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                mt={"5rem"} // margin to accomodate fixed navbar
-                pt={"2.5rem"}
-                position={"fixed"}
-                sx={{
-                    width: { lg: "91%", xl: "79%" },
-                    height: { xs: "10%", lg: "12%" },
-                    backgroundColor: "white",
-                    zIndex: 2,
-                }}
+              padding={"0.8rem"}
+              borderRadius={"0.5rem"}
+              sx={{ background: "rgb(222, 242, 255)", maxWidth: "200px" }}
             >
-                <TitleSection
-                    title={title}
-                    isEditingTitle={isEditingTitle}
-                    setisEditingTitle={setisEditingTitle}
-                    handlers={handlers}
-                />
-                {!showPDF && <Button onClick={() => setShowPDF(!showPDF)}>Open PDF</Button>}
-                <Box width={"13rem"} padding={"1rem"} borderRadius={"0.5rem"} sx={{ background: "rgb(222, 242, 255)" }}>
-                    <Typography textAlign={"start"} sx={{ fontSize: { xs: "0.8rem", xl: "1rem" } }}>
-                        Please Check Through The Parsed Paper Before Proceeding.
-                    </Typography>
-                </Box>
+              <Typography
+                textAlign={"start"}
+                sx={{ fontSize: { xs: "0.75rem", xl: "0.9rem" } }}
+              >
+                Please verify parsed content.
+              </Typography>
             </Box>
-
-            {/* This is the table of questions and its details */}
-            <ContentTable data={data} handlers={handlers} allTopics={allTopics} />
-
-            <Button type="submit" sx={{ alignSelf: "flex-end", margin: "1rem" }} variant="contained" size="large">
-                Continue
-            </Button>
+          </Box>
         </Box>
-    );
+
+        {/* ✅ Second Row: Metadata Inputs */}
+        <PaperMetadataInputs
+          moduleCode={moduleCode}
+          setModuleCode={setModuleCode}
+          moduleName={moduleName}
+          setModuleName={setModuleName}
+          academicYear={academicYear}
+          setAcademicYear={setAcademicYear}
+          semester={semester}
+          setSemester={setSemester}
+        />
+      </Box>
+
+      {/* Spacer to push content below the fixed header (adjusted for new height) */}
+      <Box sx={{ height: "14rem" }} />
+
+      <ContentTable data={data} handlers={handlers} allTopics={allTopics} />
+
+      <Button
+        type="submit"
+        sx={{ alignSelf: "flex-end", margin: "1rem" }}
+        variant="contained"
+        size="large"
+      >
+        Continue
+      </Button>
+    </Box>
+  );
 };
 
 export default DoneUploadPage;

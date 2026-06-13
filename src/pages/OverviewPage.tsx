@@ -6,19 +6,14 @@ import {
   Divider,
   Button,
   Alert,
+  Chip,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import Api from "../api/Api"; // Your Api.tsx file
+import Api from "../api/Api";
 import OverviewQuestionList from "../components/Overview/OverviewQuestionList";
-import * as XLSX from "xlsx"; // For file parsing
-import StudentChoicePieChart from "../components/Overview/StudentChoicePieChart"; // The new component
-
-// Define the shape of your statistics payload (matches types in Api.tsx)
-interface QuestionChoiceStatistics {
-  question_id: number;
-  statistics: { [key: string]: number };
-  grade_statistics?: { [key: string]: number };
-}
+import * as XLSX from "xlsx";
+import StudentChoicePieChart from "../components/Overview/StudentChoicePieChart";
+import { QuestionChoiceStatistics } from "../types/types";
 
 interface StudentChoiceData {
   questions: QuestionChoiceStatistics[];
@@ -29,63 +24,27 @@ const OverviewPage = () => {
   const { paperId, paperTitle } = location.state || {};
 
   const [paper, setPaper] = useState<any>(null);
-  // const [grades, setGrades] = useState<any>(null); // No longer needed
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- State for file upload ---
   const [isUploadingStats, setIsUploadingStats] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
-  /**
-   * Calculates the normalized Shannon entropy (0 to 1).
-   * @param statistics - An object like { "A": 0.5, "B": 0.25, "C": 0.25 }
-   * @returns A value between 0 (total certainty) and 1 (total randomness).
-   */
   const calculateEntropy = (statistics: { [key: string]: number }): number => {
-    // Get all non-zero proportions
     const proportions = Object.values(statistics).filter((p) => p > 0);
     const n = proportions.length;
-
-    // If only one option was chosen (or no options), entropy is 0
-    if (n <= 1) {
-      return 0;
-    }
-
-    // We use log base 'n' to normalize the entropy between 0 and 1.
-    // Formula: H_n(X) = (-1 / log(n)) * SUM[ p * log(p) ]
-    // We use Math.log (natural log) for all calculations.
+    if (n <= 1) return 0;
     const logOfN = Math.log(n);
-
-    const entropySum = proportions.reduce((sum, p) => {
-      // p * log(p)
-      return sum + p * Math.log(p);
-    }, 0);
-
-    // Note: entropySum is negative, so (-1 / logOfN) * entropySum becomes positive.
-    const normalizedEntropy = (-1 / logOfN) * entropySum;
-
-    // Handle potential floating point inaccuracies (e.g., -0.0)
-    return Math.max(0, normalizedEntropy);
+    const entropySum = proportions.reduce((sum, p) => sum + p * Math.log(p), 0);
+    return Math.max(0, (-1 / logOfN) * entropySum);
   };
 
-
-  /**
-   * Fetches all data for the overview page.
-   * Can be called on initial load and after an upload.
-   */
   const fetchData = () => {
     if (!paperId) return;
+    if (!paper) setIsLoading(true);
 
-    if (!paper) {
-      setIsLoading(true);
-    }
-
-    // We only need to get the paper data now
     Api.getPaperById(paperId)
-      .then((paperData) => {
-        setPaper(paperData);
-      })
+      .then((paperData) => setPaper(paperData))
       .catch((err) => {
         console.error("Error loading overview data:", err);
         setUploadError("Failed to load paper data.");
@@ -93,15 +52,10 @@ const OverviewPage = () => {
       .finally(() => setIsLoading(false));
   };
 
-  // Initial data fetch
   useEffect(() => {
     fetchData();
   }, [paperId]);
 
-  /**
-   * Handles the file upload event.
-   * Parses the file, calculates statistics, and sends them to the API.
-   */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !paper) return;
@@ -110,142 +64,371 @@ const OverviewPage = () => {
     setUploadError(null);
     setUploadSuccess(null);
 
-    // --- DEBUG CHECKPOINT 1 ---
-    console.log("File upload started. Reading file...");
-
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        // --- DEBUG CHECKPOINT 2 ---
-        console.log("File loaded. Parsing with XLSX...");
-
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
 
-        // --- DEBUG CHECKPOINT 3 ---
-        console.log("File parsed. JSON data:", jsonData);
+        const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+        });
 
         const statsPayload: StudentChoiceData = { questions: [] };
 
-        if (jsonData.length === 0) {
-          throw new Error("File is empty or in the wrong format.");
+        if (rows.length === 0) throw new Error("File is empty.");
+
+        const questionColMap = new Map<number, number>();
+        let headerRowIndex = -1;
+
+        for (let i = 0; i < Math.min(10, rows.length); i++) {
+          const row = rows[i];
+          if (!row) continue;
+
+          let foundAnyQuestion = false;
+          paper.questions.forEach((q: any) => {
+            const qNum = q.question_number;
+            const colIndex = row.findIndex((cell) => {
+              if (cell == null) return false;
+              const str = String(cell).toLowerCase().trim();
+              return (
+                str === String(qNum) ||
+                str === `q${qNum}` ||
+                str === `question ${qNum}`
+              );
+            });
+
+            if (colIndex !== -1) {
+              questionColMap.set(qNum, colIndex);
+              foundAnyQuestion = true;
+            }
+          });
+
+          if (foundAnyQuestion) {
+            headerRowIndex = i;
+            break;
+          }
         }
 
-        // 1. Find the answer row (case-insensitive check on the 'question' column)
-        const answerRow = jsonData.find(
-          (row) =>
-            String(row["question"] || "")
-              .toLowerCase()
-              .trim() === "answer",
-        );
-
-        // 2. Filter out the answer row to get only student responses
-        const studentRows = jsonData.filter(
-          (row) =>
-            String(row["question"] || "")
-              .toLowerCase()
-              .trim() !== "answer",
-        );
-        const totalStudents = studentRows.length;
-
-        if (totalStudents === 0) {
-          throw new Error("No student rows found (only answer key?)");
+        if (headerRowIndex === -1 || questionColMap.size === 0) {
+          throw new Error("Could not find question columns in the file.");
         }
 
-        console.log(
-          `Found answer key: ${!!answerRow}. Processing ${totalStudents} student rows.`,
-        );
+        let answerRow: any[] | null = null;
+        const studentRows: any[][] = [];
 
-        // --- DEBUG CHECKPOINT 4 ---
-        console.log(`Processing ${totalStudents} student entries...`);
+        for (let i = headerRowIndex + 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length === 0) continue;
 
-        paper.questions.forEach((question: any, index: number) => {
-          // --- DEBUG CHECKPOINT 5 (will log for each question) ---
-          console.log(
-            `Processing Question ${index + 1} (ID: ${question.id}, Number: ${
-              question.question_number
-            })`,
+          const isAnswerKey = row.some(
+            (cell) =>
+              String(cell || "")
+                .toLowerCase()
+                .trim() === "answer" ||
+              String(cell || "")
+                .toLowerCase()
+                .trim() === "answer key",
           );
 
-          const questionKey = question.question_number.toString();
+          if (isAnswerKey) {
+            answerRow = row;
+          } else {
+            studentRows.push(row);
+          }
+        }
+
+        const totalStudents = studentRows.length;
+        if (totalStudents === 0) throw new Error("No student responses found.");
+
+        // Helper to resolve the correct answer (Treats empty cells as "BLANK")
+        const resolveAnswer = (q: any, colIdx?: number) => {
+          if (answerRow && colIdx !== undefined) {
+            const rawExcelAns = answerRow[colIdx];
+            if (rawExcelAns == null || String(rawExcelAns).trim() === "") {
+              return "BLANK"; // Literal "None" answer
+            }
+            return String(rawExcelAns).toUpperCase().trim();
+          }
+          if (q.answer !== undefined && q.answer !== null) {
+            if (String(q.answer).trim() === "") return "BLANK";
+            return String(q.answer).toUpperCase().trim();
+          }
+          return null; // Only null if neither Excel nor DB has any record
+        };
+
+        const mrqOptionsPoolMap = new Map<number, Set<string>>();
+        paper.questions.forEach((q: any) => {
+          if (q.type === "MRQ") {
+            const colIdx = questionColMap.get(q.question_number);
+            const resolvedAns = resolveAnswer(q, colIdx);
+            const optionsSet = new Set<string>();
+
+            if (resolvedAns) {
+              resolvedAns
+                .split(/[,\s;]+/)
+                .filter((c) => c && c !== "BLANK")
+                .forEach((c) => optionsSet.add(c));
+            }
+
+            if (colIdx !== undefined) {
+              studentRows.forEach((row) => {
+                const rawAns = row[colIdx];
+                if (rawAns) {
+                  String(rawAns)
+                    .toUpperCase()
+                    .split(/[,\s;]+/)
+                    .filter((c) => c && c !== "BLANK")
+                    .forEach((c) => optionsSet.add(c));
+                }
+              });
+            }
+            mrqOptionsPoolMap.set(q.question_number, optionsSet);
+          }
+        });
+
+        let scoredStudents = studentRows.map((row) => {
+          let score = 0;
+          paper.questions.forEach((q: any) => {
+            const colIdx = questionColMap.get(q.question_number);
+
+            if (colIdx !== undefined) {
+              const activeAnswer = resolveAnswer(q, colIdx);
+              if (!activeAnswer) return;
+
+              const rawStudent = row[colIdx];
+
+              if (q.type === "MRQ") {
+                const correctAnsArr =
+                  activeAnswer === "BLANK"
+                    ? []
+                    : activeAnswer.split(/[,\s;]+/).filter((c) => c);
+                const studentAnsArr =
+                  !rawStudent ||
+                  String(rawStudent).trim() === "" ||
+                  String(rawStudent).trim().toUpperCase() === "BLANK"
+                    ? []
+                    : String(rawStudent)
+                        .toUpperCase()
+                        .split(/[,\s;]+/)
+                        .filter((c) => c);
+
+                const correctSet = new Set(correctAnsArr);
+                const studentSet = new Set(studentAnsArr);
+                const optionsPool = mrqOptionsPoolMap.get(q.question_number);
+                const numOptions = optionsPool ? optionsPool.size : 0;
+
+                if (numOptions > 0) {
+                  let marks = 0;
+                  optionsPool!.forEach((opt) => {
+                    if (correctSet.has(opt) === studentSet.has(opt)) marks++;
+                  });
+                  score += marks / numOptions;
+                }
+              } else {
+                const studentAns =
+                  !rawStudent || String(rawStudent).trim() === ""
+                    ? "BLANK"
+                    : String(rawStudent).toUpperCase().trim();
+                if (studentAns === activeAnswer) score++;
+              }
+            }
+          });
+          return { rowData: row, score };
+        });
+
+        scoredStudents.sort((a, b) => b.score - a.score);
+
+        paper.questions.forEach((question: any) => {
+          const qNum = question.question_number;
+          const colIndex = questionColMap.get(qNum);
+
+          if (colIndex === undefined) return;
+
+          const qType = question.type || "MCQ";
           const choiceCounts: { [key: string]: number } = {};
+          const individualChoiceCounts: { [key: string]: number } = {};
           let validChoicesFound = 0;
 
-          let correctAnswer: string | null = null;
-          let correctCount = 0;
-          let incorrectCount = 0;
-
-          if (answerRow && answerRow[questionKey]) {
-            correctAnswer = String(answerRow[questionKey]).toUpperCase().trim();
-          }
+          const activeAnswer = resolveAnswer(question, colIndex);
+          let totalNormalizedScore = 0;
 
           studentRows.forEach((studentRow) => {
-            if (studentRow[questionKey]) {
-              const choice = studentRow[questionKey]
-                .toString()
-                .toUpperCase()
-                .trim();
+            const rawStudent = studentRow[colIndex];
+            const choice =
+              rawStudent == null || String(rawStudent).trim() === ""
+                ? "BLANK"
+                : String(rawStudent).toUpperCase().trim();
 
-              if (choice) {
-                // Choice Stats
-                if (!choiceCounts[choice]) {
-                  choiceCounts[choice] = 0;
-                }
-                choiceCounts[choice]++;
-                validChoicesFound++;
+            if (!choiceCounts[choice]) choiceCounts[choice] = 0;
+            choiceCounts[choice]++;
+            validChoicesFound++;
 
-                // Grade Stats
-                if (correctAnswer) {
-                  if (choice === correctAnswer) {
-                    correctCount++;
-                  } else {
-                    incorrectCount++;
-                  }
+            if (qType === "MRQ") {
+              if (choice === "BLANK") {
+                individualChoiceCounts["BLANK"] =
+                  (individualChoiceCounts["BLANK"] || 0) + 1;
+              } else {
+                const individualChoices = choice
+                  .split(/[,\s;]+/)
+                  .filter((c) => c);
+                new Set(individualChoices).forEach((c) => {
+                  individualChoiceCounts[c] =
+                    (individualChoiceCounts[c] || 0) + 1;
+                });
+              }
+            }
+
+            if (activeAnswer) {
+              if (qType === "MRQ") {
+                const studentAnsArr =
+                  choice === "BLANK"
+                    ? []
+                    : choice.split(/[,\s;]+/).filter((c) => c);
+                const correctAnsArr =
+                  activeAnswer === "BLANK"
+                    ? []
+                    : activeAnswer.split(/[,\s;]+/).filter((c) => c);
+                const studentSet = new Set(studentAnsArr);
+                const correctSet = new Set(correctAnsArr);
+
+                const optionsPool = mrqOptionsPoolMap.get(qNum);
+                const numOptions = optionsPool ? optionsPool.size : 0;
+
+                if (numOptions > 0) {
+                  let marks = 0;
+                  optionsPool!.forEach((opt) => {
+                    if (correctSet.has(opt) === studentSet.has(opt)) marks++;
+                  });
+                  totalNormalizedScore += marks / numOptions;
                 }
+              } else {
+                if (choice === activeAnswer) totalNormalizedScore += 1;
               }
             }
           });
 
-          // Calculate Choice Proportions
           const statistics: { [key: string]: number } = {};
           for (const [option, count] of Object.entries(choiceCounts)) {
             statistics[option] =
               validChoicesFound > 0 ? count / validChoicesFound : 0;
           }
 
-          // Calculate Grade Proportions
           const gradeStats: { [key: string]: number } = {};
-          if (validChoicesFound > 0 && correctAnswer) {
-            gradeStats["correct"] = correctCount / validChoicesFound;
-            gradeStats["incorrect"] = incorrectCount / validChoicesFound;
+          if (validChoicesFound > 0 && activeAnswer) {
+            const avgScore = totalNormalizedScore / validChoicesFound;
+            gradeStats["correct"] = avgScore;
+            gradeStats["incorrect"] = 1 - avgScore;
           }
 
-          // Build Payload Item
+          let quartileStats: any = undefined;
+
+          if (scoredStudents.length > 0 && activeAnswer) {
+            const cohortSize = Math.max(
+              1,
+              Math.floor(scoredStudents.length * 0.25),
+            );
+            const topCohort = scoredStudents
+              .slice(0, cohortSize)
+              .map((s) => s.rowData);
+            const bottomCohort = scoredStudents
+              .slice(-cohortSize)
+              .map((s) => s.rowData);
+
+            const calculateCohortStats = (cohortRows: any[][]) => {
+              let cohortTotalScore = 0;
+              let cohortValid = 0;
+              const cohortChoices: { [key: string]: number } = {};
+
+              cohortRows.forEach((row) => {
+                const rawCell = row[colIndex];
+                const choice =
+                  rawCell == null || String(rawCell).trim() === ""
+                    ? "BLANK"
+                    : String(rawCell).toUpperCase().trim();
+
+                cohortChoices[choice] = (cohortChoices[choice] || 0) + 1;
+                cohortValid++;
+
+                if (qType === "MRQ") {
+                  const studentAnsArr =
+                    choice === "BLANK"
+                      ? []
+                      : choice.split(/[,\s;]+/).filter((c) => c);
+                  const correctAnsArr =
+                    activeAnswer === "BLANK"
+                      ? []
+                      : activeAnswer.split(/[,\s;]+/).filter((c) => c);
+                  const studentSet = new Set(studentAnsArr);
+                  const correctSet = new Set(correctAnsArr);
+
+                  const optionsPool = mrqOptionsPoolMap.get(qNum);
+                  const numOptions = optionsPool ? optionsPool.size : 0;
+
+                  if (numOptions > 0) {
+                    let marks = 0;
+                    optionsPool!.forEach((opt) => {
+                      if (correctSet.has(opt) === studentSet.has(opt)) marks++;
+                    });
+                    cohortTotalScore += marks / numOptions;
+                  }
+                } else {
+                  if (choice === activeAnswer) cohortTotalScore += 1;
+                }
+              });
+
+              const choicesProportions: { [key: string]: number } = {};
+              for (const [opt, count] of Object.entries(cohortChoices)) {
+                choicesProportions[opt] =
+                  cohortValid > 0 ? count / cohortValid : 0;
+              }
+
+              return {
+                correct_rate:
+                  cohortValid > 0 ? cohortTotalScore / cohortValid : 0,
+                choices: choicesProportions,
+              };
+            };
+
+            quartileStats = {
+              top_25: calculateCohortStats(topCohort),
+              bottom_25: calculateCohortStats(bottomCohort),
+            };
+          }
+
+          let indStats: { [key: string]: number } | undefined = undefined;
+          if (
+            qType === "MRQ" &&
+            Object.keys(individualChoiceCounts).length > 0
+          ) {
+            indStats = {};
+            for (const [opt, count] of Object.entries(individualChoiceCounts)) {
+              indStats[opt] =
+                validChoicesFound > 0 ? count / validChoicesFound : 0;
+            }
+          }
+
           const payloadItem: QuestionChoiceStatistics = {
             question_id: question.id,
             statistics: statistics,
+            answer: activeAnswer || undefined,
           };
 
-          // Only add grade statistics if we actually calculated them
-          if (Object.keys(gradeStats).length > 0) {
+          if (indStats) payloadItem.individual_choice_statistics = indStats;
+          if (Object.keys(gradeStats).length > 0)
             payloadItem.grade_statistics = gradeStats;
-          }
+          if (quartileStats) payloadItem.quartile_statistics = quartileStats;
 
           statsPayload.questions.push(payloadItem);
         });
 
-        // 3. Save the new statistics
         await Api.saveStudentChoiceStatistics(statsPayload);
-
-        // 4. Refetch data to update UI
         await fetchData();
 
         setUploadSuccess("Student choices and grades uploaded successfully!");
       } catch (err: any) {
-        // --- DEBUG CHECKPOINT FAILED ---
         console.error("CRITICAL ERROR during file processing:", err);
         setUploadError(`Error: ${err.message || "Failed to process file."}`);
         setUploadSuccess(null);
@@ -256,7 +439,6 @@ const OverviewPage = () => {
     };
     reader.readAsBinaryString(file);
   };
-  // --- Render Logic ---
 
   if (isLoading) {
     return (
@@ -279,13 +461,32 @@ const OverviewPage = () => {
     );
   }
 
-  // Updated check:
   const hasStudentChoices =
     paper.questions.length > 0 && paper.questions[0].student_choice_statistics;
 
+  const formatDescription = (description: string, q: any) => {
+    const answerKey = q.answer;
+    if (!description || !answerKey) return description;
+
+    if (answerKey === "BLANK") {
+      return description + "\n\n✅ Correct Action: Leave Blank (None)";
+    }
+
+    let formattedDesc = description;
+    const individualAnswers = String(answerKey)
+      .split(/[^A-Za-z0-9]+/)
+      .filter(Boolean);
+
+    individualAnswers.forEach((ans) => {
+      const regex = new RegExp(`^\\s*(${ans}[.)].*)`, "gim");
+      formattedDesc = formattedDesc.replace(regex, "$1  ✅ (correct)");
+    });
+
+    return formattedDesc;
+  };
+
   return (
     <Box sx={{ p: 3, pt: 15 }}>
-      {/* --- Page Header & Upload Button --- */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -313,7 +514,6 @@ const OverviewPage = () => {
         </Button>
       </Box>
 
-      {/* --- Upload Status --- */}
       {isUploadingStats && (
         <Box display="flex" justifyContent="center" my={2}>
           <CircularProgress />
@@ -332,12 +532,9 @@ const OverviewPage = () => {
 
       <Divider sx={{ mb: 3, mt: 2 }} />
 
-      {/* --- Main Content --- */}
       {!hasStudentChoices ? (
-        // If no student choices, show the question list
         <OverviewQuestionList questions={paper.questions} />
       ) : (
-        // Otherwise, show the new student choice pie charts
         <Box>
           <Typography variant="h6" gutterBottom>
             Choice Overview
@@ -347,88 +544,138 @@ const OverviewPage = () => {
           <Box display="flex" flexDirection="column" gap={3}>
             {[...paper.questions]
               .sort((a, b) => a.question_number - b.question_number)
-                .map((q: any, index: number) => {
-                  const statistics = q.student_choice_statistics || {};
-                  const entropy = calculateEntropy(statistics);
-                  return (
-                    <Box
-                      key={q.id}
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: { xs: "1fr", md: "2fr 2fr 1fr" },
-                        alignItems: "flex-start",
-                        gap: 2,
-                        p: 3,
-                        border: "1px solid #ddd",
-                        borderRadius: 2,
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                        backgroundColor: "#fff",
-                      }}
-                    >
-                      {/* Column 1: Question */}
-                      <Box>
-                        <Typography variant="h6" gutterBottom>
+              .map((q: any) => {
+                const statistics = q.student_choice_statistics || {};
+                const entropy = calculateEntropy(statistics);
+                const correctAnswer = q.answer || null;
+
+                return (
+                  <Box
+                    key={q.id}
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "2fr 2fr 1fr" },
+                      alignItems: "flex-start",
+                      gap: 2,
+                      p: 3,
+                      border: "1px solid #ddd",
+                      borderRadius: 2,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <Box>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        mb={2}
+                      >
+                        <Typography variant="h6">
                           Q{q.question_number}
                         </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{ whiteSpace: "pre-line", fontSize: "0.95rem" }}
-                        >
-                          {q.description}
-                        </Typography>
+                        <Box display="flex" gap={1}>
+                          <Chip
+                            label={q.type}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                          {q.answer ? (
+                            <Chip
+                              label={`Answer: ${q.answer === "BLANK" ? "None (Blank)" : q.answer}`}
+                              size="small"
+                              color="success"
+                            />
+                          ) : (
+                            <Chip
+                              label="No Answer Key"
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
                       </Box>
+                      <Divider sx={{ mb: 2 }} />
 
-                      {/* Column 2: Overview */}
-                      <Box>
-                        {q.overview && (
-                          <>
-                            <Typography
-                              variant="subtitle1"
-                              fontWeight="bold"
-                              gutterBottom
-                            >
-                              Overview
-                            </Typography>
-                            {Object.entries(q.overview).map(
-                              ([opt, detail]: any) => (
-                                <Box key={opt} mb={1.5}>
-                                  <Typography variant="subtitle2" fontWeight="bold">
-                                    Option {opt}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    <strong>Interpretation:</strong>{" "}
-                                    {detail.interpretation}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    <strong>Likely misunderstanding:</strong>{" "}
-                                    {detail.likely_misunderstanding}
-                                  </Typography>
-                                </Box>
-                              )
-                            )}
-                          </>
-                        )}
-                      </Box>
-
-                      {/* Column 3: Pie Chart */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
+                      <Typography
+                        variant="body1"
+                        sx={{ whiteSpace: "pre-line", fontSize: "0.95rem" }}
                       >
-                        <StudentChoicePieChart
-                          questionNumber={q.question_number}
-                          statistics={q.student_choice_statistics || {}}
-                          grade_statistics={q.grade_statistics || {}}
-                          entropy={entropy}
-                          small
-                        />
-                      </Box>
+                        {formatDescription(q.description, q)}
+                      </Typography>
+
+                      {!q.answer && (
+                        <Typography
+                          variant="body2"
+                          color="error"
+                          sx={{ mt: 2, fontStyle: "italic" }}
+                        >
+                          * No answer key assigned in the database for this
+                          question. Re-upload the Excel sheet containing the
+                          'Answer Key' row.
+                        </Typography>
+                      )}
                     </Box>
-                  )
-                })}
+
+                    <Box>
+                      {q.overview && (
+                        <>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            gutterBottom
+                          >
+                            Overview
+                          </Typography>
+                          {Object.entries(q.overview).map(
+                            ([opt, detail]: any) => (
+                              <Box key={opt} mb={1.5}>
+                                <Typography
+                                  variant="subtitle2"
+                                  fontWeight="bold"
+                                >
+                                  Option {opt}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Interpretation:</strong>{" "}
+                                  {detail.interpretation}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Likely misunderstanding:</strong>{" "}
+                                  {detail.likely_misunderstanding}
+                                </Typography>
+                              </Box>
+                            ),
+                          )}
+                        </>
+                      )}
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <StudentChoicePieChart
+                        questionNumber={q.question_number}
+                        type={q.type}
+                        statistics={q.student_choice_statistics || {}}
+                        individual_choice_statistics={
+                          q.individual_choice_statistics
+                        }
+                        grade_statistics={q.grade_statistics || {}}
+                        entropy={entropy}
+                        correctAnswer={correctAnswer}
+                        small
+                      />
+                    </Box>
+                  </Box>
+                );
+              })}
           </Box>
         </Box>
       )}
